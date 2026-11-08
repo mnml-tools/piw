@@ -1,0 +1,464 @@
+/*
+ * Task details (docs/ui-design-system.md, "Drawer"): the inspector on the canvas surface, one
+ * hairline on its left, 20px padding (the Drawer draws those). Inside, one small grid: the
+ * round checkbox in a 16px glyph column, text 10px after it (26px in), as in the task rows.
+ *   title       16/600, an inline edit with no box; hover shows the soft fill
+ *   properties  a calm two-column list (12px tertiary labels, values in text ink), no hairlines
+ *   description a soft field (the control fill, rounded 6px), 13px
+ *   subtasks    the one group label, then 28px rows with round 14px boxes, no hairlines
+ */
+.drawer {
+  /* Where text starts inside the inspector: the glyph column + its gap. */
+  --details-text: calc(var(--glyph-column) + var(--glyph-gap));
+  /* Inline fields hang their padding outside the text column, so their text stays on it. */
+  --field-pad: var(--space-1-5);
+}
+
+.loading {
+  margin: var(--space-4) 0;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+}
+
+/* Save state, in the header before the actions (11px tertiary, no box). */
+.statusSlot {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-end: var(--space-1-5);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+}
+
+.statusSlot:empty {
+  display: none;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* "↰ Subtask of …": a quiet ghost link; its glyph sits in the glyph column. */
+.parentLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  align-self: flex-start;
+  max-width: 100%;
+  min-height: var(--control-height-sm);
+  margin: 0 0 var(--space-2) calc(-1 * var(--field-pad));
+  padding: 0 var(--field-pad);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-secondary);
+  cursor: default;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.parentLink > svg {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.parentLink:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.parentLink:active {
+  background: var(--color-bg-hover-strong);
+}
+
+/* ---- Notices: the warm inline notice (an error is information, not alarm) ---- */
+.conflict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1-5) var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-2-5);
+  border: var(--border-width) solid var(--color-notice-border);
+  border-radius: var(--radius-md);
+  background: var(--color-notice-bg);
+  color: var(--color-notice-text);
+  font-size: var(--font-size-secondary);
+}
+
+.conflictCompact {
+  margin: var(--space-1) 0 var(--space-1) var(--details-text);
+  padding: var(--space-1) var(--space-2);
+}
+
+.conflictIcon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: inherit;
+}
+
+.conflictText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---- Title: the round checkbox + the inline 16/600 title on a 22px line ---- */
+.titleRow {
+  --title-line: 1.375rem; /* 22 */
+  --title-pad: calc((var(--control-height-md) - var(--title-line)) / 2); /* 3: a 28px field */
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--glyph-gap) - var(--field-pad));
+}
+
+/* The box centred on the title's first line (the field's padding is above it). */
+.titleRow > :first-child {
+  margin-top: calc(var(--title-pad) + (var(--title-line) - var(--checkbox-size)) / 2);
+}
+
+.details .titleField {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-inline-end: calc(-1 * var(--field-pad));
+  padding: var(--title-pad) var(--field-pad);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  resize: none;
+  color: var(--color-text);
+  font-size: var(--font-size-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--title-line);
+  letter-spacing: var(--letter-spacing-tight);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.details .titleField:hover:not(:disabled, :focus) {
+  background: var(--color-bg-hover);
+}
+
+.details .titleField:focus,
+.details .titleField:focus-visible {
+  outline: none;
+  background: transparent;
+}
+
+.hint {
+  margin: var(--space-1) 0 0 var(--details-text);
+  color: var(--color-danger);
+  font-size: var(--font-size-secondary);
+}
+
+/* ---- Properties: a calm two-column list, no hairlines (28px rows) ---- */
+.properties {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  align-items: center;
+  row-gap: var(--space-0-5);
+  margin: var(--space-4) 0 0;
+}
+
+/* Each dt/dd pair joins the parent grid. */
+.property {
+  display: contents;
+}
+
+.propertyLabel {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+}
+
+.propertyValue {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--control-height-md);
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-secondary);
+}
+
+/* Value buttons (date, space, document, tags): quiet ghost buttons whose label sits on the
+   value column (their 8px padding hangs into the gutter). The space picker rests without its
+   soft fill here, like the other values. */
+.propertyValue > button,
+.propertyButton {
+  max-width: 100%;
+  margin-inline-start: calc(-1 * var(--button-padding-sm));
+  color: var(--color-text);
+}
+
+.propertyValue > button:not(:hover, :active, [aria-expanded='true']) {
+  background: transparent;
+}
+
+.properties .subtle {
+  color: var(--color-text-subtle);
+}
+
+.properties .subtle:hover {
+  color: var(--color-text);
+}
+
+.properties .overdue {
+  color: var(--color-danger);
+}
+
+.readOnly {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.documentValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.documentIcon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-text-subtle);
+}
+
+.documentName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding-block: var(--space-0-5);
+}
+
+/* Tags: the soft badge (11px on the control fill, rounded 4px) with a remove ×. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  height: var(--control-height-sm);
+  padding: 0 0 0 var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-control);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-meta);
+}
+
+.tagRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: default;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.tagRemove:hover {
+  background: var(--color-bg-hover-strong);
+  color: var(--color-text);
+}
+
+.tagInput {
+  width: 10rem;
+}
+
+/* ---- Description: a soft field (the control fill, no border), 13px, three lines at rest ---- */
+.details .descriptionField {
+  --description-line: 1.25rem; /* 20: 13px text, whole pixels */
+  min-height: calc(3 * var(--description-line) + 2 * var(--space-2));
+  max-height: 20rem;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-2) var(--space-2-5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-control);
+  resize: none;
+  color: var(--color-text);
+  font-size: var(--font-size-ui);
+  line-height: var(--description-line);
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.details .descriptionField:hover:not(:disabled, :focus) {
+  border: 0;
+}
+
+/* Focus: the accent edge and the soft halo of a focused field, on the soft fill. */
+.details .descriptionField:focus {
+  border: 0;
+  outline: none;
+  box-shadow:
+    inset 0 0 0 var(--border-width) var(--color-focus-ring),
+    0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+}
+
+.descriptionField::placeholder,
+.subtaskTitle::placeholder {
+  color: var(--color-placeholder);
+  opacity: 1;
+}
+
+/* ---- Subtasks: the group label, then 28px rows with round 14px boxes ---- */
+.subtasks {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-6);
+}
+
+/* The list's group label: 11px/600 secondary on a 14px line (whole pixels), count tertiary. */
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1-5);
+  margin-bottom: var(--space-1);
+  line-height: var(--icon-size-sm);
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-section);
+  line-height: inherit;
+}
+
+.progress {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.subtaskList {
+  display: flex;
+  flex-direction: column;
+}
+
+.subtask {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The 14px box centred in the 16px glyph column; the ghost field's text on the text column.
+   Hover: the rows' soft rounded fill, hanging 6px outside. */
+.subtaskLine,
+.addSubtask {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--glyph-gap) + (var(--glyph-column) - var(--checkbox-size-sm)) / 2);
+  min-height: var(--control-height-md);
+  padding-inline-start: calc((var(--glyph-column) - var(--checkbox-size-sm)) / 2);
+  isolation: isolate;
+}
+
+/* Optically centred on the 13px text (it sits ~1px low in the 28px line), as in task rows. */
+.subtaskLine > :first-child,
+.addIcon {
+  position: relative;
+  top: var(--border-width);
+}
+
+.subtaskLine::before,
+.addSubtask::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(-1 * var(--row-fill-inset));
+  z-index: -1;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+  pointer-events: none;
+}
+
+.subtaskLine:hover:not(:focus-within)::before,
+.addSubtask:hover:not(:focus-within)::before {
+  background: var(--color-bg-hover);
+}
+
+.addSubtask {
+  color: var(--color-text-subtle);
+}
+
+.details .subtaskTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--control-height-md);
+  border-radius: 0;
+  font-size: var(--font-size-ui);
+}
+
+/* The line carries the hover; the ghost field keeps none of its own. */
+.subtaskLine .subtaskTitle:hover:not(:disabled),
+.addSubtask .subtaskTitle:hover:not(:disabled) {
+  background: transparent;
+}
+
+.addSubtask .subtaskTitle::placeholder {
+  color: var(--color-text-subtle);
+}
+
+.addSubtask .subtaskTitle:focus::placeholder {
+  color: var(--color-placeholder);
+}
+
+.subtaskDone {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-faint);
+}
+
+.addIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--checkbox-size-sm);
+  color: var(--color-text-subtle);
+}
+
+.addIcon > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+@media (forced-colors: active) {
+  .conflict {
+    border-color: CanvasText;
+  }
+
+  .details .descriptionField {
+    border: var(--border-width) solid CanvasText;
+  }
+}

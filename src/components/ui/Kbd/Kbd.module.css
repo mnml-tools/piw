@@ -1,0 +1,49 @@
+/* Kbd (docs/ui-design-system.md, "Kbd"): 11px in the UI font (never mono), secondary ink on a
+ * soft fill, radius 4, no border. `inline`: one soft chip with the whole shortcut ("⌘⇧Space";
+ * plain text inside menus). `chip`: one soft key cap per key, 2px apart (Settings). */
+.kbd {
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.visual {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.inline,
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem; /* 18 */
+  height: 1.125rem;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-control);
+}
+
+.key {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+/* The chip variant draws one cap per key; the wrapper has no box of its own. */
+.chip {
+  display: inline-flex;
+}
+
+@media (forced-colors: active) {
+  .inline,
+  .key {
+    border: var(--border-width) solid CanvasText;
+  }
+}

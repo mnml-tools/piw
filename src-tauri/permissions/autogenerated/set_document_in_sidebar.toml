@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-document-in-sidebar"
+description = "Enables the set_document_in_sidebar command without any pre-configured scope."
+commands.allow = ["set_document_in_sidebar"]
+
+[[permission]]
+identifier = "deny-set-document-in-sidebar"
+description = "Denies the set_document_in_sidebar command without any pre-configured scope."
+commands.deny = ["set_document_in_sidebar"]

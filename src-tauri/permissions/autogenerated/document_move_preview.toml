@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-document-move-preview"
+description = "Enables the document_move_preview command without any pre-configured scope."
+commands.allow = ["document_move_preview"]
+
+[[permission]]
+identifier = "deny-document-move-preview"
+description = "Denies the document_move_preview command without any pre-configured scope."
+commands.deny = ["document_move_preview"]

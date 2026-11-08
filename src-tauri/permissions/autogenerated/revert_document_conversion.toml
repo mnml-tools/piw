@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-revert-document-conversion"
+description = "Enables the revert_document_conversion command without any pre-configured scope."
+commands.allow = ["revert_document_conversion"]
+
+[[permission]]
+identifier = "deny-revert-document-conversion"
+description = "Denies the revert_document_conversion command without any pre-configured scope."
+commands.deny = ["revert_document_conversion"]

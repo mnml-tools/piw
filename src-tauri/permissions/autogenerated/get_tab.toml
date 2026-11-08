@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-get-tab"
+description = "Enables the get_tab command without any pre-configured scope."
+commands.allow = ["get_tab"]
+
+[[permission]]
+identifier = "deny-get-tab"
+description = "Denies the get_tab command without any pre-configured scope."
+commands.deny = ["get_tab"]

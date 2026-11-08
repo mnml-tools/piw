@@ -1,0 +1,158 @@
+/* Button (docs/ui-design-system.md, "Button"). Rounded 6px, no borders, 6px icon gap.
+ * primary    the accent pill: accent fill, white label (one per surface: Save, Create)
+ * secondary  a soft neutral fill (default: Cancel, toolbar commands)
+ * ghost      no fill at rest, secondary ink; the soft hover fill (back links, text actions)
+ * danger     the danger fill, white label (confirm-delete only)
+ * sm 24px · 12px label · padding 0 8px      md 28px · 13px label · padding 0 12px
+ * States: hover and pressed step the fill; focus-visible is the global 2px ring; disabled dims
+ * to --opacity-disabled; toggled (aria-pressed) takes the selected fill. 120ms ease-out. */
+
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-control);
+  color: var(--color-text);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The icon slot keeps its size, so a spinner swapping in for the icon does not move the label. */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: inherit;
+}
+
+.icon > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+/* ---- Sizes ---- */
+.sm {
+  height: var(--control-height-sm);
+  padding: 0 var(--button-padding-sm);
+  font-size: var(--font-size-secondary);
+}
+
+.md {
+  height: var(--control-height-md);
+  padding: 0 var(--button-padding-md);
+}
+
+/* An icon before the label: the padding on that side tightens by 2px, so the pair centres. */
+.sm:has(.icon:first-child) {
+  padding-inline-start: calc(var(--button-padding-sm) - var(--space-0-5));
+}
+
+.md:has(.icon:first-child) {
+  padding-inline-start: calc(var(--button-padding-md) - var(--space-0-5));
+}
+
+/* ---- Variants ---- */
+.secondary:hover:not(:disabled, [aria-disabled='true']),
+.secondary[aria-expanded='true'] {
+  background: var(--color-bg-hover-strong);
+}
+
+.secondary:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-bg-pressed);
+}
+
+.primary {
+  background: var(--color-accent-fill);
+  color: var(--color-accent-contrast);
+  font-weight: var(--font-weight-medium);
+}
+
+.primary:hover:not(:disabled, [aria-disabled='true']),
+.primary[aria-expanded='true'] {
+  background: var(--color-accent-fill-hover);
+}
+
+.primary:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-accent-fill-hover);
+  box-shadow: inset 0 0 0 100vmax var(--color-bg-hover-strong);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.ghost:hover:not(:disabled, [aria-disabled='true']),
+.ghost[aria-expanded='true'] {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.ghost:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-bg-hover-strong);
+}
+
+.danger {
+  background: var(--color-danger-fill);
+  color: var(--color-danger-contrast);
+  font-weight: var(--font-weight-medium);
+}
+
+.danger:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-danger-fill-hover);
+}
+
+.danger:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-danger-fill-hover);
+  box-shadow: inset 0 0 0 100vmax var(--color-bg-hover-strong);
+}
+
+/* ---- States ---- */
+/* Toggled on: the selected fill, text ink. */
+.button[aria-pressed='true'] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.button:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+/* A busy button (aria-disabled + aria-busy) keeps its full colours. */
+.button[aria-disabled='true']:not([aria-busy='true']) {
+  opacity: var(--opacity-disabled);
+}
+
+@media (forced-colors: active) {
+  .button {
+    border: var(--border-width) solid ButtonText;
+  }
+}

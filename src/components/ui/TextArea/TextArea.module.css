@@ -1,0 +1,103 @@
+/* TextArea (docs/ui-design-system.md, "TextInput"): the field rules of TextInput.
+ * default  boxed: rounded 6px, padding 6px 8px, at least three lines; focus = 1px accent border
+ *          + the 3px soft halo.
+ * ghost    caret-only: no box, no fill, no ring (descriptions, the sticky body).
+ * editor   no chrome at the reading measure with editor typography; the caret leads. */
+.textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: var(--color-text);
+  line-height: var(--line-height-normal);
+}
+
+.default {
+  min-height: calc(
+    3em * var(--line-height-normal) + 2 * var(--space-1-5) + 2 * var(--border-width)
+  );
+  padding: var(--space-1-5) var(--space-2);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-ui);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.default:hover:not(:disabled, :read-only, :focus) {
+  border-color: var(--color-border-hover);
+}
+
+.default:focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+  outline: none;
+}
+
+.ghost {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font-size: var(--font-size-ui);
+}
+
+.ghost:focus-visible {
+  outline: none;
+}
+
+/* The editor is the page: no box. A textarea matches :focus-visible on every click, so a ring
+   would frame the page while typing; the blinking caret is the focus indicator of a text field
+   (forced-colors keeps a system outline). */
+.editor {
+  max-width: var(--editor-max-width);
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  font-family: var(--font-editor);
+  font-size: var(--font-size-editor);
+  line-height: var(--line-height-relaxed);
+}
+
+.editor:focus-visible {
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .editor:focus-visible {
+    outline: var(--border-width) solid Highlight;
+    outline-offset: var(--space-3);
+  }
+}
+
+.autoGrow {
+  overflow-y: hidden;
+}
+
+.textarea[aria-invalid='true'] {
+  border-color: var(--color-danger-border);
+}
+
+.default[aria-invalid='true']:focus {
+  border-color: var(--color-danger);
+}
+
+.default:read-only {
+  background: transparent;
+}
+
+.textarea:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+.default:disabled {
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  .default:focus-visible {
+    outline: var(--focus-ring-width) solid Highlight;
+    outline-offset: 0;
+  }
+}

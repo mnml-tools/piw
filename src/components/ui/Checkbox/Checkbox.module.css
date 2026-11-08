@@ -1,0 +1,151 @@
+/* Checkbox (docs/ui-design-system.md, "Checkbox").
+ * ROUND, 16px (sm 14px), a 1.5px ring in tertiary ink on the canvas. Hover: the ring turns
+ * secondary and a faint check previews the click.
+ * Checked: the accent fill with a white check (the ring disappears into the fill). Focus: the
+ * small-mark ring (2px, 2px offset), round for task boxes. Disabled: --opacity-disabled.
+ * The check draws in --duration-fast (0 under reduced motion). */
+
+.root {
+  --box: var(--checkbox-size);
+  --hit: 1.5rem; /* >= 24px pointer target */
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: var(--box);
+  height: var(--box);
+}
+
+.root.sm {
+  --box: var(--checkbox-size-sm);
+}
+
+/* The real input covers the box plus a margin, invisible but hit-testable and focusable. */
+.input {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--hit);
+  height: var(--hit);
+  margin: 0;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  z-index: 1;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: var(--check-stroke) solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  color: var(--color-accent-contrast);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The check, on a 16-unit grid, sized to sit optically centred in the circle. */
+.check {
+  width: 72%;
+  height: 72%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  /* Hidden by opacity too: a zero-length dash with round caps is not reliably invisible
+     (WebKitGTK drew the whole check on unchecked boxes at 2x). */
+  opacity: 0;
+  transition:
+    stroke-dashoffset var(--duration-fast) var(--ease-enter),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+/* ---- States ---- */
+.input:hover:not(:disabled, :checked) + .box {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-subtle);
+}
+
+/* Hover preview: the check is drawn, faintly, before it is committed. */
+.root .input:hover:not(:disabled, :checked) + .box .check {
+  stroke-dashoffset: 0;
+  opacity: 0.5;
+  transition: none;
+}
+
+.input:checked + .box {
+  background: var(--color-accent-fill);
+  border-color: var(--color-accent-fill);
+  color: var(--color-accent-contrast);
+}
+
+.input:checked + .box .check {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.input:checked:hover:not(:disabled) + .box {
+  background: var(--color-accent-fill-hover);
+  border-color: var(--color-accent-fill-hover);
+}
+
+.input:focus-visible + .box {
+  outline: var(--focus-ring-width-mark) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset-mark);
+}
+
+.input:disabled + .box {
+  opacity: var(--opacity-disabled);
+}
+
+/* ---- With a visible label ---- */
+.withLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-width: 0;
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-snug);
+}
+
+.withLabel.sm {
+  gap: var(--space-2);
+  font-size: var(--font-size-secondary);
+}
+
+.labelText {
+  min-width: 0;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.withLabel:has(.input:checked) .labelText {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-faint);
+}
+
+.withLabel:has(.input:disabled) .labelText {
+  color: var(--color-text-disabled);
+}
+
+@media (forced-colors: active) {
+  .box {
+    border-color: CanvasText;
+  }
+
+  .root .input:hover:not(:disabled, :checked) + .box .check {
+    opacity: 0;
+  }
+
+  .input:checked + .box {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+}

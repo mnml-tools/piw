@@ -1,0 +1,123 @@
+/* Segmented: radiogroup of options (docs/ui-design-system.md, "Segmented").
+ * text       soft-pill text tabs for view filters (Today · Upcoming · All · Completed): no
+ *            track; secondary labels; hover takes the soft hover fill; the selected option is
+ *            text ink on the soft selected pill (6px). 2px between options.
+ * contained  a soft pill control (Settings, Quick Capture): a soft track (8px) with 2px
+ *            padding; the selected segment rises onto --color-bg-raised with --shadow-sm (6px,
+ *            concentric with the track).
+ * md 28px, sm 24px overall. Labels: md 13px, sm 12px. */
+
+.group {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.segment {
+  display: inline-flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+  padding: 0 var(--space-2-5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.sm .segment {
+  padding-inline: var(--space-2);
+  font-size: var(--font-size-secondary);
+}
+
+.segment:hover:not(:disabled, [aria-checked='true']) {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.segment[aria-checked='true'] {
+  color: var(--color-text);
+}
+
+.segment:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+.icon {
+  display: inline-flex;
+}
+
+.icon > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- text: soft-pill text tabs ---- */
+.text {
+  gap: var(--space-0-5);
+}
+
+.text.md .segment {
+  height: var(--control-height-md);
+}
+
+.text.sm .segment {
+  height: var(--control-height-sm);
+}
+
+.text .segment[aria-checked='true'] {
+  background: var(--color-bg-active);
+}
+
+/* ---- contained: a soft track with a raised selected segment ---- */
+.contained {
+  gap: var(--space-0-5);
+  padding: var(--space-0-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-control);
+}
+
+.contained.md .segment {
+  height: calc(var(--control-height-md) - 2 * var(--space-0-5));
+}
+
+.contained.sm .segment {
+  height: calc(var(--control-height-sm) - 2 * var(--space-0-5));
+}
+
+.contained .segment:hover:not(:disabled, [aria-checked='true']) {
+  background: var(--color-bg-hover);
+}
+
+.contained .segment[aria-checked='true'] {
+  background: var(--color-bg-raised);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Inside the track the ring sits on the segment, so the track never clips it. */
+.contained .segment:focus-visible {
+  outline-offset: var(--focus-ring-inset);
+}
+
+@media (forced-colors: active) {
+  .segment[aria-checked='true'] {
+    outline: var(--border-width) solid Highlight;
+    outline-offset: -1px;
+  }
+}

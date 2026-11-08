@@ -1,0 +1,103 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.label {
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-muted);
+}
+
+.error {
+  font-size: var(--font-size-secondary);
+  color: var(--color-danger);
+}
+
+/* TextInput (docs/ui-design-system.md, "TextInput").
+ * default  boxed: rounded 6px, a 1px --color-control-border on the surface, padding 0 8px;
+ *          hover: --color-border-hover. Focus (pointer or keyboard): a 1px accent border plus a
+ *          3px soft accent halo, no outline.
+ * ghost    caret-only: no box, no fill, no ring (inline rename, the Add task row); the caret
+ *          and the selection are the focus indicator.
+ * sm 24px / 12px · md 28px / 13px · lg 32px / 13px. Disabled: --opacity-disabled. */
+.input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  line-height: var(--line-height-tight);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.input:not(.ghost):hover:not(:disabled, :read-only, :focus) {
+  border-color: var(--color-border-hover);
+}
+
+.input:not(.ghost):focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+  outline: none;
+}
+
+.sm {
+  height: var(--control-height-sm);
+  font-size: var(--font-size-secondary);
+}
+
+.md {
+  height: var(--control-height-md);
+  font-size: var(--font-size-ui);
+}
+
+.lg {
+  height: var(--control-height-lg);
+  font-size: var(--font-size-ui);
+}
+
+.ghost {
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+}
+
+.ghost:focus-visible {
+  outline: none;
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-danger-border);
+}
+
+.input[aria-invalid='true']:not(.ghost):focus {
+  border-color: var(--color-danger);
+}
+
+.input:read-only {
+  background: transparent;
+}
+
+.ghost:read-only {
+  border-color: transparent;
+}
+
+.input:disabled {
+  opacity: var(--opacity-disabled);
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  .input:focus-visible {
+    outline: var(--focus-ring-width) solid Highlight;
+    outline-offset: 0;
+  }
+}

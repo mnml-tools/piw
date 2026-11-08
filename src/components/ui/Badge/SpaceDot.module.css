@@ -1,0 +1,53 @@
+.dot {
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--space-2); /* 8px: a small round dot, the only place space colours appear */
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--sticky-plain-dot);
+}
+
+.dot[data-color='yellow'] {
+  background: var(--sticky-yellow-dot);
+}
+
+.dot[data-color='peach'] {
+  background: var(--sticky-peach-dot);
+}
+
+.dot[data-color='rose'] {
+  background: var(--sticky-rose-dot);
+}
+
+.dot[data-color='mint'] {
+  background: var(--sticky-mint-dot);
+}
+
+.dot[data-color='sky'] {
+  background: var(--sticky-sky-dot);
+}
+
+.dot[data-color='lavender'] {
+  background: var(--sticky-lavender-dot);
+}
+
+.withLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .dot {
+    forced-color-adjust: none;
+    border: var(--border-width) solid CanvasText;
+  }
+}

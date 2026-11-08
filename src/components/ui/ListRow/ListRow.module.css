@@ -1,0 +1,222 @@
+/* ListRow (docs/ui-design-system.md, "ListRow").
+ * No card, no line of its own: rows are separated by their padding only. The row box is
+ * full-bleed in its column; its soft hover and selection fills are drawn by ::before, rounded
+ * (6px) and inset --row-fill-inset (6px) from the column edges, while the content stays on the
+ * grid: the leading glyph in the 16px glyph column on --content-inset, the text on
+ * --text-start, trailing parts ending on --content-inset. The keyboard ring follows the fill.
+ * Hover: --color-bg-hover. Selected / current: --color-bg-active, or the accent tint
+ * (--color-bg-active-accent) while focus is in the list; tertiary metadata turns secondary on
+ * either (AA). Keyboard focus: the inset 2px ring (.focus-inset), rounded with the row.
+ * Single line: min 32px (tasks). Two or three lines (snippet / meta, notes): padding 6px,
+ * title 13/600 on a 16px line, snippet 12 secondary, meta 11 tertiary: 56px with all three. */
+
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-width: 0;
+  min-height: var(--row-min-height);
+  padding: var(--space-1-5) var(--content-inset);
+  color: var(--color-text);
+  font-size: var(--font-size-ui);
+  line-height: 1.125rem; /* 18px: whole-pixel line for 13px text */
+  isolation: isolate;
+}
+
+/* The soft fill (and the keyboard ring), inset from the column edges. */
+.row::before {
+  content: '';
+  position: absolute;
+  inset: 0 var(--row-fill-inset);
+  z-index: -1;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+  pointer-events: none;
+}
+
+/* Rows without a glyph still put their text on the text column. */
+.row:not(:has(> .leading)) {
+  padding-inline-start: var(--text-start);
+}
+
+.row:has(.snippet, .meta) {
+  align-items: flex-start;
+  min-height: 0;
+}
+
+.row:hover::before {
+  background: var(--color-bg-hover);
+}
+
+.row[data-selected]::before {
+  background: var(--color-bg-active);
+}
+
+/* Focus in the list (or on the row): the selection takes the accent tint. */
+.row[data-selected]:focus-within::before,
+:is(ul, ol, [role='list'], [role='listbox'], [role='grid'], [role='tree']):focus-within
+  > *
+  > .row[data-selected]::before,
+:is([role='listbox'], [role='grid'], [role='tree']):focus-within > .row[data-selected]::before {
+  background: var(--color-bg-active-accent);
+}
+
+/* Keyboard focus: the 2px ring on the fill's shape instead of the row's box. */
+.row.row:focus-visible,
+.row.row:has(:focus-visible:not([type='checkbox'])) {
+  outline: none;
+}
+
+.row:focus-visible::before,
+.row:has(:focus-visible:not([type='checkbox']))::before {
+  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.leading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--glyph-column);
+  min-height: 1.125rem;
+  color: var(--color-text-subtle);
+}
+
+/* In a multi-line row the glyph centres on the title's line. */
+.row:has(.snippet, .meta) > .leading {
+  min-height: 1rem;
+}
+
+.leading > svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row:has(.snippet, .meta) .main {
+  white-space: normal;
+}
+
+.titleLine {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+  line-height: 1rem; /* 16px */
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--font-weight-regular);
+}
+
+.row:has(.snippet, .meta) .title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.snippet {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-secondary);
+  line-height: 0.9375rem; /* 15px */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-1) var(--space-1-5);
+  font-size: var(--font-size-meta);
+  line-height: 0.875rem; /* 14px */
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.meta svg {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
+
+.trailing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  min-height: 1.125rem;
+  font-size: var(--font-size-meta);
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* On either selection fill, tertiary metadata switches to secondary (AA). */
+.row[data-selected] :is(.meta, .trailing, .leading) {
+  color: var(--color-text-muted);
+}
+
+/* Revealed on hover and on focus (docs/ui-design-system.md §8: hover reveals also on
+   :focus-within). */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  flex-shrink: 0;
+  margin-block: calc(-1 * var(--space-0-5));
+  /* The last icon button's padding hangs outside, so its glyph ends on the inset. */
+  margin-inline-end: calc((var(--icon-size-sm) - var(--control-height-sm)) / 2);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.row:hover .actions,
+.row:focus-within .actions,
+.row[data-selected] .actions {
+  opacity: 1;
+}
+
+.row[data-completed] .main,
+.row[data-completed] .title {
+  color: var(--color-text-muted);
+}
+
+/* Free-form rows (tasks: `children`) keep a subtle strike-through in faint ink, so the title
+   stays readable. The note layout (`title`/`snippet`) is only dimmed. */
+.row[data-completed] .free {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-text-faint);
+  text-decoration-thickness: 1px;
+}
+
+/* Inline-block children (an "open" button around the title) do not get a parent's decoration. */
+.row[data-completed] .main * {
+  text-decoration: inherit;
+}
+
+@media (forced-colors: active) {
+  .row[data-selected]::before {
+    outline: var(--border-width) solid Highlight;
+  }
+
+  .row:focus-visible::before,
+  .row:has(:focus-visible:not([type='checkbox']))::before {
+    outline: var(--focus-ring-width) solid Highlight;
+  }
+}

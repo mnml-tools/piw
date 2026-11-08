@@ -1,0 +1,52 @@
+/* "Move items to": a native select in the boxed field look (docs/ui-design-system.md,
+   "TextInput"): a 12px/500 secondary label 6px above; 28px, rounded 6px, a 1px control border,
+   13px text and a small chevron 10px from the right. Hover: the stronger border; focus: the
+   accent border and the soft halo. */
+.field {
+  display: grid;
+  gap: var(--space-1-5);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.field select {
+  height: var(--control-height-md);
+  padding: 0 var(--space-6) 0 var(--space-2);
+  border: var(--border-width) solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg);
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+    linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+  background-position:
+    right 14px center,
+    right 10px center;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-regular);
+  appearance: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.field select:hover:not(:focus) {
+  border-color: var(--color-border-hover);
+}
+
+.field select:focus {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .field select:focus {
+    outline: var(--focus-ring-width) solid Highlight;
+  }
+}

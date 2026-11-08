@@ -1,0 +1,63 @@
+[package]
+name = "piw"
+version = "0.1.0"
+description = "Minimal, local-first notes and tasks for the desktop."
+authors = ["Piw contributors"]
+license = "MIT"
+edition = "2024"
+rust-version = "1.90"
+publish = false
+
+[lib]
+# The `_lib` suffix avoids a name clash with the binary on Windows (cargo#8519).
+name = "piw_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.5", features = ["tray-icon", "image-png"] }
+tauri-plugin-log = "2.10.1"
+tauri-plugin-dialog = "2.8.4"
+tauri-plugin-opener = "2.7.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+log = "0.4.35"
+uuid = { version = "1.29.0", features = ["v7"] }
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+ts-rs = { version = "12.0.1", features = ["no-serde-warnings"] }
+tokio = { version = "1.54.1", default-features = false, features = ["sync", "macros"] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-single-instance = "2.5.5"
+tauri-plugin-global-shortcut = "2.4.1"
+tauri-plugin-autostart = "2.7.0"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ashpd = { version = "0.14.0", default-features = false, features = ["tokio", "global_shortcuts"] }
+futures-util = { version = "0.3.34", default-features = false, features = ["std"] }
+# Same version Tauri uses; only read GTK settings (Xft DPI) for XWayland scaling.
+gtk = "0.18.2"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tauri = { version = "2.12.5", features = ["test"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+dbg_macro = "warn"
+todo = "warn"

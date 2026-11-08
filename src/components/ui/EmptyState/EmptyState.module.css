@@ -1,0 +1,60 @@
+/* EmptyState (docs/ui-design-system.md, "EmptyState").
+ * Centred on both axes of the region it describes: it grows to fill a flex column and centres
+ * its content there. A 28px thin-stroke icon in tertiary ink, 12px above a 13/600 title in
+ * text ink, a 12px secondary line (max 40ch) 4px below, and at most one soft (secondary)
+ * Button 16px below. */
+.empty {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 16rem; /* 256 */
+  margin: auto;
+  padding: var(--space-7) var(--content-inset);
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 40ch;
+}
+
+.icon {
+  display: inline-flex;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-subtle);
+}
+
+/* The thin stroke; beats base.css `svg.lucide`. */
+.empty .icon > svg {
+  width: var(--icon-size-empty);
+  height: var(--icon-size-empty);
+  stroke-width: var(--icon-stroke-thin);
+}
+
+.title {
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+}
+
+.description {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-muted);
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}

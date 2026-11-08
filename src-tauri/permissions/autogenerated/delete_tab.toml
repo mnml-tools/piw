@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-delete-tab"
+description = "Enables the delete_tab command without any pre-configured scope."
+commands.allow = ["delete_tab"]
+
+[[permission]]
+identifier = "deny-delete-tab"
+description = "Denies the delete_tab command without any pre-configured scope."
+commands.deny = ["delete_tab"]

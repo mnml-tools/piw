@@ -1,0 +1,31 @@
+.area {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: var(--color-bg);
+}
+
+/* Split view: the list is a 300px column (--list-width) on the canvas with one hairline, the
+   editor beside it on the same canvas; extra width goes to the editor's margins. Both panes
+   start with the same view-header line, so their first lines read as one. */
+.split .listPane {
+  flex: 0 0 var(--list-width);
+  border-inline-end: var(--border-width) solid var(--color-border);
+}
+
+.editorPane {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Split view toggle while the content is too narrow: visible, focusable, explained
+   (docs/ui-design-system.md §8). */
+.unavailable.unavailable,
+.unavailable.unavailable:hover {
+  background: transparent;
+  color: var(--color-text-disabled);
+}

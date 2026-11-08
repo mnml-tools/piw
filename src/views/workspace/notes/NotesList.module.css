@@ -1,0 +1,117 @@
+/* The Notes list (docs/ui-design-system.md, "ListRow"): full-bleed 56px rows on the one grid.
+   Title 13/600, a one-line 12px secondary snippet, an 11px tertiary meta line (date · space).
+   Documents carry a doc glyph in the glyph column; every title sits on the text column. The
+   soft hover / selection fill is ListRow's ::before, never a background here. */
+.scroller {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.item {
+  min-width: 0;
+}
+
+.row,
+.rowCompact {
+  min-width: 0;
+}
+
+/* The row's primary control. Its ::after covers the whole row, so a click anywhere opens it.
+   Its end padding keeps the title clear of the "More actions" button, which floats on the
+   title line (below) so the snippet and meta use the row's full width. */
+.open {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  padding-inline-end: calc(var(--control-height-sm) + var(--space-1));
+  color: inherit;
+  font-weight: inherit;
+  text-align: start;
+}
+
+.open::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+/* The row draws the ring (.focus-inset:has(:focus-visible)); keep the button's own ring
+   where :has() is unsupported so focus is never invisible. */
+@supports selector(:has(*)) {
+  .open:focus-visible {
+    outline: none;
+  }
+}
+
+/* ListRow's title weight (13/600) on one line. */
+.titleText {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.untitled {
+  color: var(--color-text-subtle);
+}
+
+/* The doc glyph, centred in the glyph column on the title line. */
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--glyph-column);
+  height: calc(var(--font-size-ui) * var(--line-height-row));
+  color: var(--color-text-subtle);
+}
+
+/* The stand-in for an empty snippet: decorative, quieter than a real one. */
+.placeholder {
+  color: var(--color-placeholder);
+}
+
+.meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-1-5);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.metaPart {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.metaPart + .metaPart::before {
+  content: '·';
+  content: '·' / '';
+  margin-inline-end: var(--space-1-5);
+  color: var(--color-text-faint);
+}
+
+/* "More actions" floats over the end of the title line (ListRow reveals it on hover and focus),
+   its glyph ending on the content inset; it stays above the row-wide click target. */
+.row > :has(> .rowActions),
+.rowCompact > :has(> .rowActions) {
+  position: absolute;
+  top: calc(
+    var(--space-1-5) + (var(--font-size-ui) * var(--line-height-row) - var(--control-height-sm)) / 2
+  );
+  right: var(--content-inset);
+  margin-block: 0;
+}
+
+.rowActions {
+  position: relative;
+  z-index: 1;
+}

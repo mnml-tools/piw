@@ -1,0 +1,40 @@
+{
+  "environment": {
+    "node": "v22.23.3",
+    "cpu": "Intel(R) Core(TM) Ultra 9 285H",
+    "dom": "jsdom 31.0.0 (vitest 5.1.0)",
+    "runs": 5,
+    "note": "median of RUNS after one warm-up; milliseconds"
+  },
+  "document": {
+    "paragraphs": 5000,
+    "topLevelBlocks": 5170,
+    "markdownBytes": 547471,
+    "jsonBytes": 2535328,
+    "plainTextBytes": 361861
+  },
+  "ms": {
+    "markdownToJson": 1471.4,
+    "jsonToMarkdown": 110.1,
+    "serializeDoc": 25.4,
+    "jsonToPlainText": 2.2,
+    "extractTaskRefIds": 0.9,
+    "editorCreateWithJson": 378.1,
+    "editorGetJsonStringify": 13.6,
+    "editorSingleInsert": 5
+  },
+  "range": {
+    "markdownToJson": [
+      1412.2,
+      1635.3
+    ],
+    "jsonToMarkdown": [
+      92.3,
+      123.8
+    ],
+    "editorCreateWithJson": [
+      342.2,
+      473.8
+    ]
+  }
+}

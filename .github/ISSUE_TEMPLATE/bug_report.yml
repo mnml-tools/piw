@@ -1,0 +1,50 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please don't paste private note or task content — describe it instead.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Piw version
+      placeholder: '0.1.0 (Settings → General → About)'
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux — KDE Plasma (Wayland)
+        - Linux — KDE Plasma (X11)
+        - Linux — GNOME (Wayland)
+        - Linux — GNOME (X11)
+        - Linux — other (say which in the details)
+        - Windows 11
+        - Windows 10
+        - macOS
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS / desktop version
+      placeholder: 'e.g. Fedora 43, Plasma 6.7; Windows 11 24H2; macOS 26.1'
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (optional)
+      description: |
+        Piw's log never contains note text. Linux: ~/.local/share/app.piw.Piw/logs ·
+        Windows: %LOCALAPPDATA%\app.piw.Piw\logs · macOS: ~/Library/Logs/app.piw.Piw
+      render: text

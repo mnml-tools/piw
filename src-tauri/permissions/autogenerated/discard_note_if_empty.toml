@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-discard-note-if-empty"
+description = "Enables the discard_note_if_empty command without any pre-configured scope."
+commands.allow = ["discard_note_if_empty"]
+
+[[permission]]
+identifier = "deny-discard-note-if-empty"
+description = "Denies the discard_note_if_empty command without any pre-configured scope."
+commands.deny = ["discard_note_if_empty"]

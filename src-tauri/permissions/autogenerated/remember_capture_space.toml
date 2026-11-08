@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-remember-capture-space"
+description = "Enables the remember_capture_space command without any pre-configured scope."
+commands.allow = ["remember_capture_space"]
+
+[[permission]]
+identifier = "deny-remember-capture-space"
+description = "Denies the remember_capture_space command without any pre-configured scope."
+commands.deny = ["remember_capture_space"]

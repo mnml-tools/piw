@@ -1,0 +1,12 @@
+[Desktop Entry]
+# Identity entry for desktop portals (Wayland global shortcuts). The visible launcher is
+# Piw.desktop; this one is hidden so menus show Piw once. See docs/architecture.md#global-shortcut.
+Type=Application
+Name=Piw
+Comment=Minimal, local-first notes and tasks
+Exec=piw %U
+Icon=piw
+Terminal=false
+Categories=Utility;Office;
+StartupWMClass=piw
+NoDisplay=true

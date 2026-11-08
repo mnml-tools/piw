@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-convert-note-to-document"
+description = "Enables the convert_note_to_document command without any pre-configured scope."
+commands.allow = ["convert_note_to_document"]
+
+[[permission]]
+identifier = "deny-convert-note-to-document"
+description = "Denies the convert_note_to_document command without any pre-configured scope."
+commands.deny = ["convert_note_to_document"]

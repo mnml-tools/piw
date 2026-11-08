@@ -1,0 +1,202 @@
+/*
+ * Document view (docs/ui-design-system.md, "View header", "Tabs", "Grid"): the quiet line above
+ * the editor (ViewToolbar titleAs="span": back link and name; save state, space and ⋯ on the
+ * right), then one scroll container holding the centred 680px reading column: the 26/700
+ * title, its quiet meta line, the quiet text tabs under it (2px accent underline, no strip) and
+ * the active tab. The column has its own grid: text on its text column, checkboxes and task
+ * rows hanging into its glyph column.
+ */
+
+.document {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  background: var(--color-bg);
+}
+
+/* ---- The quiet line ---- */
+
+/* The back link: a ghost Button sm whose start padding is 6px with an icon (8px - 2px), while
+   the header hangs it by 8px; 2px back so the arrow's box sits on the content inset. */
+.back {
+  margin-inline-start: var(--space-0-5);
+}
+
+/* SaveIndicator collapses when idle: 11px tertiary text, no box. */
+.save {
+  font-size: var(--font-size-meta);
+}
+
+/* ---- Tabs: quiet text tabs under the title ---- */
+
+/* In the reading column the first label sits on the column's text start: its 8px padding hangs
+   outside, like the back link's. 12px under the meta line, 20px above the tab's content. */
+.column .tabStrip {
+  flex: none;
+  min-width: 0;
+  margin: 0 0 var(--space-5) calc(-1 * var(--space-2));
+  padding-inline-start: 0;
+}
+
+/* Inline tab rename: same type as the tab, so the label does not jump. */
+.rename {
+  max-width: 16rem;
+  font-size: var(--font-size-secondary);
+}
+
+/* The only scroll container of the view (drives the toolbar hairline). */
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Reading column: 24px under the quiet line, 64px below. */
+.column {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-10);
+}
+
+/* ---- Title block ---- */
+
+.head {
+  display: grid;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+/* Ghost-editable 26/700: no box, no ring; the caret is the focus. A 34px line (whole pixels). */
+.title {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 2.125rem;
+  letter-spacing: var(--letter-spacing-display);
+  text-overflow: ellipsis;
+}
+
+.title:focus,
+.title:focus-visible {
+  outline: none;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metaDot {
+  padding-inline: var(--space-1-5);
+  color: var(--color-text-faint);
+}
+
+/* ---- Content tab ---- */
+
+.editor {
+  min-height: 50vh;
+}
+
+/* Conflict: the warm inline notice, kept in view while writing. */
+.banner {
+  position: sticky;
+  bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-2) var(--space-2-5);
+  border: var(--border-width) solid var(--color-notice-border);
+  border-radius: var(--radius-md);
+  background: var(--color-notice-bg);
+  color: var(--color-notice-text);
+  font-size: var(--font-size-secondary);
+}
+
+/* ---- Tasks tab: the same rows as Tasks, under a quiet line of text-tab filters ---- */
+
+.tasksTab {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Quiet filters on one line (a tertiary label + a text Segmented sm), the pin at the far
+   right. */
+.tasksToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--control-height-md);
+  margin-bottom: var(--space-3);
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+}
+
+.filterLabel {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* The pin icon button hangs its padding outside, so its glyph ends on the text's right edge. */
+.tasksToolbar > :last-child {
+  margin-inline-end: calc(-1 * var(--icon-button-hang));
+}
+
+/* Rows reach back to the content edges, so their glyph sits on the content inset and their
+   text on --text-start, under the document's text; hover and selection fills span the view. */
+.hang {
+  margin-inline: calc(-1 * var(--text-start)) calc(-1 * var(--content-inset));
+}
+
+/* ---- Dialogs ---- */
+
+.choices {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choices label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- Narrow content ---- */
+
+@container content (max-width: 560px) {
+  .column {
+    padding-top: var(--space-5);
+  }
+
+  .head {
+    margin-bottom: var(--space-4);
+  }
+}

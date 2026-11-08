@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-set-task-due-date"
+description = "Enables the set_task_due_date command without any pre-configured scope."
+commands.allow = ["set_task_due_date"]
+
+[[permission]]
+identifier = "deny-set-task-due-date"
+description = "Denies the set_task_due_date command without any pre-configured scope."
+commands.deny = ["set_task_due_date"]

@@ -1,0 +1,148 @@
+/* Tabs (docs/ui-design-system.md, "Tabs"): quiet text tabs under a document title: no strip
+ * fill, no hairline and no dividers. 13px secondary labels, 0 8px, 32px tall; hover turns the
+ * label text ink; the selected tab is text ink with a 2px accent underline under its label
+ * (rounded ends). The first label sits on the content inset. The + follows 4px after the last
+ * tab. */
+
+/* The first tab's 8px padding hangs outside the content inset, so its label is on the grid. */
+.tabs {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--tabbar-height);
+  padding-inline-start: calc(var(--content-inset) - var(--space-2));
+}
+
+.scroller {
+  flex: 0 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Edge fades: the mask only uses alpha, so currentColor (always opaque text) is enough. */
+.scroller[data-fade-end] {
+  mask-image: linear-gradient(to right, currentColor calc(100% - 2rem), transparent);
+}
+
+.scroller[data-fade-start] {
+  mask-image: linear-gradient(to right, transparent, currentColor 2rem);
+}
+
+.scroller[data-fade-start][data-fade-end] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    currentColor 2rem,
+    currentColor calc(100% - 2rem),
+    transparent
+  );
+}
+
+.tablist {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  height: 100%;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  flex-shrink: 0;
+  max-width: 16rem;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.tab:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.icon {
+  display: inline-flex;
+  color: inherit;
+}
+
+.icon > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.editor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-1);
+}
+
+/* ---- Text and one accent underline ---- */
+.tabs .tablist {
+  gap: var(--space-1);
+}
+
+.tabs .tab {
+  padding: 0 var(--space-2);
+}
+
+.tabs .tab:hover:not(:disabled, [aria-selected='true']) {
+  color: var(--color-text);
+}
+
+.tabs .tab[aria-selected='true'] {
+  color: var(--color-text);
+}
+
+.tabs .tab[aria-selected='true']::after,
+.tabs .editor::after {
+  content: '';
+  position: absolute;
+  inset-inline: var(--space-2);
+  bottom: 0;
+  height: var(--accent-bar-width);
+  border-radius: var(--radius-full);
+  background: var(--color-accent-mark);
+}
+
+.tabs .editor::after {
+  inset-inline: var(--space-1);
+}
+
+/* The + (or the add menu) and the overflow ▾: 4px after the last tab, centred. */
+.tabs > :not(.scroller) {
+  margin-inline-start: var(--space-1);
+}
+
+.panel:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+@media (forced-colors: active) {
+  .tab[aria-selected='true'] {
+    text-decoration: underline;
+  }
+}

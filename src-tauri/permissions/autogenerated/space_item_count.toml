@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-space-item-count"
+description = "Enables the space_item_count command without any pre-configured scope."
+commands.allow = ["space_item_count"]
+
+[[permission]]
+identifier = "deny-space-item-count"
+description = "Denies the space_item_count command without any pre-configured scope."
+commands.deny = ["space_item_count"]

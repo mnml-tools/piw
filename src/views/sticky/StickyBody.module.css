@@ -1,0 +1,289 @@
+/* Sticky bodies (docs/ui-design-system.md §9; brief v6 §5). The paper under the strip: 13px
+ * text at 1.5 on the 12px side inset, one typeface, no boxes. Shared components (TextArea,
+ * TextInput, Checkbox) pick up the sticky ink through the [data-sticky-color] token remap, so a
+ * checked round box fills in the paper's own ink rather than the app accent.
+ *
+ * Task layout (the app grid, on the sticky's 12px inset): 14px round task checkboxes centred in
+ * the 16px glyph column, then the 10px gap, so titles start 26px in (--sticky-indent); the
+ * description, subtasks and "Add subtask" start on that line, and subtasks nest their own
+ * column there. Rows are 26px with no row borders; long titles wrap with the box on the first
+ * line. */
+
+.note,
+.task {
+  --sticky-inset: var(--space-3);
+  --sticky-indent: calc(var(--glyph-column) + var(--glyph-gap));
+  --sticky-box-inset: calc((var(--glyph-column) - var(--checkbox-size-sm)) / 2);
+  --sticky-row: calc(var(--control-height-sm) + var(--space-0-5));
+  --sticky-line: calc(var(--font-size-ui) * var(--line-height-snug));
+  --sticky-row-pad: calc((var(--sticky-row) - var(--sticky-line)) / 2);
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* The text area itself fills the body (so its scrollbar sits at the window edge) and carries
+   the padding. No box, no hover fill and no ring: the caret is the focus indicator. */
+.note .noteField {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-0-5) var(--sticky-inset) var(--sticky-inset);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--sticky-text);
+  caret-color: var(--sticky-text);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-normal);
+  resize: none;
+}
+
+.note .noteField:hover:not(:disabled) {
+  background: transparent;
+}
+
+.note .noteField:focus-visible {
+  outline: none;
+}
+
+.note .noteField::placeholder {
+  color: var(--sticky-text-muted);
+}
+
+/* Save error / conflict: a soft notice line under the text, which is kept. Wraps in narrow
+   windows. */
+.errorBar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-0-5);
+  min-height: var(--control-height-md);
+  margin: 0 var(--space-2) var(--space-2);
+  padding: var(--space-0-5) var(--space-0-5) var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-md);
+  background: var(--color-notice-bg);
+  color: var(--color-notice-text);
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-snug);
+}
+
+.errorText {
+  flex: 1 1 6rem;
+  min-width: 0;
+  padding-block: var(--space-0-5);
+}
+
+/* Retry / Reload / Keep mine: quiet text buttons in the notice ink. */
+.errorBar > button {
+  color: var(--color-notice-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.errorBar > button:hover:not(:disabled, [aria-disabled='true']) {
+  color: var(--color-notice-text);
+}
+
+/* ---- Tasks ---- */
+
+.task {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 0 var(--sticky-inset) var(--sticky-inset);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-normal);
+}
+
+.taskTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-height: var(--sticky-row);
+}
+
+/* The box centred in the glyph column. */
+.taskTitle > :first-child {
+  margin-inline: var(--sticky-box-inset);
+}
+
+.task .titleInput {
+  flex: 1;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--sticky-text);
+  caret-color: var(--sticky-text);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+  text-overflow: ellipsis;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.task .titleInput:hover:not(:disabled) {
+  background: transparent;
+}
+
+.task .titleInput:focus-visible {
+  outline: none;
+}
+
+.task .done {
+  color: var(--sticky-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--sticky-text-muted);
+}
+
+.description {
+  display: -webkit-box;
+  margin: 0 0 var(--space-1) var(--sticky-indent);
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-normal);
+  color: var(--sticky-text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.subtasks {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 0 var(--sticky-indent);
+  list-style: none;
+}
+
+/* 26px for a one-line title; long titles wrap and the box stays on the first line. */
+.subtasks > li {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  padding-block: var(--sticky-row-pad);
+}
+
+.task .subtasks > li > label,
+.task .tabRow > label {
+  align-items: flex-start;
+  gap: var(--glyph-gap);
+  min-width: 0;
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-snug);
+  overflow-wrap: anywhere;
+}
+
+.task .subtasks > li > label > :first-child,
+.task .tabRow > label > :first-child {
+  margin-top: calc((var(--sticky-line) - var(--checkbox-size-sm)) / 2);
+  margin-inline: var(--sticky-box-inset);
+}
+
+/* A document Tasks tab: real task rows, so no indent. */
+.tabList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-block: var(--sticky-row-pad);
+}
+
+.tabRow > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Same line box as the title, so both sit on the first line. */
+.rowMeta {
+  flex: none;
+  font-size: var(--font-size-meta);
+  line-height: var(--sticky-line);
+  font-variant-numeric: tabular-nums;
+  color: var(--sticky-text-muted);
+}
+
+.rowMeta:empty {
+  display: none;
+}
+
+/* "Add subtask" / "Add task": quiet, revealed with the window's controls. */
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-height: var(--sticky-row);
+  color: var(--sticky-text-muted);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.task:hover .addRow,
+.task:focus-within .addRow,
+.addRow:has(input:not(:placeholder-shown)),
+.tabList:empty + .addRow {
+  opacity: 1;
+}
+
+.addSubtask {
+  padding-left: var(--sticky-indent);
+}
+
+/* The + sits in the glyph column, as the boxes above it. */
+.addRow > svg {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  margin-inline: calc((var(--glyph-column) - var(--icon-size-sm)) / 2);
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sticky-text);
+  caret-color: var(--sticky-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+}
+
+.addInput::placeholder {
+  color: var(--sticky-text-muted);
+}
+
+.addInput:focus-visible {
+  outline: none;
+}
+
+.missing {
+  margin: var(--space-0-5) var(--space-3) var(--space-3);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-normal);
+  color: var(--sticky-text-muted);
+}
+
+@media (forced-colors: active) {
+  .addRow {
+    opacity: 1;
+  }
+
+  .note .noteField:focus-visible,
+  .task .titleInput:focus-visible,
+  .addInput:focus-visible {
+    outline: var(--border-width) solid Highlight;
+  }
+}

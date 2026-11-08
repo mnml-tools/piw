@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-reset-sticky-positions"
+description = "Enables the reset_sticky_positions command without any pre-configured scope."
+commands.allow = ["reset_sticky_positions"]
+
+[[permission]]
+identifier = "deny-reset-sticky-positions"
+description = "Denies the reset_sticky_positions command without any pre-configured scope."
+commands.deny = ["reset_sticky_positions"]

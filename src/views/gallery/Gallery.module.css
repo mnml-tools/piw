@@ -1,0 +1,402 @@
+/* Dev-only component gallery: a calm review surface. Sections are separated by space and one
+ * hairline, never cards; demo frames that stand for a real surface use that surface's token.
+ * Forced states mirror the components' own rules with the same tokens. */
+
+.page {
+  min-height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky-header);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  min-height: var(--titlebar-height);
+  padding: var(--space-2) var(--space-7);
+  background: var(--color-bg);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 32rem), 1fr));
+  gap: var(--space-7) var(--space-8);
+  padding: var(--space-6) var(--space-7) var(--space-10);
+  align-items: start;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-1);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-section);
+  color: var(--color-text-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.rowLabel {
+  flex: 0 0 6.5rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowItems {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+}
+
+.code {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ---- Forced states (gallery only) ----
+ * Mirrors of the components' own hover/focus rules, with the same tokens. */
+.states {
+  display: grid;
+  grid-template-columns: 6.5rem repeat(6, minmax(0, 1fr));
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.stateHead {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-subtle);
+}
+
+.stateCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: var(--control-height-md);
+}
+
+.statesWide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+  max-width: var(--list-max-width);
+  margin-top: var(--space-3);
+}
+
+.states [data-force='hover'],
+.statesWide [data-force='hover']::before {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+/* Boxed fields: the stronger border. */
+.states input[data-force='hover-field'] {
+  border-color: var(--color-border-hover);
+}
+
+/* Soft-filled controls step from --color-bg-control to the stronger fill. */
+.states [data-force='hover-layer'] {
+  background-color: var(--color-bg-hover-strong);
+}
+
+.states [data-force='hover-accent'] {
+  background-color: var(--color-accent-fill-hover);
+}
+
+.states [data-force='focus'] {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.statesWide [data-force='focus-inset']::before {
+  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+.statesWide [data-force='selected-accent'][data-selected]::before {
+  background-color: var(--color-bg-active-accent);
+}
+
+.states [data-force='focus-field'] {
+  border-color: var(--color-focus-ring);
+  box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
+}
+
+/* Checkbox: the input is invisible, its box is the next sibling. */
+.states input[type='checkbox'][data-force='hover'] + span {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-subtle);
+}
+
+.states input[type='checkbox'][data-force='hover'] + span svg {
+  stroke-dashoffset: 0;
+  opacity: 0.5;
+}
+
+.states input[type='checkbox'][data-force='focus'] {
+  outline: none;
+}
+
+.states input[type='checkbox'][data-force='focus'] + span {
+  outline: var(--focus-ring-width-mark) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset-mark);
+}
+
+/* ---- Static surfaces (real component classes, positioned in flow) ---- */
+.surfaces {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  background: var(--color-bg-app);
+  border-radius: var(--radius-lg);
+}
+
+.staticMenu {
+  position: relative;
+  min-width: 14rem;
+}
+
+.surfaceFrame {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--color-bg-overlay);
+  border-radius: var(--radius-lg);
+}
+
+.surfaceFrame .staticDialog {
+  position: relative;
+  z-index: auto;
+  left: auto;
+  top: auto;
+  transform: none;
+  animation: none;
+}
+
+.toastStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--color-bg-app);
+  border-radius: var(--radius-lg);
+}
+
+.toastStack > * {
+  animation: none;
+}
+
+/* ---- Live demos ---- */
+.tabsFrame {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.panel {
+  padding: var(--space-4) var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.contextTarget {
+  padding: var(--space-5);
+  background: var(--color-bg-soft);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.palette {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.meta svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.overdue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-danger);
+}
+
+.rowButton {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: start;
+  color: inherit;
+}
+
+.emptyFrame {
+  padding: 0 var(--space-5);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-xl);
+}
+
+.drawerFrame {
+  position: relative;
+  isolation: isolate; /* keep the overlay drawer under the gallery's sticky header */
+  display: flex;
+  height: 22rem;
+  overflow: hidden;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.drawerList {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.stickies {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr));
+  gap: var(--space-3);
+}
+
+.sticky {
+  display: flex;
+  flex-direction: column;
+  min-height: 7.5rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.stickyStrip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: var(--sticky-titlebar-height);
+  padding: 0 var(--space-1) 0 var(--space-4);
+}
+
+.stickyTitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
+}
+
+.stickyBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-4) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+@media (width < 900px) {
+  .states {
+    grid-template-columns: 5rem repeat(6, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+}
+
+@media (width < 560px) {
+  .grid,
+  .header {
+    padding-inline: var(--space-4);
+  }
+
+  .rowLabel {
+    flex-basis: auto;
+  }
+
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .states {
+    overflow-x: auto;
+  }
+}

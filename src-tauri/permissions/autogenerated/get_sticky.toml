@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-get-sticky"
+description = "Enables the get_sticky command without any pre-configured scope."
+commands.allow = ["get_sticky"]
+
+[[permission]]
+identifier = "deny-get-sticky"
+description = "Denies the get_sticky command without any pre-configured scope."
+commands.deny = ["get_sticky"]

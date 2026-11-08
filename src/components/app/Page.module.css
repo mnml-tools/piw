@@ -1,0 +1,248 @@
+/* Shared page skeleton of every workspace view (docs/ui-design-system.md, "Grid" and "View
+ * header"). The header is the first line of the canvas, then one scroll container on the canvas.
+ * One grid: the title and every glyph sit on --content-inset (16px; 20px in windows ≥ 1100px),
+ * row text on --text-start (inset + 26px), and right edges share --content-inset. Controls with
+ * no box at rest (icon buttons, the back link) hang their padding outside the grid, so their
+ * glyphs sit on it, like the rows' soft fills hang 6px outside the content. */
+
+/* A view: header + one scroll container. A size container, so compact paddings follow the
+   view's own width (the 300px split-view list is compact in any window). */
+.view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  background: var(--color-bg);
+  container-type: inline-size;
+}
+
+.scroll {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---- View header: 20px above, a 28px line, 12px below; no fill ---- */
+.toolbar {
+  flex: none;
+  min-width: 0;
+  padding: var(--view-header-above) 0 var(--view-header-below);
+  border-bottom: var(--border-width) solid transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The one hairline: only once the content scrolls under the header. */
+.toolbar[data-scrolled] {
+  border-bottom-color: var(--color-border);
+}
+
+.toolbarInner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  max-width: var(--list-max-width);
+  min-height: var(--control-height-md);
+  padding-inline: var(--content-inset);
+}
+
+/* Above an editor the line spans the canvas: its actions sit at the window's right edge. */
+.toolbar[data-quiet] .toolbarInner {
+  max-width: none;
+}
+
+.toolbarLeading {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+}
+
+/* "← Notes": a ghost Button sm whose arrow sits on the content inset (its 8px padding hangs
+   outside), then a gap before the title. */
+.toolbarBack {
+  display: flex;
+  flex: none;
+  align-items: center;
+  margin-inline-start: calc(-1 * var(--button-padding-sm));
+}
+
+.toolbarBack:has(+ .heading) {
+  margin-inline-end: var(--space-2);
+}
+
+.heading {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--font-size-view-title);
+  font-weight: var(--font-weight-title);
+  line-height: var(--line-height-title);
+  letter-spacing: var(--letter-spacing-title);
+  text-overflow: ellipsis;
+  color: var(--color-text);
+}
+
+/* The line above an editor: a quiet 13px breadcrumb; the document carries the title. */
+.toolbar[data-quiet] .title {
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-tight);
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+}
+
+/* The quiet count after the title ("9 open"): 13px tertiary, on the title's baseline. */
+.count {
+  flex: none;
+  font-size: var(--font-size-ui);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-subtle);
+}
+
+.note {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-muted);
+}
+
+.toolbarFilters {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.toolbarActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+/* An icon button at the end hangs its padding outside the inset: the glyph ends on the grid. */
+.toolbarActions:has(> [data-icon-button]:last-child) {
+  margin-inline-end: calc(-1 * var(--icon-button-hang));
+}
+
+/* ---- Content column ---- */
+/* Lists are full-bleed: the column has no side padding; rows reach the column's edges and
+   keep their content on the grid. `content` is the full canvas up to --list-max-width (880),
+   left-aligned; `editor` is the centred 680px reading column (text on its own grid, checkboxes
+   hanging into the glyph column); `narrow` the centred 640px form column (Settings). */
+.column {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--list-max-width);
+  margin-inline: 0 auto;
+  padding: 0 0 var(--space-7);
+}
+
+.column[data-width='editor'] {
+  max-width: calc(var(--editor-max-width) + 2 * var(--text-start));
+  margin-inline: auto;
+  padding-inline: var(--text-start);
+}
+
+.column[data-width='narrow'] {
+  max-width: calc(var(--form-max-width) + 2 * var(--content-inset));
+  margin-inline: auto;
+  padding-inline: var(--content-inset);
+}
+
+.column[data-width='full'] {
+  max-width: none;
+}
+
+/* ---- Group label inside a list: the one section style ----
+   11px/600 sentence case in secondary ink on the text column, 16px above it; an optional glyph
+   in the glyph column; the count 11px/400 tertiary. Sticky on the canvas, no bar or line. */
+.sectionHeader {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky-header);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin: 0;
+  padding: var(--space-4) var(--content-inset) var(--space-1-5) var(--text-start);
+  background: var(--color-bg);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-section);
+  line-height: 0.875rem; /* 14px: whole pixels */
+  color: var(--color-text-muted);
+}
+
+/* Right under the view header (12px below it) the label keeps 16px above, not 28. */
+.group:first-child > .sectionHeader:first-child {
+  padding-top: var(--space-1);
+}
+
+.sectionIcon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--glyph-column);
+  /* Back from the text column onto the glyph column; 10px to the label (6px is the gap). */
+  margin-inline: calc(var(--content-inset) - var(--text-start))
+    calc(var(--glyph-gap) - var(--space-1-5));
+}
+
+.sectionIcon > svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.sectionCount {
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Groups are separated by their labels' space; no lines. */
+.group {
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A narrow view (the split-view list, small windows) drops the header's secondary note. The
+   inset follows the window, not the pane, so a split list stays under the top bar's mark. */
+@container (max-width: 559px) {
+  .note {
+    display: none;
+  }
+}

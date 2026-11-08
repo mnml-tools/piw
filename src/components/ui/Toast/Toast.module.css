@@ -1,0 +1,88 @@
+/* Toast (docs/ui-design-system.md, "Toast"): bottom centre, 16px above the window edge, on the
+ * menu surface (--color-bg-elevated, radius 8, --shadow-md, no border); 13px text with 12px
+ * leading padding. The action (Undo, Retry) is a ghost Button sm in the accent; the × a 24px
+ * icon button. Errors keep the surface and lead with a danger icon. Enters with a 140ms fade
+ * and a 4px rise. */
+.viewport {
+  position: fixed;
+  inset-inline: 0;
+  bottom: var(--space-4);
+  z-index: var(--z-toast);
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  pointer-events: none;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+  max-width: var(--toast-max-width);
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: fit-content;
+  max-width: 100%;
+  min-width: min(16rem, 100%);
+  min-height: var(--control-height-lg);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-snug);
+  animation: toast-in var(--duration-normal) var(--ease-enter);
+}
+
+.error .toneIcon {
+  color: var(--color-danger);
+}
+
+.toneIcon {
+  flex-shrink: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  margin-inline-end: var(--space-1);
+}
+
+.message {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-block: var(--space-0-5);
+  padding-inline-end: var(--space-2);
+  overflow-wrap: anywhere;
+}
+
+/* A text button in the accent. */
+.toast .action {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.toast .action:hover:not(:disabled) {
+  color: var(--color-accent-hover);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+  }
+}
+
+@media (forced-colors: active) {
+  .toast {
+    border: var(--border-width) solid CanvasText;
+  }
+}

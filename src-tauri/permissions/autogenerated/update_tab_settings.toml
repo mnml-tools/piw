@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-update-tab-settings"
+description = "Enables the update_tab_settings command without any pre-configured scope."
+commands.allow = ["update_tab_settings"]
+
+[[permission]]
+identifier = "deny-update-tab-settings"
+description = "Denies the update_tab_settings command without any pre-configured scope."
+commands.deny = ["update_tab_settings"]

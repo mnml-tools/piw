@@ -1,0 +1,83 @@
+{
+  "vite": "8.3.6",
+  "gzipLevel": -1,
+  "probes": {
+    "tiptap": {
+      "entry": "bundle/tiptap.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 617118,
+      "gzipBytes": 192892,
+      "minifiedKiB": 602.7,
+      "gzipKiB": 188.4
+    },
+    "tiptap-react": {
+      "entry": "bundle/tiptap-react.tsx",
+      "external": [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime"
+      ],
+      "chunks": 1,
+      "minifiedBytes": 649599,
+      "gzipBytes": 203005,
+      "minifiedKiB": 634.4,
+      "gzipKiB": 198.2
+    },
+    "part-tiptap-starterkit": {
+      "entry": "bundle/tiptap-starterkit.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 383691,
+      "gzipBytes": 119814,
+      "minifiedKiB": 374.7,
+      "gzipKiB": 117
+    },
+    "part-lowlight-common": {
+      "entry": "bundle/lowlight-common.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 162821,
+      "gzipBytes": 51031,
+      "minifiedKiB": 159,
+      "gzipKiB": 49.8
+    },
+    "part-lowlight-curated": {
+      "entry": "bundle/lowlight-curated.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 69350,
+      "gzipBytes": 22818,
+      "minifiedKiB": 67.7,
+      "gzipKiB": 22.3
+    },
+    "part-marked": {
+      "entry": "bundle/marked.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 40130,
+      "gzipBytes": 11950,
+      "minifiedKiB": 39.2,
+      "gzipKiB": 11.7
+    },
+    "codemirror": {
+      "entry": "bundle/codemirror.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 499058,
+      "gzipBytes": 170654,
+      "minifiedKiB": 487.4,
+      "gzipKiB": 166.7
+    },
+    "codemirror-basic": {
+      "entry": "bundle/codemirror-basic.ts",
+      "external": [],
+      "chunks": 1,
+      "minifiedBytes": 607315,
+      "gzipBytes": 204013,
+      "minifiedKiB": 593.1,
+      "gzipKiB": 199.2
+    }
+  }
+}

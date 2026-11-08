@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-spike-broadcast"
+description = "Enables the spike_broadcast command without any pre-configured scope."
+commands.allow = ["spike_broadcast"]
+
+[[permission]]
+identifier = "deny-spike-broadcast"
+description = "Denies the spike_broadcast command without any pre-configured scope."
+commands.deny = ["spike_broadcast"]

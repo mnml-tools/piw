@@ -1,0 +1,250 @@
+/* The top bar (docs/ui-design-system.md, "Top bar"): the app's only chrome.
+ *
+ * 44px on --color-bg-soft with one hairline under it (the box is 45px, so 28px controls sit on
+ * whole pixels). One grid with the canvas: the 16px app mark sits in the glyph column on
+ * --content-inset and the first area label starts on the text column (inset + 26px). Right
+ * side: the space pill, the 220px search field, then New, Trash and Settings as 28px icon
+ * buttons; the last glyph ends on the content inset (its padding hangs outside, as in the view
+ * headers). Area tabs: 13px secondary text; the active one is text ink on a soft 6px pill.
+ * Everything else in the bar is a drag region. */
+
+.bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  min-width: 0;
+  height: calc(var(--topbar-height) + var(--border-width));
+  padding: 0 var(--content-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-tight);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---- Left: mark + areas ---- */
+.mark {
+  display: inline-flex;
+  flex: none;
+  width: var(--glyph-column);
+  height: var(--glyph-column);
+  color: var(--color-text);
+}
+
+.mark > svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Tabs are 6px apart, so two pills (hover next to current) never touch. The first tab's
+   10px padding hangs before the text column: its label lands on it. */
+.tabs {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: 0;
+  margin-inline-start: calc(var(--glyph-gap) - var(--space-2-5));
+}
+
+.tab,
+.areaMenu,
+.switcher {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1-5);
+  height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.tab {
+  padding: 0 var(--space-2-5);
+  color: var(--color-text-muted);
+}
+
+.tab:hover,
+.areaMenu:hover,
+.switcher:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.tab:active,
+.areaMenu:active,
+.switcher:active {
+  background: var(--color-bg-hover-strong);
+}
+
+.tab[aria-current='page'] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.areaMenu[data-state='open'],
+.switcher[data-state='open'] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.count {
+  margin-inline-start: var(--space-1-5);
+  font-size: var(--font-size-meta);
+  color: var(--color-text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.tab[aria-current='page'] .count {
+  color: var(--color-text-muted);
+}
+
+/* Narrow: the areas fold into one menu button; its label keeps the text column. */
+.areaMenu {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-inline-start: calc(var(--glyph-gap) - var(--space-2));
+  color: var(--color-text);
+}
+
+.areaMenuName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The empty middle of the bar: it drags the window. */
+.drag {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: var(--space-4);
+}
+
+/* ---- Right: space pill, search, New / Trash / Settings ---- */
+.actions {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  margin-inline-end: calc(-1 * var(--icon-button-hang));
+}
+
+.switcher {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 12rem;
+  color: var(--color-text);
+}
+
+.switcherGlyph {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-icon);
+}
+
+.switcherGlyph > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.switcherName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  flex: none;
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+  color: var(--color-text-subtle);
+}
+
+/* The search field's look (TextInput's soft sibling), as a button that opens the palette. */
+.search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1-5);
+  width: 13.75rem; /* 220 */
+  height: var(--control-height-md);
+  padding: 0 var(--space-1-5) 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-control);
+  color: var(--color-text-muted);
+  font: inherit;
+  text-align: start;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.search:hover {
+  background: var(--color-bg-hover-strong);
+}
+
+.search:active {
+  background: var(--color-bg-pressed);
+}
+
+.searchIcon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-text-subtle);
+}
+
+.searchLabel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Plain text in the UI font, not a mono chip. */
+.searchKey {
+  flex: none;
+  font-size: var(--font-size-meta);
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+.icons {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-0-5);
+}
+
+.bar[data-narrow] .switcher {
+  max-width: 8rem;
+}
+
+@media (forced-colors: active) {
+  .tab[aria-current='page'] {
+    outline: var(--border-width) solid Highlight;
+  }
+
+  .search {
+    border: var(--border-width) solid ButtonText;
+  }
+}
+
+/* macOS: the native traffic lights sit over the bar's leading edge (overlay title bar). */
+:global(:root[data-platform='macos'][data-window='main']) .bar {
+  padding-inline-start: calc(var(--content-inset) + 4.25rem);
+}

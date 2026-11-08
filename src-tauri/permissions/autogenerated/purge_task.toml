@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-purge-task"
+description = "Enables the purge_task command without any pre-configured scope."
+commands.allow = ["purge_task"]
+
+[[permission]]
+identifier = "deny-purge-task"
+description = "Denies the purge_task command without any pre-configured scope."
+commands.deny = ["purge_task"]

@@ -1,0 +1,75 @@
+/* IconButton (docs/ui-design-system.md, "IconButton"). Rounded 6px, no border, secondary ink.
+ * md 28×28 with a 16px icon (the top bar, view headers, the inspector); sm 24×24 with a 14px
+ * icon (row actions, tab close, sticky strips, toasts).
+ * Hover: the soft hover fill and text ink. Pressed: a stronger fill. Toggled on (aria-pressed):
+ * the selected fill. Open menu (aria-expanded): the hover fill. Disabled: --opacity-disabled.
+ * Focus: the global 2px ring. 120ms ease-out. */
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  background: transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.iconButton > svg {
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+}
+
+.md {
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+}
+
+.sm {
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+}
+
+.sm > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.iconButton:hover:not(:disabled, [aria-disabled='true']),
+.iconButton[aria-expanded='true'] {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.iconButton:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-bg-hover-strong);
+}
+
+.iconButton[aria-pressed='true'] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.iconButton[aria-pressed='true']:hover:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-bg-hover-strong);
+}
+
+.iconButton:disabled {
+  opacity: var(--opacity-disabled);
+}
+
+.iconButton[aria-pressed='true']:disabled {
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  .iconButton[aria-pressed='true']:not(:focus-visible) {
+    outline: var(--border-width) solid Highlight;
+    outline-offset: -1px;
+  }
+}

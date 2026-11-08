@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-rename-space"
+description = "Enables the rename_space command without any pre-configured scope."
+commands.allow = ["rename_space"]
+
+[[permission]]
+identifier = "deny-rename-space"
+description = "Denies the rename_space command without any pre-configured scope."
+commands.deny = ["rename_space"]

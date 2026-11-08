@@ -1,0 +1,147 @@
+/* Dialog / ConfirmDialog (docs/ui-design-system.md, "Dialog").
+ * Scrim --color-bg-overlay. Surface: 360px, radius 10, --color-bg-elevated with
+ * --shadow-lg (its 0.5px ring is the edge), no border and no header bar. 20px padding: the
+ * title 15/600, the description 13px secondary, the body, then the actions right-aligned with
+ * 8px gaps and no hairline. The × is a 24px icon button 12px from the top-right corner.
+ * Order: Cancel (secondary), then the primary (accent pill) or danger action. Opens with a
+ * 160ms fade and a slight rise. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--color-bg-overlay);
+}
+
+.overlay[data-state='open'] {
+  animation: fade-in var(--duration-slow) var(--ease-enter);
+}
+
+.dialog {
+  position: fixed;
+  z-index: var(--z-modal);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  width: min(var(--dialog-width), calc(100vw - 2 * var(--space-5)));
+  max-height: 95vh;
+  overflow: auto;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog:focus-visible {
+  outline: none; /* focus moves to the first control; the ring would wrap the whole dialog */
+}
+
+.dialog[data-state='open'] {
+  animation: dialog-in var(--duration-slow) var(--ease-enter);
+}
+
+.top {
+  top: 15vh;
+  transform: translateX(-50%);
+  max-height: 70vh;
+}
+
+.top[data-state='open'] {
+  animation-name: fade-in;
+}
+
+@media (width < 560px) {
+  .dialog {
+    width: calc(100vw - var(--space-4));
+  }
+}
+
+.header {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) 0;
+}
+
+.headerHidden {
+  padding: 0;
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-tight);
+  overflow-wrap: break-word;
+}
+
+/* Keep the title clear of the × in the corner. */
+.header:has(.close) .title {
+  padding-inline-end: var(--space-6);
+}
+
+.close.close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+}
+
+.description {
+  padding: var(--space-1-5) var(--space-5) 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-ui);
+  line-height: var(--line-height-normal);
+}
+
+.body {
+  min-height: 0;
+  padding: var(--space-4) var(--space-5) 0;
+}
+
+.description + .body {
+  padding-top: var(--space-3);
+}
+
+.flush .body {
+  padding: 0;
+}
+
+/* Actions: right-aligned, 8px apart, no hairline. */
+.footer,
+.confirmFooter {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-5);
+}
+
+.flush .footer {
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + var(--space-1)));
+  }
+}
+
+@media (forced-colors: active) {
+  .dialog {
+    border: var(--border-width) solid CanvasText;
+  }
+}

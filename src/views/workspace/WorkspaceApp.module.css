@@ -1,0 +1,47 @@
+/* App shell (docs/ui-design-system.md, "Shell"): the 44px top bar, then one content region at
+   full width on the canvas. No sidebar and no status bar. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* The content region is a size container, so views follow their own width (a 300px split-view
+   list is compact in any window). */
+.content {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--color-bg);
+  container-type: inline-size;
+  container-name: content;
+}
+
+.region {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.dataError {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.detail {
+  display: block;
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  overflow-wrap: anywhere;
+  user-select: text;
+}

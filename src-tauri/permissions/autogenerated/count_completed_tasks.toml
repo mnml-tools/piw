@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-count-completed-tasks"
+description = "Enables the count_completed_tasks command without any pre-configured scope."
+commands.allow = ["count_completed_tasks"]
+
+[[permission]]
+identifier = "deny-count-completed-tasks"
+description = "Denies the count_completed_tasks command without any pre-configured scope."
+commands.deny = ["count_completed_tasks"]

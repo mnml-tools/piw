@@ -1,0 +1,22 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "capture",
+  "description": "Quick Capture popup: create notes/tasks, keep a draft, pin after saving. Nothing else.",
+  "windows": ["capture"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-start-dragging",
+    "allow-list-spaces",
+    "allow-get-settings",
+    "allow-get-capture-draft",
+    "allow-save-capture-draft",
+    "allow-clear-capture-draft",
+    "allow-create-note",
+    "allow-create-task",
+    "allow-open-sticky",
+    "allow-hide-capture",
+    "allow-remember-capture-space",
+    "allow-spike-ack"
+  ]
+}

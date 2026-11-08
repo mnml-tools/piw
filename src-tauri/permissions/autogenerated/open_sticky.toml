@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-open-sticky"
+description = "Enables the open_sticky command without any pre-configured scope."
+commands.allow = ["open_sticky"]
+
+[[permission]]
+identifier = "deny-open-sticky"
+description = "Denies the open_sticky command without any pre-configured scope."
+commands.deny = ["open_sticky"]

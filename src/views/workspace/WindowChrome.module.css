@@ -1,0 +1,116 @@
+/* Window controls drawn in the top bar (Linux, Windows): 28px quiet squares on the bar's soft
+   surface, the close button turning danger on hover, like a native title bar. */
+.controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-0-5);
+  margin-inline-start: var(--space-3);
+  padding-inline-start: var(--space-3);
+  border-inline-start: var(--border-width) solid var(--color-border);
+  height: var(--control-height-sm);
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.control:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+.control:active {
+  background: var(--color-bg-hover-strong);
+}
+
+.close:hover {
+  background: var(--color-danger-fill);
+  color: var(--color-accent-contrast);
+}
+
+.restore {
+  transform: scaleX(-1);
+}
+
+/* ---- Resize edges (Linux): 5px bands and 10px corners above everything ---- */
+.edges {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-toast) + 1);
+  pointer-events: none;
+}
+
+.edge {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.edge[data-edge='North'] {
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: ns-resize;
+}
+.edge[data-edge='South'] {
+  bottom: 0;
+  left: 10px;
+  right: 10px;
+  height: 5px;
+  cursor: ns-resize;
+}
+.edge[data-edge='West'] {
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: ew-resize;
+}
+.edge[data-edge='East'] {
+  right: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  cursor: ew-resize;
+}
+.edge[data-edge='NorthWest'] {
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.edge[data-edge='SouthEast'] {
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+.edge[data-edge='NorthEast'] {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+.edge[data-edge='SouthWest'] {
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}

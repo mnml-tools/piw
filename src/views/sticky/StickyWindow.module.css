@@ -1,0 +1,189 @@
+/* Sticky window (docs/ui-design-system.md §9; brief v6 §5): a muted paper with nothing on it but
+ * the text. The window is opaque and undecorated, so the paper fills it and a 1px
+ * --sticky-border hairline is its edge (no CSS shadow).
+ *
+ *   strip  a 24px drag strip on the paper's own colour, with no divider: an 11px/500 secondary
+ *          title on the 12px side inset, then the controls (keep on top, open, more, hide) as
+ *          22px soft icon buttons whose last glyph ends on the inset. The controls appear on
+ *          hover or focus-within (120ms fade) over the end of the title; keyboard focus always
+ *          reveals them. While "keep on top" is on, a small filled pin marks it at rest.
+ *   body   the paper itself (StickyBody.module.css). */
+
+.sticky {
+  --sticky-inset: var(--space-3);
+  --sticky-control-size: calc(var(--control-height-sm) - var(--space-0-5));
+  --sticky-control-hang: calc((var(--sticky-control-size) - var(--icon-size-sm)) / 2);
+
+  display: grid;
+  grid-template-rows: var(--sticky-titlebar-height) minmax(0, 1fr);
+  height: 100vh;
+  background: var(--sticky-bg);
+  color: var(--sticky-text);
+  border: var(--border-width) solid var(--sticky-border);
+  overflow: hidden;
+}
+
+/* ---- Strip ---- */
+
+.strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 var(--sticky-inset);
+  user-select: none;
+}
+
+/* Block (not flex) so a long title ends in an ellipsis; it fills the strip to stay a drag
+   area. */
+.title {
+  flex: 1;
+  align-self: stretch;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--sticky-titlebar-height);
+  color: var(--sticky-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The resting on-top pin takes the last glyph slot: the title stops before it. */
+.strip:has(.onTopMark) .title {
+  padding-inline-end: calc(var(--icon-size-sm) + var(--space-1-5));
+}
+
+/* The controls sit over the end of the title on the paper, which fades the title out under
+   them. Hidden at rest, never removed: still in the tab order and the accessibility tree. */
+.controls {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: calc(var(--sticky-inset) - var(--sticky-control-hang));
+  display: flex;
+  align-items: center;
+  padding-inline-start: var(--space-4);
+  background: linear-gradient(to right, transparent, var(--sticky-bg) var(--space-3));
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.sticky:hover .controls,
+.sticky:focus-within .controls,
+.strip[data-state='open'] .controls,
+.controls:has([aria-expanded='true']) {
+  opacity: 1;
+}
+
+/* 22px soft icon buttons: transparent at rest, the paper's hover fill (IconButton states, on
+   the sticky's remapped tokens). */
+.controls .control {
+  width: var(--sticky-control-size);
+  height: var(--sticky-control-size);
+  color: var(--sticky-text-muted);
+}
+
+.controls .control > svg {
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+}
+
+.controls .control:hover:not(:disabled),
+.controls .control[aria-expanded='true'],
+.controls .control[aria-pressed='true'] {
+  color: var(--sticky-text);
+}
+
+/* The 22px controls fill the 24px strip, so the focus ring is drawn inside them. */
+.controls .control:focus-visible {
+  outline-offset: var(--focus-ring-inset);
+}
+
+/* While it is on, a small filled pin sits in the last glyph slot at rest, so the state reads
+   without hovering; it gives way to the controls. Decorative: the toggle carries the state. */
+.onTopMark {
+  position: absolute;
+  top: calc((var(--sticky-titlebar-height) - var(--icon-size-sm)) / 2);
+  right: var(--sticky-inset);
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--sticky-text-muted);
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.sticky:hover .onTopMark,
+.sticky:focus-within .onTopMark,
+.strip[data-state='open'] .onTopMark,
+.strip:has([aria-expanded='true']) .onTopMark {
+  opacity: 0;
+}
+
+/* ---- Body ---- */
+
+.body {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ---- Colour swatches in the menus (rendered outside the sticky, on app tokens) ----
+   Round paper chips, edged in the colour's dot: the paper's own hairline vanishes on the menu
+   surface. */
+
+.swatch {
+  display: inline-block;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  border: var(--border-width) solid var(--sticky-plain-dot);
+  border-radius: var(--radius-full);
+  background: var(--sticky-plain-bg);
+}
+
+.swatch[data-color='yellow'] {
+  border-color: var(--sticky-yellow-dot);
+  background: var(--sticky-yellow-bg);
+}
+
+.swatch[data-color='peach'] {
+  border-color: var(--sticky-peach-dot);
+  background: var(--sticky-peach-bg);
+}
+
+.swatch[data-color='rose'] {
+  border-color: var(--sticky-rose-dot);
+  background: var(--sticky-rose-bg);
+}
+
+.swatch[data-color='mint'] {
+  border-color: var(--sticky-mint-dot);
+  background: var(--sticky-mint-bg);
+}
+
+.swatch[data-color='sky'] {
+  border-color: var(--sticky-sky-dot);
+  background: var(--sticky-sky-bg);
+}
+
+.swatch[data-color='lavender'] {
+  border-color: var(--sticky-lavender-dot);
+  background: var(--sticky-lavender-bg);
+}
+
+@media (forced-colors: active) {
+  .sticky {
+    border-color: CanvasText;
+  }
+
+  .controls {
+    background: Canvas;
+    opacity: 1;
+  }
+
+  .onTopMark {
+    display: none;
+  }
+
+  .swatch {
+    forced-color-adjust: none;
+  }
+}

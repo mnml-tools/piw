@@ -1,0 +1,252 @@
+/* Search palette (docs/ui-design-system.md, "Dialog", "ListRow", "Kbd"): the elevated dialog
+   surface (10px radius, --shadow-lg) at 560px, 15vh from the top, no header bar. It keeps the
+   view grid inside its own edges: 16px inset, the 16px glyph column, text 10px after it.
+   - Query row: 48px, the 16px search glyph, a borderless 15px input, the Esc key cap at the end;
+     one hairline below.
+   - Results: soft rows like the lists (the fill inset 6px from the edges, radius 6), a 16px type
+     glyph on the title line, 13px title, 11px tertiary context, a 12px secondary snippet whose
+     matches are marked (highlight fill and 600 weight, never colour alone). The active result
+     takes the soft selected fill. Group labels: 11px/600 secondary on the text column.
+   - Footer: the palette's keys in 11px tertiary, after one hairline, no fill. */
+.dialog.dialog {
+  width: min(var(--palette-width), calc(100vw - 2 * var(--space-4)));
+  overflow: hidden;
+}
+
+.palette {
+  --palette-inset: var(--space-4);
+  --palette-text: calc(var(--palette-inset) + var(--glyph-column) + var(--glyph-gap));
+  display: flex;
+  flex-direction: column;
+  max-height: min(70vh, 35rem);
+}
+
+/* ---- Query row ---- */
+.field {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--glyph-gap);
+  height: 3rem;
+  padding: 0 calc(var(--palette-inset) - var(--space-1)) 0 var(--palette-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.fieldIcon {
+  flex: none;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  color: var(--color-text-subtle);
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-lg);
+  letter-spacing: var(--letter-spacing-tight);
+  outline: none;
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--color-placeholder);
+}
+
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  appearance: none;
+}
+
+/* The close control is the Esc key cap itself: its 4px padding hangs outside the inset. */
+.escape {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.escape:hover {
+  background: var(--color-bg-hover);
+}
+
+.escape:active {
+  background: var(--color-bg-hover-strong);
+}
+
+/* ---- Results ---- */
+.results {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--space-1-5);
+}
+
+.hint {
+  margin: 0;
+  padding: var(--space-3) var(--palette-inset) var(--space-1-5) var(--palette-text);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-snug);
+}
+
+.groupTitle {
+  padding: var(--space-3) var(--palette-inset) var(--space-1) var(--palette-text);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-section);
+  line-height: var(--line-height-tight);
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A result: full-bleed, its soft fill drawn by ::before, inset 6px (as ListRow). */
+.row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--glyph-gap);
+  min-height: var(--row-min-height);
+  padding: var(--space-1-5) var(--palette-inset);
+  line-height: var(--line-height-row);
+  cursor: default;
+  isolation: isolate;
+}
+
+.row::before {
+  content: '';
+  position: absolute;
+  inset: 0 var(--row-fill-inset);
+  z-index: -1;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+  pointer-events: none;
+}
+
+.row:not(:has(.snippet)) {
+  align-items: center;
+}
+
+.active::before {
+  background: var(--color-bg-active-accent);
+}
+
+/* On the selection fill, tertiary text turns secondary (AA). */
+.active :is(.context, .icon) {
+  color: var(--color-text-muted);
+}
+
+/* The type glyph, centred on the title line. */
+.icon {
+  flex: none;
+  width: var(--icon-size-md);
+  height: calc(var(--font-size-ui) * var(--line-height-row));
+  color: var(--color-text-subtle);
+}
+
+.text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.titleLine {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.title {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context {
+  flex: 0 1000 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-size-meta);
+  color: var(--color-text-subtle);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snippet {
+  overflow: hidden;
+  font-size: var(--font-size-secondary);
+  line-height: var(--line-height-row);
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A match: the highlight fill, text ink and 600 weight (never colour alone). */
+.snippet mark {
+  padding: 0 var(--space-0-5);
+  border-radius: var(--radius-sm);
+  background: var(--color-highlight);
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* "Show all 12": an accent text line on the text column. */
+.more {
+  padding-inline-start: calc(var(--glyph-column) + var(--glyph-gap));
+  color: var(--color-accent);
+  font-size: var(--font-size-secondary);
+}
+
+/* ---- Footer: the palette's keys, quiet ---- */
+.footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--statusbar-height);
+  padding: 0 var(--palette-inset);
+  border-top: var(--border-width) solid var(--color-border);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+  white-space: nowrap;
+}
+
+.footerHint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.footerKeys {
+  display: inline-flex;
+  gap: var(--space-0-5);
+}
+
+@media (forced-colors: active) {
+  .active::before {
+    outline: var(--border-width) solid Highlight;
+  }
+}

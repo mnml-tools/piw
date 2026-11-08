@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-trash-document"
+description = "Enables the trash_document command without any pre-configured scope."
+commands.allow = ["trash_document"]
+
+[[permission]]
+identifier = "deny-trash-document"
+description = "Denies the trash_document command without any pre-configured scope."
+commands.deny = ["trash_document"]

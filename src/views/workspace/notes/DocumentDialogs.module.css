@@ -1,0 +1,33 @@
+/* Radio choices inside a dialog (docs/ui-design-system.md, "Dialog"): native round radios
+   (14px, accent when checked) centred on the first line of a 13px label, 8px between them. */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  font-size: var(--font-size-ui);
+  color: var(--color-text);
+  line-height: var(--line-height-snug);
+}
+
+.radio {
+  flex-shrink: 0;
+  width: var(--checkbox-size-sm);
+  height: var(--checkbox-size-sm);
+  margin: calc((var(--font-size-ui) * var(--line-height-snug) - var(--checkbox-size-sm)) / 2) 0 0;
+  accent-color: var(--color-accent);
+}
+
+.radio:focus-visible {
+  outline: var(--focus-ring-width-mark) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset-mark);
+}
