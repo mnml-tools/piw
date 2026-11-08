@@ -20,7 +20,7 @@ React, TypeScript, and Rust, and keeps everything in one SQLite file on your com
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/piw-screenshot-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/piw-screenshot-light.png">
-  <img src="docs/piw-screenshot-light.png" alt="Piw's Tasks view with overdue, today and upcoming tasks in a demo workspace">
+  <img src="docs/piw-screenshot-light.png" alt="A note open in Piw, with the Quick Capture popup adding a task and a sticky note on top">
 </picture>
 
 View screenshots in [light mode](docs/piw-screenshot-light.png) or [dark mode](docs/piw-screenshot-dark.png).
