@@ -69,7 +69,7 @@ All notable changes are documented here. The format follows
   kit's status bar at the window's foot (`PIW / <space>`, the Inbox count, where the data
   lives). The areas no longer fold into a menu in narrow windows.
 - **Accent colour:** the title bar's palette and Settings › Appearance offer the kit's five
-  accents (pink, blue, orange, green, purple); blue is the default.
+  accents (pink, blue, orange, green, purple); purple is the default.
 - **Documentation** follows the layout of its sister project Zap: a shorter README, one
   [architecture guide](docs/architecture.md) that absorbs the former data-format, platform,
   release, security, status, testing and decision records, and the

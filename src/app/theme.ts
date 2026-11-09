@@ -36,7 +36,7 @@ export function applyAppearance(
   stopFollowingSystem = null;
   if (settings.theme === 'system') stopFollowingSystem = followSystemTheme(root);
   else root.dataset.theme = settings.theme;
-  root.dataset.accent = settings.accent ?? 'blue';
+  root.dataset.accent = settings.accent ?? 'purple';
   if (settings.textSize === 'default') delete root.dataset.textSize;
   else root.dataset.textSize = settings.textSize;
 }

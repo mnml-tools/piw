@@ -75,7 +75,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             theme: Theme::System,
-            accent: Accent::Blue,
+            accent: Accent::Purple,
             text_size: TextSize::Default,
             close_to_tray: true,
             launch_at_login: false,

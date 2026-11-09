@@ -9,7 +9,7 @@ import type { Settings } from '@/lib/ipc/bindings/Settings';
 
 export const settings: Settings = {
   theme: 'system',
-  accent: 'blue',
+  accent: 'purple',
   textSize: 'default',
   closeToTray: true,
   launchAtLogin: false,

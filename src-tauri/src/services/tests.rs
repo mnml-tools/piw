@@ -1121,7 +1121,7 @@ fn settings_have_defaults_and_validate_patches() {
     assert!(
         defaults.close_to_tray && !defaults.launch_at_login && !defaults.restore_stickies_on_launch
     );
-    assert_eq!(defaults.accent, settings::Accent::Blue);
+    assert_eq!(defaults.accent, settings::Accent::Purple);
     let patch = json!({"theme": "dark", "accent": "green", "closeToTray": false})
         .as_object()
         .unwrap()
