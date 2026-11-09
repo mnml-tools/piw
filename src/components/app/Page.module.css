@@ -1,9 +1,11 @@
 /* Shared page skeleton of every workspace view (docs/ui-design-system.md, "Grid" and "View
- * header"). The header is the first line of the canvas, then one scroll container on the canvas.
- * One grid: the title and every glyph sit on --content-inset (16px; 20px in windows ≥ 1100px),
- * row text on --text-start (inset + 26px), and right edges share --content-inset. Controls with
- * no box at rest (icon buttons, the back link) hang their padding outside the grid, so their
- * glyphs sit on it, like the rows' soft fills hang 6px outside the content. */
+ * header"), in the kit's look (@mnml-tools/ui, after Zap's view heading bar): the header is a
+ * 36px line plain on the canvas with one hairline under it, then one scroll container on the
+ * canvas. One grid: the title and every glyph sit on --content-inset (12px; 16px in windows
+ * >= 1100px), row text on --text-start (inset + 22px), and right edges share --content-inset.
+ * Controls with no box at rest (icon buttons, the back link) hang their padding outside the
+ * grid, so their glyphs sit on it. Group labels are the kit's sidebar label: 10px uppercase in
+ * tertiary ink, the count at the row's right edge. */
 
 /* A view: header + one scroll container. A size container, so compact paddings follow the
    view's own width (the 300px split-view list is compact in any window). */
@@ -27,35 +29,28 @@
   overscroll-behavior: contain;
 }
 
-/* ---- View header: 20px above, a 28px line, 12px below; no fill ---- */
+/* ---- View header: a 36px line on the canvas (the kit's bar height, so it lines up with the
+   inspector's heading beside it), 26px controls centred in it, one hairline under it. No fill.
+   The hairline is always drawn, as Zap's; `data-scrolled` changes nothing. ---- */
 .toolbar {
+  display: flex;
   flex: none;
+  align-items: center;
   min-width: 0;
-  padding: var(--view-header-above) 0 var(--view-header-below);
-  border-bottom: var(--border-width) solid transparent;
+  min-height: var(--titlebar-height);
+  border-bottom: var(--border-width) solid var(--color-border);
   -webkit-user-select: none;
   user-select: none;
-  transition: border-color var(--duration-fast) var(--ease-standard);
-}
-
-/* The one hairline: only once the content scrolls under the header. */
-.toolbar[data-scrolled] {
-  border-bottom-color: var(--color-border);
 }
 
 .toolbarInner {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
-  max-width: var(--list-max-width);
   min-height: var(--control-height-md);
   padding-inline: var(--content-inset);
-}
-
-/* Above an editor the line spans the canvas: its actions sit at the window's right edge. */
-.toolbar[data-quiet] .toolbarInner {
-  max-width: none;
 }
 
 .toolbarLeading {
@@ -65,7 +60,7 @@
   min-width: 0;
 }
 
-/* "← Notes": a ghost Button sm whose arrow sits on the content inset (its 8px padding hangs
+/* "← Notes": a ghost Button sm whose arrow sits on the content inset (its 6px padding hangs
    outside), then a gap before the title. */
 .toolbarBack {
   display: flex;
@@ -100,7 +95,7 @@
   color: var(--color-text);
 }
 
-/* The line above an editor: a quiet 13px breadcrumb; the document carries the title. */
+/* The line above an editor: a quiet 12px breadcrumb; the document carries the title. */
 .toolbar[data-quiet] .title {
   font-size: var(--font-size-ui);
   font-weight: var(--font-weight-regular);
@@ -109,10 +104,12 @@
   color: var(--color-text-muted);
 }
 
-/* The quiet count after the title ("9 open"): 13px tertiary, on the title's baseline. */
+/* The quiet count after the title ("9 open"): 10px mono tertiary (metadata, as in Zap), on
+   the title's baseline. */
 .count {
   flex: none;
-  font-size: var(--font-size-ui);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
   font-variant-numeric: tabular-nums;
   line-height: var(--line-height-tight);
   color: var(--color-text-subtle);
@@ -150,15 +147,14 @@
 
 /* ---- Content column ---- */
 /* Lists are full-bleed: the column has no side padding; rows reach the column's edges and
-   keep their content on the grid. `content` is the full canvas up to --list-max-width (880),
-   left-aligned; `editor` is the centred 680px reading column (text on its own grid, checkboxes
+   keep their content on the grid. `content` is the full canvas, as Zap's lists and tables, so
+   rows end where the view header's actions do; `editor` is the centred 680px reading column (text on its own grid, checkboxes
    hanging into the glyph column); `narrow` the centred 640px form column (Settings). */
 .column {
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
   width: 100%;
-  max-width: var(--list-max-width);
   margin-inline: 0 auto;
   padding: 0 0 var(--space-7);
 }
@@ -180,8 +176,9 @@
 }
 
 /* ---- Group label inside a list: the one section style ----
-   11px/600 sentence case in secondary ink on the text column, 16px above it; an optional glyph
-   in the glyph column; the count 11px/400 tertiary. Sticky on the canvas, no bar or line. */
+   The kit's sidebar label: 10px/400 uppercase in tertiary ink on the text column, 16px above
+   it; an optional glyph in the glyph column; the count at the right inset, as Zap's
+   "TABLES  2". Sticky on the canvas, no bar or line. */
 .sectionHeader {
   position: sticky;
   top: 0;
@@ -195,12 +192,13 @@
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-section);
   line-height: 0.875rem; /* 14px: whole pixels */
-  color: var(--color-text-muted);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
 }
 
-/* Right under the view header (12px below it) the label keeps 16px above, not 28. */
+/* Right under the view header's hairline: 12px above. */
 .group:first-child > .sectionHeader:first-child {
-  padding-top: var(--space-1);
+  padding-top: var(--space-3);
 }
 
 .sectionIcon {
@@ -220,6 +218,7 @@
 }
 
 .sectionCount {
+  margin-inline-start: auto;
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-regular);
   color: var(--color-text-subtle);

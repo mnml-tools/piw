@@ -1,10 +1,11 @@
 /*
  * Document view (docs/ui-design-system.md, "View header", "Tabs", "Grid"): the quiet line above
  * the editor (ViewToolbar titleAs="span": back link and name; save state, space and ⋯ on the
- * right), then one scroll container holding the centred 680px reading column: the 26/700
- * title, its quiet meta line, the quiet text tabs under it (2px accent underline, no strip) and
- * the active tab. The column has its own grid: text on its text column, checkboxes and task
- * rows hanging into its glyph column.
+ * right), then one scroll container holding the centred 680px reading column: the 22/600 title,
+ * its quiet 10px mono meta line (as Zap's status lines), the kit's tab strip under it (a 32px
+ * --soft bar with a hairline foot, square tabs, the selected one on the canvas with an accent
+ * line on top) and the active tab. The column has its own grid: text on its text column,
+ * checkboxes and task rows hanging into its glyph column.
  */
 
 .document {
@@ -24,20 +25,22 @@
   margin-inline-start: var(--space-0-5);
 }
 
-/* SaveIndicator collapses when idle: 11px tertiary text, no box. */
+/* SaveIndicator collapses when idle: 10px tertiary text, no box. */
 .save {
   font-size: var(--font-size-meta);
 }
 
-/* ---- Tabs: quiet text tabs under the title ---- */
+/* ---- Tabs: the kit's strip under the title ---- */
 
-/* In the reading column the first label sits on the column's text start: its 8px padding hangs
-   outside, like the back link's. 12px under the meta line, 20px above the tab's content. */
+/* The strip spans the reading column, square on its text edges like a code block, closed on
+   the left by a hairline (tabs are separated by their own right hairlines). 12px under the meta
+   line, 20px above the tab's content. */
 .column .tabStrip {
   flex: none;
   min-width: 0;
-  margin: 0 0 var(--space-5) calc(-1 * var(--space-2));
+  margin: 0 0 var(--space-5);
   padding-inline-start: 0;
+  border-inline-start: var(--border-width) solid var(--color-border);
 }
 
 /* Inline tab rename: same type as the tab, so the label does not jump. */
@@ -68,7 +71,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* Ghost-editable 26/700: no box, no ring; the caret is the focus. A 34px line (whole pixels). */
+/* Ghost-editable 22/600: no box, no ring; the caret is the focus. A 28px line (whole pixels). */
 .title {
   width: 100%;
   min-width: 0;
@@ -81,7 +84,7 @@
   font: inherit;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  line-height: 2.125rem;
+  line-height: 1.75rem;
   letter-spacing: var(--letter-spacing-display);
   text-overflow: ellipsis;
 }
@@ -96,6 +99,7 @@
   flex-wrap: wrap;
   margin: 0;
   color: var(--color-text-subtle);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   line-height: 1rem;
   font-variant-numeric: tabular-nums;
@@ -112,7 +116,8 @@
   min-height: 50vh;
 }
 
-/* Conflict: the warm inline notice, kept in view while writing. */
+/* Conflict: the kit's message box (square, 1px notice edge, 11px), kept in view while
+   writing. */
 .banner {
   position: sticky;
   bottom: var(--space-4);
@@ -135,8 +140,8 @@
   flex-direction: column;
 }
 
-/* Quiet filters on one line (a tertiary label + a text Segmented sm), the pin at the far
-   right. */
+/* Quiet filters on one line (the kit's 10px uppercase label + a Segmented sm), the pin at the
+   far right. */
 .tasksToolbar {
   display: flex;
   flex-wrap: wrap;
@@ -156,6 +161,8 @@
 .filterLabel {
   color: var(--color-text-subtle);
   font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-section);
+  text-transform: uppercase;
 }
 
 .spacer {

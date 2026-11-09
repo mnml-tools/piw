@@ -1121,16 +1121,20 @@ fn settings_have_defaults_and_validate_patches() {
     assert!(
         defaults.close_to_tray && !defaults.launch_at_login && !defaults.restore_stickies_on_launch
     );
-    let patch = json!({"theme": "dark", "closeToTray": false})
+    assert_eq!(defaults.accent, settings::Accent::Blue);
+    let patch = json!({"theme": "dark", "accent": "green", "closeToTray": false})
         .as_object()
         .unwrap()
         .clone();
     let (updated, _) = db.write(|tx| settings::update(tx, patch)).unwrap();
     assert_eq!(updated.theme, settings::Theme::Dark);
+    assert_eq!(updated.accent, settings::Accent::Green);
     assert_eq!(db.read(settings::get).unwrap(), updated);
     let unknown = json!({"telemetry": true}).as_object().unwrap().clone();
     assert!(db.write(|tx| settings::update(tx, unknown)).is_err());
     let invalid = json!({"theme": "neon"}).as_object().unwrap().clone();
+    assert!(db.write(|tx| settings::update(tx, invalid)).is_err());
+    let invalid = json!({"accent": "teal"}).as_object().unwrap().clone();
     assert!(db.write(|tx| settings::update(tx, invalid)).is_err());
 }
 

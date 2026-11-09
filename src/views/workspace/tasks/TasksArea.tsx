@@ -54,7 +54,7 @@ function drawerMode(width: number): DrawerMode {
  * The Tasks area (docs/ui-design-system.md §10): Today · Upcoming · All · Completed, filtered by
  * the global space filter, with the task inspector docked at ≥ 820px and overlaid below. The view
  * header carries the title, the quiet count, the view filters and "New task"; the list sits in the
- * page column under it (880px, left on the grid), so rows, group labels and the header share one
+ * page column under it (the full canvas), so rows, group labels and the header share one
  * grid.
  */
 export default function TasksArea() {

@@ -1,21 +1,21 @@
-/* "Move items to": a native select in the boxed field look (docs/ui-design-system.md,
-   "TextInput"): a 12px/500 secondary label 6px above; 28px, rounded 6px, a 1px control border,
-   13px text and a small chevron 10px from the right. Hover: the stronger border; focus: the
-   accent border and the soft halo. */
+/* "Move items to": a native select drawn as the kit's field (`.mnml-fields select`, after
+   TextInput md): an 11px secondary label 6px above; 26px, square, a 1px control border on the
+   canvas, 12px text, padding 0 7px and a small chevron 10px from the right. Hover: the
+   stronger border; focus: the border takes the focus-ring colour (the kit's 1px ring). */
 .field {
   display: grid;
   gap: var(--space-1-5);
   color: var(--color-text-muted);
   font-size: var(--font-size-secondary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-tight);
 }
 
 .field select {
   height: var(--control-height-md);
-  padding: 0 var(--space-6) 0 var(--space-2);
+  padding: 0 var(--space-6) 0 7px;
   border: var(--border-width) solid var(--color-control-border);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   background-color: var(--color-bg);
   background-image:
     linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),

@@ -1,47 +1,13 @@
-/* Busy indicator: a faint full ring with a turning arc, both in currentColor.
- * md 14px (default, replaces a 16px icon), sm 12px (small buttons). */
+/* Busy indicator: the kit's turning Loader2 (`.mnml-spin`) in currentColor. md 13px (replaces a
+ * 14px icon), sm 12px (small buttons). */
 .spinner {
-  position: relative;
-  display: inline-block;
+  display: inline-flex;
   flex-shrink: 0;
-  border-radius: var(--radius-full);
-  border: 1.5px solid currentColor;
-  border-block-end-color: transparent;
-  border-inline-start-color: transparent;
-  animation: spin 720ms linear infinite;
 }
 
-.spinner::before {
-  content: '';
-  position: absolute;
-  inset: -1.5px;
-  border: inherit;
-  border-color: currentColor;
-  border-radius: inherit;
-  opacity: 0.2;
-}
-
-.sm {
-  width: 0.75rem;
-  height: 0.75rem;
-}
-
-.md {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* base.css clamps animation duration; a frozen three-quarter arc still reads as "busy". */
+/* base.css clamps animation duration; a still loader glyph still reads as "busy". */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
-    animation: none;
-    border-inline-start-color: currentColor;
     opacity: 0.7;
   }
 }

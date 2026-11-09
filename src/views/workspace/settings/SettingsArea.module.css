@@ -1,9 +1,11 @@
-/* Settings (docs/ui-design-system.md, "Settings"; brief v6 §4): one centred 640px column
-   (--form-max-width) holding the view header, the tabs and the groups, so every left edge in
-   the view shares one line. Groups are grouped macOS-style: an 11px/600 secondary label, then a
-   rounded (10px) --color-bg-soft group of 40px rows split by inset hairlines, the 13px label
-   (and a 12px secondary description) on the left and the control on the right; an optional
-   11px tertiary footnote below. Rows have no hover fill: only their controls react. */
+/* Settings (docs/ui-design-system.md, "Settings"): one centred 640px column (--form-max-width)
+   holding the view header, the tabs and the groups, so every left edge in the view shares one
+   line. Groups are drawn in the kit's language: a sidebar label (10px uppercase, muted) above
+   a square box on the canvas with a 1px --border edge, its rows split by full-width hairlines.
+   Rows: the 12px label (and an 11px secondary description) on the left, the control on the
+   right, 12px in; an optional 10px muted footnote below the box. Rows have no hover fill: only
+   their controls react. The switch is square (track and knob), as every kit control; the
+   accent picker is the kit's swatch row (`.mnml-appearance-accents`), right-aligned. */
 
 /* The view header and the tabs follow the form column instead of the list column. */
 .header > *,
@@ -27,21 +29,24 @@
   margin-top: var(--space-6);
 }
 
-/* Label, rows and footnote text share one inner inset (the rows' 12px padding). */
+/* The kit's sidebar label; label, rows and footnote text share one inner inset (the rows'
+   12px padding). */
 .groupLabel {
   margin: 0;
   padding: 0 var(--space-3) var(--space-1-5);
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-section);
   line-height: var(--line-height-tight);
-  color: var(--color-text-muted);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
 }
 
 .rows {
   display: flex;
   flex-direction: column;
-  border-radius: var(--radius-xl);
-  background: var(--color-bg-soft);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-bg);
 }
 
 .footnote {
@@ -64,15 +69,10 @@
   padding: var(--space-2) var(--space-3);
 }
 
-/* The hairline between two rows, inset to the text like a macOS group. */
-.rows > * + *::before,
-.reference > * + *::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  inset-inline: var(--space-3);
-  height: var(--border-width);
-  background: var(--color-border-subtle);
+/* The hairline between two rows, edge to edge as in the kit's lists. */
+.rows > * + *,
+.reference > * + * {
+  border-top: var(--border-width) solid var(--color-border-subtle);
 }
 
 .toggleRow {
@@ -127,12 +127,13 @@
   padding: var(--space-2-5) var(--space-3) var(--space-3);
 }
 
-/* Code on the canvas inside the soft group: the code fill would vanish on it. */
+/* Code: a soft, square block with the kit's hairline edge. */
 .code {
   margin: 0;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-lg);
-  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-code-bg);
   color: var(--color-text);
   font-family: var(--font-mono);
   font-size: var(--font-size-secondary);
@@ -154,10 +155,10 @@
   margin: 0;
 }
 
-/* ---- Switch: a round pill ----
-   28×16 with a 1.5px ring (the task checkbox ring, tertiary, ≥ 3:1) and a 10px round thumb in
-   the same ink; on: the accent fill with a white thumb slid to the end. Hover (off): ring and
-   thumb turn secondary. Focus: the small-mark ring, following the pill. */
+/* ---- Switch: square, as every kit control ----
+   28×16 with a 1px ring (the task checkbox ring, muted, >= 3:1) and a 10px square knob in the
+   same ink, 2px inside; on: the accent fill with a white knob slid to the end. Hover (off):
+   ring and knob turn secondary. Focus: the small-mark ring, 1px outside the track. */
 .switch {
   appearance: none;
   flex: none;
@@ -167,8 +168,8 @@
   height: 1rem;
   margin: 0;
   border: var(--check-stroke) solid var(--color-border-strong);
-  border-radius: var(--radius-full);
-  background: transparent;
+  border-radius: 0;
+  background: var(--color-bg);
   transition:
     background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard);
@@ -181,7 +182,7 @@
   left: 0.125rem;
   width: 0.625rem;
   height: 0.625rem;
-  border-radius: var(--radius-full);
+  border-radius: 0;
   background: var(--color-border-strong);
   transform: translateY(-50%);
   transition:
@@ -194,7 +195,7 @@
   background: var(--color-accent-fill);
 }
 
-/* Track inner width (28 - 2 × 1.5) minus the thumb and both 2px gaps: 11px. */
+/* Track inner width (28 - 2 × 1) minus the knob and both 2px gaps: 12px. */
 .switch:checked::after {
   background: var(--color-accent-contrast);
   transform: translate(calc(1.75rem - 2 * var(--check-stroke) - 0.625rem - 0.25rem), -50%);
@@ -222,13 +223,14 @@
   opacity: var(--opacity-disabled);
 }
 
-/* The shortcut recorder: a boxed field in its focused state (accent border + soft halo). */
+/* The shortcut recorder: the kit's field in its focused state (the focus-ring colour on its
+   1px edge, square). */
 .recorder {
   min-width: 14rem;
   height: var(--control-height-sm);
   padding: 0 var(--space-2);
-  border: var(--border-width) solid var(--color-accent);
-  border-radius: var(--radius-md);
+  border: var(--border-width) solid var(--color-focus-ring);
+  border-radius: 0;
   background: var(--color-bg);
   box-shadow: 0 0 0 var(--focus-halo-width) var(--color-focus-halo);
   color: var(--color-text-muted);
@@ -267,7 +269,7 @@
 
 @media (forced-colors: active) {
   .rows {
-    border: var(--border-width) solid CanvasText;
+    border-color: CanvasText;
   }
 
   .switch {

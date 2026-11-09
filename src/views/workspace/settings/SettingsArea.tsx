@@ -1,7 +1,16 @@
 import { CheckCircle2, AlertTriangle, MinusCircle } from 'lucide-react';
 import { useId, useState, type ReactNode } from 'react';
 import { PageColumn, PageScroll, PageView, ViewToolbar } from '@/components/app/Page';
-import { Button, Kbd, Segmented, TabPanel, Tabs, detectPlatform, useToast } from '@/components/ui';
+import {
+  AccentPicker,
+  Button,
+  Kbd,
+  Segmented,
+  TabPanel,
+  Tabs,
+  detectPlatform,
+  useToast,
+} from '@/components/ui';
 import { useAppStatus, useSettings } from '@/lib/hooks/data';
 import { api } from '@/lib/ipc/api';
 import type { Settings } from '@/lib/ipc/bindings/Settings';
@@ -24,8 +33,8 @@ function toKbd(accelerator: string): string {
 }
 
 /**
- * A macOS-style group: an optional 11px/600 sentence-case label, the rows on one rounded soft
- * background split by inset hairlines, and an optional footnote.
+ * A kit-style group: an optional 10px uppercase sidebar label, the rows in one square bordered
+ * box split by hairlines, and an optional footnote.
  */
 function Group({
   label,
@@ -384,6 +393,14 @@ export default function SettingsArea() {
                       value: v,
                       label: t.appearance.themes[v],
                     }))}
+                  />
+                </Row>
+                <Row label={t.appearance.accent}>
+                  <AccentPicker
+                    label={t.appearance.accent}
+                    names={t.appearance.accents}
+                    value={s.accent}
+                    onValueChange={(v) => update({ accent: v })}
                   />
                 </Row>
                 <Row label={t.appearance.textSize}>

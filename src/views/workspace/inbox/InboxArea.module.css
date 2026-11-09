@@ -1,7 +1,8 @@
-/* Inbox: the page (view header + list) and, beside it, the docked task inspector. Notes and
-   tasks share one grid: the type glyph (note / document icon, or the round task checkbox) in
-   the glyph column, titles on the text column, and the capture time (11px tertiary) in one
-   fixed right-aligned slot that ends on the content inset, so times line up for both kinds.
+/* Inbox: the page (view header + list) and, beside it, the docked task inspector, in the kit's
+   look (square rows, no hairlines between them). Notes and tasks share one grid: the type
+   glyph (note / document icon, or the square task checkbox) in the glyph column, titles on the
+   text column, and the capture time (10px mono tertiary, like Zap's metadata) in one fixed
+   right-aligned slot that ends on the content inset, so times line up for both kinds.
    "Mark organised" takes the time's place while the row is hovered or focused. */
 .inbox {
   display: flex;
@@ -39,8 +40,9 @@
 .taskWhen {
   width: var(--when-width);
   color: var(--color-text-subtle);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
-  line-height: calc(var(--font-size-ui) * var(--line-height-snug));
+  line-height: 1rem; /* 16: the rows' title line */
   font-variant-numeric: tabular-nums;
   text-align: end;
   white-space: nowrap;
@@ -77,7 +79,7 @@
 
 /* Over a note row: centred on its title line (6px padding + the 16px title line). */
 .row + .organise {
-  height: calc(2 * var(--space-1-5) + var(--font-size-ui) * var(--line-height-row));
+  height: calc(2 * var(--space-1-5) + 1rem);
 }
 
 .line:hover .organise,

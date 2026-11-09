@@ -1,13 +1,14 @@
-/* Sticky bodies (docs/ui-design-system.md §9; brief v6 §5). The paper under the strip: 13px
- * text at 1.5 on the 12px side inset, one typeface, no boxes. Shared components (TextArea,
- * TextInput, Checkbox) pick up the sticky ink through the [data-sticky-color] token remap, so a
- * checked round box fills in the paper's own ink rather than the app accent.
+/* Sticky bodies (docs/ui-design-system.md §9). The paper under the strip: 12px text at 1.5 on
+ * the 12px side inset, one typeface, no boxes. Shared components (TextArea, TextInput,
+ * Checkbox) pick up the sticky ink through the [data-sticky-color] token remap, so a checked
+ * square box fills in the paper's own ink rather than the app accent.
  *
- * Task layout (the app grid, on the sticky's 12px inset): 14px round task checkboxes centred in
- * the 16px glyph column, then the 10px gap, so titles start 26px in (--sticky-indent); the
+ * Task layout (the app grid, on the sticky's 12px inset): 12px square task checkboxes centred
+ * in the 14px glyph column, then the 8px gap, so titles start 22px in (--sticky-indent); the
  * description, subtasks and "Add subtask" start on that line, and subtasks nest their own
- * column there. Rows are 26px with no row borders; long titles wrap with the box on the first
- * line. */
+ * column there. Rows are 24px with no row borders; long titles wrap with the box on the first
+ * line. Counts and dates are 10px mono, the kit's metadata face. Errors are the kit's notice:
+ * a 1px --notice-border box, square. */
 
 .note,
 .task {
@@ -64,6 +65,7 @@
   min-height: var(--control-height-md);
   margin: 0 var(--space-2) var(--space-2);
   padding: var(--space-0-5) var(--space-0-5) var(--space-0-5) var(--space-2);
+  border: var(--border-width) solid var(--color-notice-border);
   border-radius: var(--radius-md);
   background: var(--color-notice-bg);
   color: var(--color-notice-text);
@@ -161,7 +163,7 @@
   list-style: none;
 }
 
-/* 26px for a one-line title; long titles wrap and the box stays on the first line. */
+/* 24px for a one-line title; long titles wrap and the box stays on the first line. */
 .subtasks > li {
   display: flex;
   align-items: flex-start;
@@ -209,6 +211,7 @@
 /* Same line box as the title, so both sit on the first line. */
 .rowMeta {
   flex: none;
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   line-height: var(--sticky-line);
   font-variant-numeric: tabular-nums;

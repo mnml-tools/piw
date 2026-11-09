@@ -1,10 +1,12 @@
 /* Dialog / ConfirmDialog (docs/ui-design-system.md, "Dialog").
- * Scrim --color-bg-overlay. Surface: 360px, radius 10, --color-bg-elevated with
- * --shadow-lg (its 0.5px ring is the edge), no border and no header bar. 20px padding: the
- * title 15/600, the description 13px secondary, the body, then the actions right-aligned with
- * 8px gaps and no hairline. The × is a 24px icon button 12px from the top-right corner.
- * Order: Cancel (secondary), then the primary (accent pill) or danger action. Opens with a
- * 160ms fade and a slight rise. */
+ * The look is the kit's `Dialog` (@mnml-tools/ui): `.mnml-dialog` (square, a 1px --faint edge,
+ * the canvas colour, a soft shadow) over the --overlay scrim; `.mnml-dialog-heading`, a 12/500
+ * title on a --soft bar with a hairline under it and the × at its end; `.mnml-dialog-actions`,
+ * buttons right-aligned 7px apart, 12px 16px padding. ConfirmDialog is the kit's 360px
+ * `.mnml-message-dialog`, its description a 12px secondary paragraph.
+ * This module positions the Radix content (the kit's is a native <dialog>), sets the width
+ * (360px, the search palette its own), pads the body 16px and handles the palette's `top`
+ * placement and flush body. Order: Cancel, then the primary or danger action. */
 .overlay {
   position: fixed;
   inset: 0;
@@ -25,12 +27,8 @@
   display: flex;
   flex-direction: column;
   width: min(var(--dialog-width), calc(100vw - 2 * var(--space-5)));
-  max-height: 95vh;
-  overflow: auto;
-  background: var(--color-bg-elevated);
-  color: var(--color-text);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  max-width: none;
+  margin: 0;
 }
 
 .dialog:focus-visible {
@@ -38,17 +36,13 @@
 }
 
 .dialog[data-state='open'] {
-  animation: dialog-in var(--duration-slow) var(--ease-enter);
+  animation: fade-in var(--duration-slow) var(--ease-enter);
 }
 
 .top {
   top: 15vh;
   transform: translateX(-50%);
   max-height: 70vh;
-}
-
-.top[data-state='open'] {
-  animation-name: fade-in;
 }
 
 @media (width < 560px) {
@@ -58,12 +52,8 @@
 }
 
 .header {
-  position: relative;
-  display: flex;
   flex: none;
-  align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-5) 0;
 }
 
 .headerHidden {
@@ -73,70 +63,51 @@
 .title {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-heading);
-  letter-spacing: var(--letter-spacing-tight);
   overflow-wrap: break-word;
 }
 
-/* Keep the title clear of the × in the corner. */
-.header:has(.close) .title {
-  padding-inline-end: var(--space-6);
+.close {
+  flex: none;
 }
 
-.close.close {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-}
-
+/* ConfirmDialog's message (the kit's `.mnml-message-dialog p`). */
 .description {
-  padding: var(--space-1-5) var(--space-5) 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-ui);
-  line-height: var(--line-height-normal);
+  margin: var(--space-3) 0 0;
 }
 
 .body {
   min-height: 0;
-  padding: var(--space-4) var(--space-5) 0;
+  padding: var(--space-4) var(--space-4) 0;
 }
 
 .description + .body {
-  padding-top: var(--space-3);
+  padding-top: var(--space-2);
 }
 
 .flush .body {
   padding: 0;
 }
 
-/* Actions: right-aligned, 8px apart, no hairline. */
+/* Actions: the kit's row; a footer under a padded body keeps the kit's 12px 16px. */
 .footer,
 .confirmFooter {
-  display: flex;
   flex: none;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  padding: var(--space-5);
+}
+
+.confirmFooter {
+  margin-top: var(--space-1);
 }
 
 .flush .footer {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1-5) var(--space-3);
   border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-soft);
 }
 
 @keyframes fade-in {
   from {
     opacity: 0;
-  }
-}
-
-@keyframes dialog-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + var(--space-1)));
   }
 }
 

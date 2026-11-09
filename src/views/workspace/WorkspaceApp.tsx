@@ -2,7 +2,7 @@ import { isTauri } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui';
-import { useAppStatus, useSettings } from '@/lib/hooks/data';
+import { useAppStatus, useSettings, useSpaces } from '@/lib/hooks/data';
 import { useHotkeys } from '@/lib/hooks/useHotkeys';
 import { api } from '@/lib/ipc/api';
 import type { StickyTarget } from '@/lib/ipc/bindings/StickyTarget';
@@ -13,6 +13,7 @@ import { NewDocumentDialog } from './NewDocumentDialog';
 import { SearchPalette } from './search/SearchPalette';
 import { TopBar } from './TopBar';
 import { ResizeEdges } from './WindowChrome';
+import { WorkspaceStatusBar } from './WorkspaceStatusBar';
 import styles from './WorkspaceApp.module.css';
 
 const NotesArea = lazy(() => import('./notes/NotesArea'));
@@ -26,8 +27,8 @@ const DocumentView = lazy(() => import('./document/DocumentView'));
 const AREA_KEYS: Area[] = ['inbox', 'notes', 'tasks', 'pinned'];
 
 /**
- * The workspace window (docs/ui-design-system.md, "Shell"): the top bar, then one content region
- * at full width. No sidebar and no status bar.
+ * The workspace window (docs/ui-design-system.md, "Shell"): the title bar and area tabs, one
+ * content region at full width, then the status bar. No sidebar.
  */
 export default function WorkspaceApp() {
   const ws = useWorkspace();
@@ -35,6 +36,16 @@ export default function WorkspaceApp() {
   const settings = useSettings();
   const { toast } = useToast();
   const [newDocument, setNewDocument] = useState(false);
+
+  // The space filter is persisted per webview, not per database: a filter left on a space that
+  // no longer exists (deleted elsewhere, or another data directory) would hide every item.
+  const spaces = useSpaces().data;
+  const { spaceId, setSpace } = ws;
+  useEffect(() => {
+    if (spaces && spaceId !== null && !spaces.some((space) => space.id === spaceId)) {
+      setSpace(null);
+    }
+  }, [spaces, spaceId, setSpace]);
 
   // Tray → Settings, and the one-time "keeps running in the tray" notice.
   const { navigate } = ws;
@@ -110,13 +121,14 @@ export default function WorkspaceApp() {
 
   return (
     <div className={styles.shell}>
-      <TopBar onNewDocument={() => setNewDocument(true)} />
+      <TopBar />
       <ResizeEdges />
       <main className={styles.content}>
         <div className={styles.region}>
           <Suspense fallback={null}>{content}</Suspense>
         </div>
       </main>
+      <WorkspaceStatusBar />
       {ws.searchOpen && <SearchPalette onClose={() => ws.setSearchOpen(false)} />}
       {newDocument && <NewDocumentDialog onClose={() => setNewDocument(false)} />}
     </div>

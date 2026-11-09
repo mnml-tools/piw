@@ -10,7 +10,7 @@ use crate::platform::geometry::Rect;
 use crate::platform::labels::{StickyTarget, is_valid_id};
 use crate::platform::lifecycle::Lifecycle;
 use crate::platform::shortcuts::{self, ShortcutManager, ShortcutStatus};
-use crate::platform::window;
+use crate::platform::window::{self, CaptureMode};
 
 #[derive(Debug, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
@@ -64,6 +64,12 @@ pub async fn platform_info<R: Runtime>(
         shortcut: shortcuts.status(),
         monitors,
     })
+}
+
+/// The workspace's New button: opens the Quick Capture popup, as the global shortcut does.
+#[tauri::command]
+pub async fn show_capture<R: Runtime>(app: AppHandle<R>, mode: CaptureMode) -> AppResult<()> {
+    window::show_capture(&app, mode)
 }
 
 #[tauri::command]

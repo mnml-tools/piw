@@ -5,6 +5,7 @@ import { installDomPolyfills, setPlatform } from '@/components/ui/test-utils';
 import { api } from '@/lib/ipc/api';
 import { useWorkspace } from '@/state/workspace';
 import { spaces } from '@/test/fixtures';
+import { settings } from './notes/test-helpers';
 import { renderWithProviders } from '@/test/render';
 import { TopBar } from './TopBar';
 
@@ -24,9 +25,8 @@ function setNarrow(matches: boolean) {
   );
 }
 
-function renderBar(onNewDocument = vi.fn()) {
-  renderWithProviders(<TopBar onNewDocument={onNewDocument} />);
-  return onNewDocument;
+function renderBar() {
+  renderWithProviders(<TopBar />);
 }
 
 beforeAll(() => {
@@ -88,16 +88,16 @@ describe('TopBar', () => {
     );
   });
 
-  it('creates a note, a task or a document from the New menu', async () => {
+  it('opens the Quick Capture popup from New, as a task in the Tasks area', async () => {
     const user = userEvent.setup();
-    const onNewDocument = renderBar();
+    const show = vi.spyOn(api, 'showCapture').mockResolvedValue(undefined);
+    renderBar();
     await user.click(screen.getByRole('button', { name: 'New' }));
-    await user.click(await screen.findByRole('menuitem', { name: /New document/ }));
-    expect(onNewDocument).toHaveBeenCalledTimes(1);
+    expect(show).toHaveBeenLastCalledWith('task');
 
+    useWorkspace.setState({ area: 'notes' });
     await user.click(screen.getByRole('button', { name: 'New' }));
-    await user.click(await screen.findByRole('menuitem', { name: /New note/ }));
-    expect(useWorkspace.getState().focus).toEqual({ type: 'newNote' });
+    expect(show).toHaveBeenLastCalledWith('note');
   });
 
   it('filters by space and edits or creates spaces from the switcher', async () => {
@@ -115,15 +115,31 @@ describe('TopBar', () => {
     expect(await screen.findByRole('dialog', { name: 'New space' })).toBeInTheDocument();
   });
 
-  it('folds the areas into a menu and search into an icon in narrow windows', async () => {
+  it('opens the appearance dialog from the palette and applies a mode and an accent', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(api, 'getSettings').mockResolvedValue(settings);
+    const update = vi.spyOn(api, 'updateSettings').mockResolvedValue(settings);
+    renderBar();
+    expect(screen.getByText('Local workspace')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Appearance' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Appearance' });
+    await user.click(await within(dialog).findByRole('radio', { name: 'Dark' }));
+    expect(update).toHaveBeenCalledWith({ theme: 'dark' });
+    await user.click(within(dialog).getByRole('button', { name: 'Green' }));
+    expect(update).toHaveBeenCalledWith({ accent: 'green' });
+    await user.click(within(dialog).getByRole('button', { name: 'Done' }));
+    expect(screen.queryByRole('dialog', { name: 'Appearance' })).not.toBeInTheDocument();
+  });
+
+  it('keeps the area tabs and folds search into an icon in narrow windows', async () => {
     setNarrow(true);
     const user = userEvent.setup();
     renderBar();
-    expect(screen.queryByRole('navigation', { name: 'Areas' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Search' })).not.toHaveTextContent('Search');
 
-    await user.click(screen.getByRole('button', { name: 'Go to: Tasks' }));
-    await user.click(await screen.findByRole('menuitemradio', { name: 'Pinned' }));
+    const nav = screen.getByRole('navigation', { name: 'Areas' });
+    await user.click(within(nav).getByRole('button', { name: 'Pinned' }));
     expect(useWorkspace.getState().area).toBe('pinned');
   });
 });

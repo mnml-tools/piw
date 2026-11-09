@@ -6,23 +6,27 @@ export const workspaceStrings = {
     restore: 'Restore',
     close: 'Close window',
   },
-  /** The app's one top bar (docs/ui-design-system.md, "Top bar"). */
+  /** The title bar and area tabs (docs/ui-design-system.md, "Title bar and area tabs"). */
   topBar: {
-    label: 'Piw',
+    /** The title bar's brand, lower case like the other mnml-tools apps ("zap"). */
+    brand: 'piw',
+    brandNote: 'notes & tasks',
+    /** The title bar's status line, as Zap's "Local workspace": everything stays on this device. */
+    status: 'Local workspace',
+    /** The status bar at the window's foot, as Zap's ("ZAP / fixture"). */
+    footerApp: 'PIW',
+    footerInbox: (n: number) => `${n} in inbox`,
+    footerStorage: 'Stored on this device',
+    appearance: 'Appearance',
+    done: 'Done',
     areasLabel: 'Areas',
-    areaMenu: (current: string) => `Go to: ${current}`,
-    areaMenuLabel: 'Go to',
-    inboxInMenu: (n: number) => `Inbox (${n})`,
     spaceTrigger: (name: string) => `Space filter: ${name}`,
     newSpace: 'New space…',
     renameSpace: 'Rename…',
     deleteSpace: 'Delete…',
   },
-  newMenu: {
-    note: 'New note',
-    task: 'New task',
-    document: 'New document',
-    tooltip: 'New note, task or document',
+  newButton: {
+    tooltip: 'New note or task (Quick Capture)',
   },
   inboxCount: (n: number) => `${n} unorganised`,
   spaces: {

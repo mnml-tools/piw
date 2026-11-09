@@ -1,8 +1,11 @@
-/* TextArea (docs/ui-design-system.md, "TextInput"): the field rules of TextInput.
- * default  boxed: rounded 6px, padding 6px 8px, at least three lines; focus = 1px accent border
- *          + the 3px soft halo.
+/* TextArea (docs/ui-design-system.md, "TextInput"): the field rules of TextInput, after the
+ * kit's `.mnml-fields input`.
+ * default  boxed: square, a 1px --color-control-border on the canvas, padding 5px 7px, 12px
+ *          text, at least three lines; hover: --color-border-hover. Focus (pointer or
+ *          keyboard): the border takes the focus colour (the kit's 1px ring), no outline.
  * ghost    caret-only: no box, no fill, no ring (descriptions, the sticky body).
- * editor   no chrome at the reading measure with editor typography; the caret leads. */
+ * editor   no chrome at the reading measure with editor typography; the caret leads.
+ * Disabled: --opacity-disabled. */
 .textarea {
   display: block;
   width: 100%;
@@ -12,10 +15,8 @@
 }
 
 .default {
-  min-height: calc(
-    3em * var(--line-height-normal) + 2 * var(--space-1-5) + 2 * var(--border-width)
-  );
-  padding: var(--space-1-5) var(--space-2);
+  min-height: calc(3em * var(--line-height-normal) + 2 * 5px + 2 * var(--border-width));
+  padding: 5px 7px; /* the kit's field: 7px in line, like TextInput */
   background: var(--color-bg);
   border: var(--border-width) solid var(--color-control-border);
   border-radius: var(--radius-md);

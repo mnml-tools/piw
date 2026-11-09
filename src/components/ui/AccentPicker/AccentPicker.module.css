@@ -1,0 +1,17 @@
+/* AccentPicker: the kit's `.mnml-appearance-accents` row (23px round swatches over 10px names,
+ * the pressed one ringed in text ink), sized for a Settings row. The kit draws it on a dialog's
+ * canvas; here the buttons stay transparent so it sits on any surface. */
+.accents {
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+}
+
+.accents > button {
+  flex: 0 0 auto;
+  min-width: 2.75rem; /* 44, the kit's swatch column */
+  background: transparent;
+}
+
+.accents > button:hover {
+  background: var(--color-bg-hover);
+}

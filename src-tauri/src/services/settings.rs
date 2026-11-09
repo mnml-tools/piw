@@ -18,6 +18,19 @@ pub enum Theme {
     Dark,
 }
 
+/// The accent colours of the shared mnml-tools UI kit (`@mnml-tools/ui`), written to
+/// `<html data-accent>`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export, export_to = "bindings/")]
+pub enum Accent {
+    Pink,
+    Blue,
+    Orange,
+    Green,
+    Purple,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "snake_case")]
 #[ts(export, export_to = "bindings/")]
@@ -44,6 +57,7 @@ pub enum TextSize {
 #[ts(export, export_to = "bindings/")]
 pub struct Settings {
     pub theme: Theme,
+    pub accent: Accent,
     pub text_size: TextSize,
     /// Closing the workspace hides it to the tray instead of quitting.
     pub close_to_tray: bool,
@@ -61,6 +75,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             theme: Theme::System,
+            accent: Accent::Blue,
             text_size: TextSize::Default,
             close_to_tray: true,
             launch_at_login: false,

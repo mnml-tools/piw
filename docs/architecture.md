@@ -41,9 +41,13 @@ lucide icons and plain CSS with design tokens; no UI kit. Every dependency versi
   `src/views/gallery` is a dev-only component gallery.
 - `src/app`: providers, theme, and `window-kind.ts`, which maps the window label to a view.
   `Root.tsx` lazy-loads each view, so the capture popup never loads the document editor.
-- `src/strings`: every user-facing string. `src/styles`: `tokens.css` (the design tokens),
-  `base.css`, and `tokens.test.ts`, which checks contrast and that both themes define the same
-  tokens.
+- `src/strings`: every user-facing string. `src/styles`: `tokens.css` (Piw's semantic tokens,
+  mapped onto the shared kit's), `base.css`, and `tokens.test.ts`, which checks contrast against
+  the kit's palette in both themes and every accent.
+- The look comes from the shared mnml-tools kit, [`@mnml-tools/ui`](https://github.com/mnml-tools/ui-kit)
+  (also used by Zap): `main.tsx` imports its `tokens.css` and `components.css`, and the
+  components in `src/components/ui` render the kit's components or class names (`mnml-*`) while
+  keeping their own behaviour (Radix menus and dialogs, roving focus).
 
 Views compose components; components never call the backend. Colours come only from tokens, and
 everything must be keyboard-operable without colour carrying meaning alone.
@@ -215,9 +219,9 @@ on `piw://shortcut/status` and shown in Settings; it is never fatal.
 
 - **No network.** No account, telemetry or network code in `src/` or `src-tauri/`. The production
   CSP (`tauri.conf.json`) is `default-src 'self'`, `connect-src ipc: http://ipc.localhost`, with
-  `object-src`, `base-uri`, `form-action` and `frame-ancestors` set to `'none'`. Fonts (Inter)
-  and every other asset are bundled. `withGlobalTauri` is off and `freezePrototype` on;
-  release builds have no devtools.
+  `object-src`, `base-uri`, `form-action` and `frame-ancestors` set to `'none'`. Every asset is
+  bundled (the UI uses the system font, as the shared kit does). `withGlobalTauri` is off and
+  `freezePrototype` on; release builds have no devtools.
 - **Least privilege.** Every command is listed in `src-tauri/build.rs`, which generates one
   permission per command and fails the build if `capabilities/main.json` misses one. Each window
   label has its own capability: `main` gets the app commands, `capture` only what capture needs,

@@ -1,16 +1,15 @@
-/* Tabs (docs/ui-design-system.md, "Tabs"): quiet text tabs under a document title: no strip
- * fill, no hairline and no dividers. 13px secondary labels, 0 8px, 32px tall; hover turns the
- * label text ink; the selected tab is text ink with a 2px accent underline under its label
- * (rounded ends). The first label sits on the content inset. The + follows 4px after the last
- * tab. */
+/* Tabs (docs/ui-design-system.md, "Tabs"). The look is the kit's `Tabs` (@mnml-tools/ui):
+ * `.mnml-tabs`, a 32px --soft strip with a hairline at its foot; `.mnml-tab`, square tabs
+ * separated by hairlines, muted 11px labels, the selected one (`data-active`) in text ink on the
+ * canvas colour with a 1px line in the focus colour (the accent) along its top. Piw's tabs are
+ * not closable: this module keeps the scroller with its edge fades, the inline rename editor,
+ * and the + / overflow ▾ after the last tab. */
 
-/* The first tab's 8px padding hangs outside the content inset, so its label is on the grid. */
 .tabs {
-  display: flex;
-  align-items: center;
+  align-items: stretch;
   min-width: 0;
   min-height: var(--tabbar-height);
-  padding-inline-start: calc(var(--content-inset) - var(--space-2));
+  overflow: visible;
 }
 
 .scroller {
@@ -54,23 +53,17 @@
 }
 
 .tab {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
   gap: var(--space-1-5);
-  flex-shrink: 0;
   max-width: 16rem;
-  border-radius: var(--radius-md);
-  white-space: nowrap;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-ui);
-  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-secondary);
   line-height: var(--line-height-tight);
+  white-space: nowrap;
   -webkit-user-select: none;
   user-select: none;
-  transition:
-    color var(--duration-fast) var(--ease-standard),
-    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.tab:hover:not(:disabled, [aria-selected='true']) {
+  color: var(--color-text);
 }
 
 .tab:disabled {
@@ -93,48 +86,21 @@
   height: var(--icon-size-sm);
 }
 
+/* The rename field stands in for the tab, on the canvas like a selected one. */
 .editor {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0 var(--space-1);
+  padding: 0 var(--space-1-5);
+  border-top: var(--border-width) solid var(--color-focus-ring);
+  border-right: var(--border-width) solid var(--color-border);
+  background: var(--color-bg);
 }
 
-/* ---- Text and one accent underline ---- */
-.tabs .tablist {
-  gap: var(--space-1);
-}
-
-.tabs .tab {
-  padding: 0 var(--space-2);
-}
-
-.tabs .tab:hover:not(:disabled, [aria-selected='true']) {
-  color: var(--color-text);
-}
-
-.tabs .tab[aria-selected='true'] {
-  color: var(--color-text);
-}
-
-.tabs .tab[aria-selected='true']::after,
-.tabs .editor::after {
-  content: '';
-  position: absolute;
-  inset-inline: var(--space-2);
-  bottom: 0;
-  height: var(--accent-bar-width);
-  border-radius: var(--radius-full);
-  background: var(--color-accent-mark);
-}
-
-.tabs .editor::after {
-  inset-inline: var(--space-1);
-}
-
-/* The + (or the add menu) and the overflow ▾: 4px after the last tab, centred. */
+/* The + (or the add menu) and the overflow ▾: centred in the strip after the last tab. */
 .tabs > :not(.scroller) {
-  margin-inline-start: var(--space-1);
+  align-self: center;
+  margin-inline: var(--space-1);
 }
 
 .panel:focus-visible {

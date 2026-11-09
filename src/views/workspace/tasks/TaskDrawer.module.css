@@ -1,11 +1,12 @@
 /*
- * Task details (docs/ui-design-system.md, "Drawer"): the inspector on the canvas surface, one
- * hairline on its left, 20px padding (the Drawer draws those). Inside, one small grid: the
- * round checkbox in a 16px glyph column, text 10px after it (26px in), as in the task rows.
- *   title       16/600, an inline edit with no box; hover shows the soft fill
- *   properties  a calm two-column list (12px tertiary labels, values in text ink), no hairlines
- *   description a soft field (the control fill, rounded 6px), 13px
- *   subtasks    the one group label, then 28px rows with round 14px boxes, no hairlines
+ * Task details (docs/ui-design-system.md, "Drawer") in the kit's look (@mnml-tools/ui): a side
+ * panel on the canvas with a 1px --color-border edge, the kit's dialog heading as its header
+ * and a 16px body (all drawn by the Drawer). Inside, one small grid: the square checkbox in the 14px glyph column, text 8px after it.
+ *   title       14/600, an inline edit with no box; hover shows the square hover fill
+ *   properties  the kit's `Fields`: 11px secondary labels, values in ink, no hairlines
+ *   description the kit's boxed field (TextArea default: 1px border, focus-coloured on focus)
+ *   tags        the kit's badge: 10px mono in a 1px --color-border box, with a remove ×
+ *   subtasks    the kit's sidebar label (10px uppercase), then 26px rows with 12px boxes
  */
 .drawer {
   /* Where text starts inside the inspector: the glyph column + its gap. */
@@ -20,12 +21,13 @@
   font-size: var(--font-size-meta);
 }
 
-/* Save state, in the header before the actions (11px tertiary, no box). */
+/* Save state, in the header before the actions (10px mono tertiary, like Zap's status line). */
 .statusSlot {
   display: inline-flex;
   align-items: center;
   margin-inline-end: var(--space-1-5);
   color: var(--color-text-subtle);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
 }
 
@@ -108,10 +110,10 @@
   min-width: 0;
 }
 
-/* ---- Title: the round checkbox + the inline 16/600 title on a 22px line ---- */
+/* ---- Title: the square checkbox + the inline 14/600 title on a 20px line ---- */
 .titleRow {
-  --title-line: 1.375rem; /* 22 */
-  --title-pad: calc((var(--control-height-md) - var(--title-line)) / 2); /* 3: a 28px field */
+  --title-line: 1.25rem; /* 20 */
+  --title-pad: calc((var(--control-height-md) - var(--title-line)) / 2); /* 3: a 26px field */
   display: flex;
   align-items: flex-start;
   gap: calc(var(--glyph-gap) - var(--field-pad));
@@ -155,7 +157,7 @@
   font-size: var(--font-size-secondary);
 }
 
-/* ---- Properties: a calm two-column list, no hairlines (28px rows) ---- */
+/* ---- Properties: the kit's Fields as a two-column list, no hairlines (26px rows) ---- */
 .properties {
   display: grid;
   grid-template-columns: 5.5rem minmax(0, 1fr);
@@ -173,7 +175,7 @@
   display: flex;
   align-items: center;
   min-height: var(--control-height-md);
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted);
   font-size: var(--font-size-secondary);
   line-height: var(--line-height-tight);
   white-space: nowrap;
@@ -190,7 +192,7 @@
 }
 
 /* Value buttons (date, space, document, tags): quiet ghost buttons whose label sits on the
-   value column (their 8px padding hangs into the gutter). The space picker rests without its
+   value column (their 6px padding hangs into the gutter). The space picker rests without its
    soft fill here, like the other values. */
 .propertyValue > button,
 .propertyButton {
@@ -255,16 +257,19 @@
   padding-block: var(--space-0-5);
 }
 
-/* Tags: the soft badge (11px on the control fill, rounded 4px) with a remove ×. */
+/* Tags: the kit's badge (10px mono secondary in a 1px --color-border box, square) with a
+   remove × filling its end. */
 .tag {
   display: inline-flex;
   align-items: center;
   gap: var(--space-0-5);
   height: var(--control-height-sm);
-  padding: 0 0 0 var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-control);
+  padding: 0 0 0 var(--space-1-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
   color: var(--color-text-muted);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
 }
 
@@ -272,8 +277,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
+  width: calc(var(--control-height-sm) - 2 * var(--border-width));
+  height: 100%;
   padding: 0;
   border: 0;
   border-radius: var(--radius-md);
@@ -294,34 +299,14 @@
   width: 10rem;
 }
 
-/* ---- Description: a soft field (the control fill, no border), 13px, three lines at rest ---- */
+/* ---- Description: the kit's boxed field (TextArea default), three lines at rest ----
+   The box (1px border, padding 5px 7px, 12px text on an 18px line, three lines high), its
+   hover and the focus-coloured edge are the TextArea's; only the spacing and the cap are set
+   here. */
 .details .descriptionField {
-  --description-line: 1.25rem; /* 20: 13px text, whole pixels */
-  min-height: calc(3 * var(--description-line) + 2 * var(--space-2));
   max-height: 20rem;
   margin: var(--space-4) 0 0;
-  padding: var(--space-2) var(--space-2-5);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-control);
   resize: none;
-  color: var(--color-text);
-  font-size: var(--font-size-ui);
-  line-height: var(--description-line);
-  transition: box-shadow var(--duration-fast) var(--ease-standard);
-}
-
-.details .descriptionField:hover:not(:disabled, :focus) {
-  border: 0;
-}
-
-/* Focus: the accent edge and the soft halo of a focused field, on the soft fill. */
-.details .descriptionField:focus {
-  border: 0;
-  outline: none;
-  box-shadow:
-    inset 0 0 0 var(--border-width) var(--color-focus-ring),
-    0 0 0 var(--focus-halo-width) var(--color-focus-halo);
 }
 
 .descriptionField::placeholder,
@@ -330,14 +315,15 @@
   opacity: 1;
 }
 
-/* ---- Subtasks: the group label, then 28px rows with round 14px boxes ---- */
+/* ---- Subtasks: the kit's sidebar label, then 26px rows with square 12px boxes ---- */
 .subtasks {
   display: flex;
   flex-direction: column;
   margin-top: var(--space-6);
 }
 
-/* The list's group label: 11px/600 secondary on a 14px line (whole pixels), count tertiary. */
+/* The kit's sidebar label: 10px uppercase tertiary on a 14px line, the count in mono beside
+   it. */
 .sectionHeader {
   display: flex;
   align-items: baseline;
@@ -348,14 +334,16 @@
 
 .sectionTitle {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-subtle);
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-section);
   line-height: inherit;
+  text-transform: uppercase;
 }
 
 .progress {
   color: var(--color-text-subtle);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   font-variant-numeric: tabular-nums;
 }
@@ -370,8 +358,8 @@
   flex-direction: column;
 }
 
-/* The 14px box centred in the 16px glyph column; the ghost field's text on the text column.
-   Hover: the rows' soft rounded fill, hanging 6px outside. */
+/* The 12px box centred in the 14px glyph column; the ghost field's text on the text column.
+   Hover: the rows' square hover fill. */
 .subtaskLine,
 .addSubtask {
   position: relative;
@@ -383,7 +371,7 @@
   isolation: isolate;
 }
 
-/* Optically centred on the 13px text (it sits ~1px low in the 28px line), as in task rows. */
+/* Optically centred on the text (it sits ~1px low in the 26px line), as in task rows. */
 .subtaskLine > :first-child,
 .addIcon {
   position: relative;
@@ -415,7 +403,6 @@
   flex: 1 1 auto;
   min-width: 0;
   height: var(--control-height-md);
-  border-radius: 0;
   font-size: var(--font-size-ui);
 }
 

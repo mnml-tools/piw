@@ -1,14 +1,14 @@
-/* ListRow (docs/ui-design-system.md, "ListRow").
- * No card, no line of its own: rows are separated by their padding only. The row box is
- * full-bleed in its column; its soft hover and selection fills are drawn by ::before, rounded
- * (6px) and inset --row-fill-inset (6px) from the column edges, while the content stays on the
- * grid: the leading glyph in the 16px glyph column on --content-inset, the text on
- * --text-start, trailing parts ending on --content-inset. The keyboard ring follows the fill.
- * Hover: --color-bg-hover. Selected / current: --color-bg-active, or the accent tint
- * (--color-bg-active-accent) while focus is in the list; tertiary metadata turns secondary on
- * either (AA). Keyboard focus: the inset 2px ring (.focus-inset), rounded with the row.
- * Single line: min 32px (tasks). Two or three lines (snippet / meta, notes): padding 6px,
- * title 13/600 on a 16px line, snippet 12 secondary, meta 11 tertiary: 56px with all three. */
+/* ListRow (docs/ui-design-system.md, "ListRow"), after Zap's sidebar rows (the kit's
+ * `.mnml-sidebar-nav button`): no card, no line of its own; rows are separated by their padding
+ * only. The fill is square and spans the full row (::before, inset --row-fill-inset, 0), while
+ * the content stays on the grid: the leading glyph in the 14px glyph column on --content-inset,
+ * the text on --text-start, trailing parts ending on --content-inset.
+ * Hover: --color-bg-hover. Selected / current: --color-bg-active (the kit's selection tint) and a
+ * 2px --color-accent-mark bar along the left edge, as Zap's active row; the accent-tint hook
+ * (--color-bg-active-accent) still applies while focus is in the list. Tertiary metadata turns
+ * secondary on the selection (AA). Keyboard focus: a 1px ring inside the row.
+ * Single line: min 28px (tasks), 12px text. Two or three lines (snippet / meta, notes): padding
+ * 6px, title 12/600 on a 16px line, snippet 11px secondary, meta 10px mono in tertiary ink. */
 
 .row {
   position: relative;
@@ -20,11 +20,11 @@
   padding: var(--space-1-5) var(--content-inset);
   color: var(--color-text);
   font-size: var(--font-size-ui);
-  line-height: 1.125rem; /* 18px: whole-pixel line for 13px text */
+  line-height: 1.125rem; /* 18px: whole-pixel line for 12px text */
   isolation: isolate;
 }
 
-/* The soft fill (and the keyboard ring), inset from the column edges. */
+/* The fill, the selection bar and the keyboard ring, square across the row. */
 .row::before {
   content: '';
   position: absolute;
@@ -54,6 +54,7 @@
 
 .row[data-selected]::before {
   background: var(--color-bg-active);
+  box-shadow: inset var(--accent-bar-width) 0 0 var(--color-accent-mark);
 }
 
 /* Focus in the list (or on the row): the selection takes the accent tint. */
@@ -65,7 +66,7 @@
   background: var(--color-bg-active-accent);
 }
 
-/* Keyboard focus: the 2px ring on the fill's shape instead of the row's box. */
+/* Keyboard focus: the 1px ring on the fill (the row's own outline is dropped). */
 .row.row:focus-visible,
 .row.row:has(:focus-visible:not([type='checkbox'])) {
   outline: none;
@@ -74,6 +75,14 @@
 .row:focus-visible::before,
 .row:has(:focus-visible:not([type='checkbox']))::before {
   box-shadow: inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
+}
+
+/* Selected and focused: the bar and the ring together. */
+.row[data-selected]:focus-visible::before,
+.row[data-selected]:has(:focus-visible:not([type='checkbox']))::before {
+  box-shadow:
+    inset var(--accent-bar-width) 0 0 var(--color-accent-mark),
+    inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring);
 }
 
 .leading {
@@ -144,6 +153,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: var(--space-1) var(--space-1-5);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   line-height: 0.875rem; /* 14px */
   color: var(--color-text-subtle);

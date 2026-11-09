@@ -8,7 +8,7 @@ import { createQueryClient } from '@/lib/query/client';
 import { subscribeToChanges } from '@/lib/query/sync';
 import { applyAppearance, applyPlatform } from './theme';
 
-/** Keeps `data-theme` / `data-text-size` in sync with settings in every window. */
+/** Keeps `data-theme` / `data-accent` / `data-text-size` in sync with settings in every window. */
 function AppearanceSync() {
   const settings = useSettings();
   useEffect(() => {

@@ -1,6 +1,7 @@
 /* Quick-note editor (docs/ui-design-system.md, "Editor"): the quiet view-header line on top
    (breadcrumb, save state, space, actions), then the text as the page: a centred 680px reading
-   column at 15px / 1.6, no chrome. */
+   column at the editor's 13px / 1.6 on the canvas, no chrome. Square throughout, as the kit:
+   tags are the kit's badge, notices the kit's message box. */
 .editor {
   container-type: inline-size;
   display: flex;
@@ -12,8 +13,9 @@
   background: var(--color-bg);
 }
 
-/* Tags above the text, on the reading column: quiet "#tag" labels (12px secondary) on the soft
-   control fill, 6px radius, no border. Hover / open: the stronger fill and text ink. */
+/* Tags above the text, on the reading column: the kit's badge (`.mnml-badge`) as a button,
+   "#tag" in 10px mono secondary ink in a square 1px --color-border box, no fill. Hover / open:
+   the hover fill, the stronger edge and text ink; pressed: the pressed fill. */
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -34,14 +36,17 @@
   align-items: center;
   max-width: 12rem;
   height: var(--control-height-sm);
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-control);
+  padding: 0 var(--space-1-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--color-text-muted);
-  font-size: var(--font-size-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
   line-height: var(--line-height-tight);
   transition:
     background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -50,7 +55,8 @@
 
 .tag:hover:not(:disabled),
 .tag[aria-expanded='true'] {
-  background: var(--color-bg-hover-strong);
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-hover);
   color: var(--color-text);
 }
 
@@ -58,9 +64,10 @@
   background: var(--color-bg-pressed);
 }
 
-/* Notices on the reading column: a soft tinted block (8px radius, no border), 12px text, the
-   action at the end. A conflict is information (warm notice colours); a failed save is red;
-   trashed / gone are neutral. */
+/* Notices on the reading column: the kit's message box (`.mnml-message`), square, a tinted
+   fill with a 1px edge in its own tone, 11px text, the actions at the end. A conflict is
+   information (warm notice colours); a failed save is red; trashed / gone are neutral (the soft
+   bar fill and the hairline). */
 .banners {
   flex-shrink: 0;
   padding: var(--space-3) var(--space-6) 0;
@@ -75,19 +82,22 @@
   max-width: var(--editor-max-width);
   margin-inline: auto;
   min-height: calc(var(--control-height-sm) + 2 * var(--space-1-5));
-  padding: var(--space-1-5) var(--space-1-5) var(--space-1-5) var(--space-3);
-  border-radius: var(--radius-lg);
+  padding: var(--space-1-5) var(--space-1-5) var(--space-1-5) var(--space-2-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
   color: var(--color-text);
   font-size: var(--font-size-secondary);
   line-height: var(--line-height-snug);
 }
 
 .banner[data-tone='warning'] {
+  border-color: var(--color-notice-border);
   background: var(--color-notice-bg);
   color: var(--color-notice-text);
 }
 
 .banner[data-tone='danger'] {
+  border-color: var(--color-danger-border);
   background: var(--color-danger-subtle);
   color: var(--color-danger);
 }
@@ -114,7 +124,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 1.75rem var(--space-6) var(--space-10); /* 28px 24px 64px */
+  padding: var(--space-6) var(--space-6) var(--space-10); /* 24px 24px 64px, as a document */
 }
 
 .text {
@@ -136,6 +146,6 @@
 
 @media (forced-colors: active) {
   .banner {
-    border: var(--border-width) solid CanvasText;
+    border-color: CanvasText;
   }
 }

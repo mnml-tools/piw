@@ -1,8 +1,9 @@
 /* Row parts shared by the simple areas (Inbox, Pinned, Trash) on the Page skeleton
    (components/app/Page): the same anatomy as the note rows (docs/ui-design-system.md,
-   "ListRow"). The soft hover / selection fill is ListRow's ::before, never set here. */
+   "ListRow"). The square hover / selection fill and the selection bar are ListRow's ::before,
+   never set here. */
 
-/* One line in ListRow's title type: 13/600 over a snippet or meta line, 13/400 alone. */
+/* One line in ListRow's title type: 12/600 over a snippet or meta line, 12/400 alone. */
 .rowTitle {
   display: block;
   min-width: 0;
@@ -12,7 +13,7 @@
   white-space: nowrap;
 }
 
-/* Leading type icon in the 16px glyph column, so titles line up with task titles. */
+/* Leading type icon in the 14px glyph column, so titles line up with task titles. */
 .leadingIcon {
   display: inline-flex;
   align-items: center;
@@ -27,7 +28,7 @@
   height: var(--icon-size-md);
 }
 
-/* 11px subtle meta line under the title: "Note · Deleted 2d ago". */
+/* The meta line under the title (ListRow's: 10px mono, tertiary): "Note · Deleted 2d ago". */
 .meta {
   display: inline-flex;
   flex-wrap: wrap;

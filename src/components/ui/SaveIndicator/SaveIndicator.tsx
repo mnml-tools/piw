@@ -1,4 +1,4 @@
-import { Check, CircleExclamationPoint } from 'lucide-react';
+import { CircleExclamationPoint } from 'lucide-react';
 import { useEffect, useState, type ComponentPropsWithRef } from 'react';
 import { cx, iconProps } from '../utils';
 import styles from './SaveIndicator.module.css';
@@ -59,6 +59,8 @@ function nextDisplay(
  * Discreet autosave feedback (docs/ui-design-system.md §8): hidden at rest, "Saving…" only for slow
  * saves, "Saved" briefly after a visible save or a recovery, and a persistent "Couldn't save —
  * Retry". Only errors are announced (`role="alert"`); "Saving…/Saved" would be chatter.
+ * Drawn as Zap's status line: the kit's DirtyIndicator square (`.mnml-dirty-dot`) while unsaved
+ * changes are being written, its status square (`.mnml-status-dot`) once saved.
  */
 export function SaveIndicator({
   state,
@@ -93,10 +95,15 @@ export function SaveIndicator({
 
   return (
     <div className={cx(styles.indicator, className)} data-state={display} {...rest}>
-      {display === 'saving' && <span className={styles.status}>{labels.saving}</span>}
+      {display === 'saving' && (
+        <span className={styles.status}>
+          <span className={cx('mnml-dirty-dot', styles.dot)} aria-hidden="true" />
+          {labels.saving}
+        </span>
+      )}
       {display === 'saved' && (
         <span className={styles.status}>
-          <Check {...iconProps} className={styles.icon} />
+          <span className={cx('mnml-status-dot', styles.dot)} aria-hidden="true" />
           {labels.saved}
         </span>
       )}

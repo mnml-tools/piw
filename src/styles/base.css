@@ -1,294 +1,299 @@
-/* Piw — base styles. Import after tokens.css. Minimal reset + global defaults
- * (docs/ui-design-system.md): the platform UI font at 13px (Inter Variable on Linux), Lucide
- * icons at stroke 1.75, a 2px accent focus ring that follows each control's radius, thin
- * rounded scrollbar thumbs, selection in the accent tint.
- * Root attributes set by the app: data-theme="light|dark" (absent = system),
- * data-text-size="small|large" (absent = default), data-platform="macos|windows|linux". */
+/* Piw — base styles. Import after the kit's tokens and components and Piw's tokens.css.
+ * Minimal reset + global defaults (docs/ui-design-system.md): the kit's system font at 12px,
+ * Lucide icons at their own stroke, the kit's 1px focus ring, thin square scrollbar thumbs,
+ * selection in the accent tint.
+ * Everything sits in the kit's `mnml.base` layer (as @mnml-tools/ui asks of an app's
+ * bare-element defaults), so the kit's components (`mnml.components`) and Piw's CSS modules
+ * (unlayered) both override it.
+ * Root attributes set by the app: data-theme="light|dark" (System is resolved in JS),
+ * data-accent="pink|blue|orange|green|purple", data-text-size="small|large" (absent =
+ * default), data-platform="macos|windows|linux". */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer mnml.tokens, mnml.base, mnml.components;
 
-/* not "*": native <dialog> relies on margin: auto */
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-figure,
-blockquote,
-dl,
-dd,
-ul,
-ol,
-menu,
-pre {
-  margin: 0;
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  font-size: 100%; /* never px: the text-size setting and OS zoom scale rem */
-}
-:root[data-text-size='small'] {
-  font-size: 93.75%;
-}
-:root[data-text-size='large'] {
-  font-size: 112.5%;
-}
-
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-normal);
-  /* Real weights only (the variable fonts cover 400–700), never a faux bold. */
-  font-synthesis-weight: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  overscroll-behavior: none; /* no rubber-band on the app shell */
-}
-#root {
-  isolation: isolate;
-}
-
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-}
-svg {
-  flex-shrink: 0;
-}
-/* One stroke for every Lucide icon (docs/ui-design-system.md, "Icons": 16px at 1.75). CSS beats
-   the presentation attribute each icon sets, so per-call strokeWidth props never drift; empty
-   states use the thin stroke (EmptyState.module.css). */
-svg.lucide {
-  stroke-width: var(--icon-stroke);
-}
-
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-  letter-spacing: inherit;
-}
-textarea {
-  resize: none;
-}
-
-/* desktop convention: arrow cursor on controls; pointer only on links */
-button {
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: default;
-}
-/* A busy control (Button loading) is aria-disabled too, but keeps its colours. Zero
-   specificity: components dim a disabled control to --opacity-disabled and keep their own
-   colour; only unstyled buttons fall back to the disabled text colour. */
-:where(button:disabled, [aria-disabled='true']:not([aria-busy='true'])) {
-  cursor: default;
-  color: var(--color-text-disabled);
-}
-
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-li,
-td,
-th {
-  overflow-wrap: break-word;
-}
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-size: inherit;
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--line-height-tight);
-}
-
-ul[role='list'],
-ol[role='list'],
-menu {
-  list-style: none;
-  padding: 0;
-}
-
-a {
-  color: var(--color-accent);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
-  cursor: pointer;
-}
-a:hover {
-  color: var(--color-accent-hover);
-}
-
-/* Mono is for code only: key chips stay in the UI font. */
-code,
-samp,
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-}
-kbd {
-  font-family: inherit;
-}
-
-mark {
-  background: var(--color-highlight);
-  color: inherit;
-  font-weight: var(--font-weight-medium); /* never colour-only */
-  border-radius: var(--radius-sm);
-}
-
-hr {
-  border: 0;
-  border-top: var(--border-width) solid var(--color-border);
-}
-table {
-  border-collapse: collapse;
-}
-[hidden] {
-  display: none !important;
-}
-
-/* ---- Focus: visible for keyboard, quiet for pointer ----
-   A 2px accent ring 1px outside the control; outlines follow border-radius, so pills and
-   rounded fields keep their shape. Small marks (checkbox, swatch) use the *-mark tokens; boxed
-   fields replace the ring with an accent border and a soft halo (TextInput). */
-:focus:not(:focus-visible) {
-  outline: none;
-}
-:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-ring-offset);
-}
-/* Rows, tabs, items in scroll containers: ring inside the box, so nothing clips it. Two rules
-   on purpose — an unsupported :has() must not invalidate the first selector. */
-.focus-inset:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-ring-inset);
-}
-/* A checkbox draws its own ring: the row does not add a second one around it. */
-.focus-inset:has(:focus-visible:not([type='checkbox'])) {
-  outline: var(--focus-ring-width) solid var(--color-focus-ring);
-  outline-offset: var(--focus-ring-inset);
-}
-@media (forced-colors: active) {
-  :focus-visible {
-    outline-color: Highlight;
-  }
-}
-
-::selection {
-  background: var(--color-selection);
-  color: inherit;
-}
-::placeholder {
-  color: var(--color-placeholder);
-  opacity: 1;
-}
-
-/* ---- Scrollbars: thin, rounded and quiet. macOS keeps native overlay scrollbars. ----
-   WebKit (WebKitGTK, WebView2) styles the pseudo-elements: a 10px gutter with a 4px pill thumb
-   (3px transparent border) that thickens to 6px while hovered. Engines without them (Firefox)
-   get the standard properties; Chromium ignores the pseudo-elements once those are set. */
-:root:not([data-platform='macos']) ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-:root:not([data-platform='macos']) ::-webkit-scrollbar-track,
-:root:not([data-platform='macos']) ::-webkit-scrollbar-corner {
-  background: transparent;
-}
-:root:not([data-platform='macos']) ::-webkit-scrollbar-thumb {
-  background-color: var(--color-scrollbar);
-  border: 3px solid transparent;
-  border-radius: var(--radius-full);
-  background-clip: content-box;
-}
-:root:not([data-platform='macos']) ::-webkit-scrollbar-thumb:hover,
-:root:not([data-platform='macos']) ::-webkit-scrollbar-thumb:active {
-  background-color: var(--color-scrollbar-hover);
-  border-width: 2px;
-}
-@supports not selector(::-webkit-scrollbar) {
-  :root:not([data-platform='macos']) * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-scrollbar) transparent;
-  }
-}
-
-/* ---- Utilities (keep this list short) ---- */
-.visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* App chrome only (nav labels, tab bars, title strips) — never on content */
-.chrome,
-[data-tauri-drag-region] {
-  -webkit-user-select: none;
-  user-select: none;
-  cursor: default;
-}
-
-/* ---- Reduced motion (tokens already zero the durations) ---- */
-@media (prefers-reduced-motion: reduce) {
+@layer mnml.base {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+    box-sizing: border-box;
   }
-}
 
-/* The main window has no system frame on Linux (undecorated, no compositor shadow): a 1px
-   hairline frames it, except when maximized. Drawn above the content, never interactive. */
-:root[data-platform='linux'][data-window='main']:not([data-maximized]) #root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: calc(var(--z-toast) + 2);
-  border: var(--border-width) solid var(--color-border-strong);
-  pointer-events: none;
+  /* not "*": native <dialog> relies on margin: auto */
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd,
+  ul,
+  ol,
+  menu,
+  pre {
+    margin: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    font-size: 100%; /* never px: the text-size setting and OS zoom scale rem */
+  }
+  :root[data-text-size='small'] {
+    font-size: 93.75%;
+  }
+  :root[data-text-size='large'] {
+    font-size: 112.5%;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+    /* Real weights and italics only, never synthesised (as the kit's base). */
+    font-synthesis: none;
+    overscroll-behavior: none; /* no rubber-band on the app shell */
+  }
+  #root {
+    isolation: isolate;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+  /* One stroke for every Lucide icon (docs/ui-design-system.md, "Icons": 14px at 2, as the kit
+     draws them). CSS beats the presentation attribute each icon sets, so per-call strokeWidth
+     props never drift; empty states use the thin stroke. */
+  svg.lucide {
+    stroke-width: var(--icon-stroke);
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+  textarea {
+    resize: none;
+  }
+
+  /* desktop convention: arrow cursor on controls; pointer only on links */
+  button {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: default;
+  }
+  /* A busy control (Button loading) is aria-disabled too, but keeps its colours. Zero
+     specificity: components dim a disabled control to --opacity-disabled and keep their own
+     colour; only unstyled buttons fall back to the disabled text colour. */
+  :where(button:disabled, [aria-disabled='true']:not([aria-busy='true'])) {
+    cursor: default;
+    color: var(--color-text-disabled);
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  li,
+  td,
+  th {
+    overflow-wrap: break-word;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: inherit;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+  }
+
+  ul[role='list'],
+  ol[role='list'],
+  menu {
+    list-style: none;
+    padding: 0;
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+  }
+  a:hover {
+    color: var(--color-accent-hover);
+  }
+
+  /* Mono is for code only: key chips stay in the UI font. */
+  code,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+  kbd {
+    font-family: inherit;
+  }
+
+  mark {
+    background: var(--color-highlight);
+    color: inherit;
+    font-weight: var(--font-weight-medium); /* never colour-only */
+    border-radius: var(--radius-sm);
+  }
+
+  hr {
+    border: 0;
+    border-top: var(--border-width) solid var(--color-border);
+  }
+  table {
+    border-collapse: collapse;
+  }
+  [hidden] {
+    display: none !important;
+  }
+
+  /* ---- Focus: visible for keyboard, quiet for pointer ----
+     The kit's ring: 1px in the focus colour (the accent) drawn on the control's own edge. Small
+     marks (checkbox, swatch) use the *-mark tokens and sit just outside. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+  /* Rows, tabs, items in scroll containers: ring inside the box, so nothing clips it. Two rules
+     on purpose — an unsupported :has() must not invalidate the first selector. */
+  .focus-inset:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-inset);
+  }
+  /* A checkbox draws its own ring: the row does not add a second one around it. */
+  .focus-inset:has(:focus-visible:not([type='checkbox'])) {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-inset);
+  }
+  @media (forced-colors: active) {
+    :focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
+  ::selection {
+    background: var(--color-selection);
+    color: inherit;
+  }
+  ::placeholder {
+    color: var(--color-placeholder);
+    opacity: 1;
+  }
+
+  /* ---- Scrollbars: thin, square and quiet. macOS keeps native overlay scrollbars. ----
+     WebKit (WebKitGTK, WebView2) styles the pseudo-elements: a 10px gutter with a 4px square thumb
+     (3px transparent border) that thickens to 6px while hovered. Engines without them (Firefox)
+     get the standard properties; Chromium ignores the pseudo-elements once those are set. */
+  :root:not([data-platform='macos']) ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  :root:not([data-platform='macos']) ::-webkit-scrollbar-track,
+  :root:not([data-platform='macos']) ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  :root:not([data-platform='macos']) ::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar);
+    border: 3px solid transparent;
+    border-radius: 0;
+    background-clip: content-box;
+  }
+  :root:not([data-platform='macos']) ::-webkit-scrollbar-thumb:hover,
+  :root:not([data-platform='macos']) ::-webkit-scrollbar-thumb:active {
+    background-color: var(--color-scrollbar-hover);
+    border-width: 2px;
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    :root:not([data-platform='macos']) * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-scrollbar) transparent;
+    }
+  }
+
+  /* ---- Utilities (keep this list short) ---- */
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* App chrome only (nav labels, tab bars, title strips) — never on content */
+  .chrome,
+  [data-tauri-drag-region] {
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
+
+  /* ---- Reduced motion (tokens already zero the durations) ---- */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* The main window has no system frame on Linux (undecorated, no compositor shadow): a 1px
+     hairline frames it, except when maximized, like the kit's framed AppShell. Drawn above the
+     content, never interactive. */
+  :root[data-platform='linux'][data-window='main']:not([data-maximized]) #root::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-toast) + 2);
+    border: var(--border-width) solid var(--color-border);
+    pointer-events: none;
+  }
 }

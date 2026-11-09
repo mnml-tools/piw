@@ -1,38 +1,39 @@
 # Piw design system
 
 The single design and behaviour reference for every window of Piw: the shell, the components,
-the views and their keyboard and window rules. Tokens live in
-[`src/styles/tokens.css`](../src/styles/tokens.css) and global defaults in
-[`src/styles/base.css`](../src/styles/base.css). Both are guarded by
-[`src/styles/tokens.test.ts`](../src/styles/tokens.test.ts): WCAG contrast, identical dark
-blocks, unknown tokens and raw colours outside `tokens.css`. When this page and `tokens.css`
-disagree, `tokens.css` wins. Live examples of every component and state: `pnpm dev`, then
-`/?window=gallery`.
+the views and their keyboard and window rules. The look comes from the shared mnml-tools kit,
+[`@mnml-tools/ui`](https://github.com/mnml-tools/ui-kit), extracted from Zap and shared by every
+mnml-tools app: `src/main.tsx` imports its `tokens.css` and `components.css`. Piw's semantic
+tokens live in [`src/styles/tokens.css`](../src/styles/tokens.css), mapped onto the kit's, and
+global defaults in [`src/styles/base.css`](../src/styles/base.css). Both are guarded by
+[`src/styles/tokens.test.ts`](../src/styles/tokens.test.ts): WCAG contrast against the kit's
+palette in both modes and every accent, unknown tokens, and raw colours outside `tokens.css`.
+When this page and `tokens.css` disagree, `tokens.css` wins. Live examples of every component
+and state: `pnpm dev`, then `/?window=gallery`.
 
-**In one sentence:** one quiet top bar over a white canvas; typography carries the hierarchy;
-soft rounded fills instead of boxes; two greys and one calm blue.
+**In one sentence:** one soft title bar over a white canvas; square controls with hairline
+borders; warm neutral greys and one accent, used sparingly; the system font at 12px.
 
 **Conventions:** **Mod** = ⌘ on macOS, Ctrl on Windows and Linux. "Item" = note, document or
 task. Sizes are CSS px unless stated.
 
-**Provenance:** the principles come from Apple-platform note apps: **Bear** (editorial writing,
-white surfaces, soft rounded selection), **Minimal** (spacious, gentle colours) and **NotePlan**
-(tasks inline in text, round checkboxes, quiet metadata). Piw studies their principles only: no
-assets, code or values were taken from them. **Zap** (<https://github.com/rafmst/zap>), by the
-same team, is the reference for density and finish. Inter Variable (OFL-1.1) is bundled as the
-Linux fallback font (notices in
-[`THIRD_PARTY_LICENSES.md`](../src-tauri/resources/THIRD_PARTY_LICENSES.md)).
+**Provenance:** the visual language is Zap's, shared through `@mnml-tools/ui` so that every
+mnml-tools app looks the same. Piw's own behaviour (capture first, autosave, keyboard-first, the
+grid, stickies) comes from Apple-platform note apps (**Bear**, **Minimal**, **NotePlan**), whose
+principles only were studied: no assets, code or values were taken from them.
 
 ## 1. Principles
 
 1. **Capture first.** Nothing may slow `shortcut → type → save → back to work`.
-2. **Quiet chrome.** One top bar. No sidebar, no status bar, no boxed controls in content.
-   Hairlines appear only between the bar and the canvas, between panes, or between groups.
-3. **Typography carries the hierarchy.** Size and weight first, then colour; never boxes.
-4. **Soft geometry.** 6px for controls and rows, 8px for menus and popovers, 10px for dialogs,
-   Quick Capture, stickies and Settings groups. Selection is a soft rounded fill.
-5. **Calm colour.** Near-white canvas, near-black text, a secondary and a tertiary grey, one
-   accent. Space colours are small round dots only.
+2. **Quiet chrome.** Zap's shell: the title bar, the area tabs, the canvas, the status bar.
+   Hairlines separate them, panes from each other, and groups.
+3. **The kit's look, everywhere.** Use the kit's components or class names (`mnml-*`) before
+   writing new CSS; when Piw needs a control the kit lacks, build it from the same parts (1px
+   hairlines, square corners, the soft fill, 10–12px type).
+4. **Square geometry.** No radii, except dots and swatches. Selection is the accent tint with a
+   2px accent bar on the leading edge, as in Zap's sidebar.
+5. **Calm colour.** White canvas, near-black text, warm greys (secondary, muted, faint), one
+   accent the user picks among the kit's five. Space colours are small squares only.
 6. **One grid** (§4). Every left edge sits on the glyph column or the text column.
 7. **Keyboard-first, mouse-friendly.** Every action works from the keyboard; shortcuts are shown
    in menus and tooltips; anything revealed on hover is also revealed on focus.
@@ -41,237 +42,253 @@ Linux fallback font (notices in
 9. **Honest about the platform.** When the OS limits something (Wayland shortcuts, tray,
    always-on-top), say so in plain words and offer the alternative. Never fail silently.
 10. **Every state designed.** Rest, hover, pressed, selected, focus-visible, disabled, busy;
-    light and dark. Motion is 120–160ms ease-out, zero under reduced motion.
+    light and dark; every accent. Motion is short (80–150ms), zero under reduced motion.
 
 ## 2. Tokens
 
-Components use semantic tokens only. Alias tokens (`var(--other)`) are declared once in `:root`
-and follow the theme they point to. The computed contrast table and the small AA-driven
-adjustments to the starting palette are in the `tokens.css` header.
+Components use Piw's semantic tokens only (`--color-*`, `--font-*`, `--space-*`, ...). Each is
+an alias of a kit token, declared once in `:root`, so it follows the colour mode and the accent
+the kit applies. Only Piw's own colours (code syntax, sticky papers) have values in
+`tokens.css`, with a dark block. The contrast exceptions inherited from the kit are listed in
+the `tokens.css` header.
+
+**Theming.** `<html>` carries `data-theme="light|dark"` and `data-accent`
+(`pink|blue|orange|green|purple`, default blue), both from Settings › Appearance. The kit only
+knows light and dark, so **System** is resolved in `src/app/theme.ts`, which follows
+`prefers-color-scheme` and rewrites `data-theme` when the OS changes.
 
 ### 2.1 Colour
 
-| Token                      | Light             | Dark                    | Use                                                     |
-| -------------------------- | ----------------- | ----------------------- | ------------------------------------------------------- |
-| `--color-bg`               | `#FFFFFF`         | `#1C1C1E`               | The canvas: views, editor, inspector, notes list        |
-| `--color-bg-app`           | = `--color-bg`    | = `--color-bg`          | Window base, secondary panes (alias)                    |
-| `--color-bg-soft`          | `#F7F7F5`         | `#232325`               | The top bar; Settings groups                            |
-| `--color-bg-elevated`      | `#FFFFFF`         | `#2A2A2D`               | Menus, popovers, dialogs, toasts (+ shadow)             |
-| `--color-bg-raised`        | `#FFFFFF`         | `#3A3A3D`               | Selected segment on a contained Segmented track         |
-| `--color-bg-control`       | `rgba(0,0,0,.05)` | `rgba(255,255,255,.08)` | Secondary buttons, the search field, segmented tracks   |
-| `--color-bg-hover`         | `rgba(0,0,0,.04)` | `rgba(255,255,255,.06)` | Hover on rows and borderless controls                   |
-| `--color-bg-hover-strong`  | `rgba(0,0,0,.08)` | `rgba(255,255,255,.11)` | Pressed borderless controls; hover on soft-filled ones  |
-| `--color-bg-pressed`       | `rgba(0,0,0,.11)` | `rgba(255,255,255,.14)` | Pressed soft-filled controls                            |
-| `--color-bg-active`        | `rgba(0,0,0,.06)` | `rgba(255,255,255,.09)` | Selected (soft): rows, the active area pill, toggles    |
-| `--color-bg-active-accent` | accent 12%        | accent 18%              | The selected row while focus is in its list             |
-| `--color-bg-overlay`       | `rgba(0,0,0,.2)`  | `rgba(0,0,0,.5)`        | Scrim behind modal dialogs                              |
-| `--color-border`           | `rgba(0,0,0,.08)` | `rgba(255,255,255,.09)` | The one hairline                                        |
-| `--color-border-subtle`    | `rgba(0,0,0,.05)` | `rgba(255,255,255,.06)` | Hairlines inside a group (Settings rows)                |
-| `--color-control-border`   | `rgba(0,0,0,.14)` | `rgba(255,255,255,.14)` | Boxed input at rest                                     |
-| `--color-border-hover`     | `rgba(0,0,0,.22)` | `rgba(255,255,255,.24)` | Boxed input on hover                                    |
-| `--color-border-strong`    | = tertiary        | = tertiary              | The task checkbox ring (≥ 3:1)                          |
-| `--color-text`             | `#1D1D1F`         | `#F5F5F7`               | Text                                                    |
-| `--color-text-muted`       | `#66666B`         | `#A1A1A6`               | Secondary: snippets, descriptions, inactive tabs, icons |
-| `--color-text-subtle`      | `#707075`         | `#949499`               | Tertiary: metadata, counts, hints (≥ 4.5:1)             |
-| `--color-text-faint`       | `#A1A1A6`         | `#636366`               | Decorative only: strike lines, separators               |
-| `--color-placeholder`      | `#98989D`         | `#727276`               | Placeholders (non-essential, ≥ 2.8:1)                   |
-| `--color-accent`           | `#0A66C2`         | `#5AA9FF`               | Links, marks, focus, "today"                            |
-| `--color-accent-fill`      | `#0A66C2`         | `#2E76CD`               | Primary button, checked checkbox (white on top)         |
-| `--color-accent-contrast`  | `#FFFFFF`         | `#FFFFFF`               | Label / check on an accent fill                         |
-| `--color-focus-ring`       | = accent          | = accent                | Keyboard focus                                          |
-| `--color-focus-halo`       | accent 15%        | accent 25%              | Soft ring around a focused boxed field                  |
-| `--color-danger`           | `#C0392B`         | `#FF6B5E`               | Overdue dates, destructive menu items                   |
-| `--color-danger-fill`      | `#C0392B`         | `#C4463A`               | Danger button (white on top)                            |
-| success / warning / notice | see `tokens.css`  | see `tokens.css`        | Badges and inline notices, always with text             |
-| `--color-highlight`        | `#FCE9A6`         | `#5A4A1F`               | Search match `<mark>` (also bold: never colour-only)    |
-| `--color-selection`        | accent 18%        | accent 30%              | Text selection                                          |
-| `--color-code-*`           | see `tokens.css`  | see `tokens.css`        | Code blocks (AA on `--color-code-bg`)                   |
-| `--sticky-<name>-*`        | muted papers      | muted papers            | Sticky surfaces and space dots (7 colours)              |
+| Token                      | Kit token          | Use                                                       |
+| -------------------------- | ------------------ | --------------------------------------------------------- |
+| `--color-bg`               | `--background`     | The canvas: views, editor, inspector, menus, dialogs      |
+| `--color-bg-soft`          | `--soft`           | The title bar, tab strips, dialog headings, footers       |
+| `--color-bg-sidebar`       | `--sidebar`        | List panes beside an editor                               |
+| `--color-bg-control`       | `--soft`           | Soft fill of fields and tracks                            |
+| `--color-bg-hover`         | `--hover`          | Hover on rows and controls                                |
+| `--color-bg-hover-strong`  | `--hover-strong`   | Pressed controls; hover on the primary button             |
+| `--color-bg-active`        | `--selected`       | Selected rows, the active area, toggled controls          |
+| `--color-bg-overlay`       | `--overlay`        | Scrim behind modal dialogs                                |
+| `--color-border`           | `--border`         | The one hairline, and the edge of controls                |
+| `--color-border-hover`     | `--control-border` | A boxed control on hover; the primary button's edge       |
+| `--color-border-floating`  | `--faint`          | The edge of menus, popovers, dialogs and toasts           |
+| `--color-border-strong`    | `--muted`          | The checkbox ring (≥ 3:1)                                 |
+| `--color-text`             | `--text`           | Text                                                      |
+| `--color-text-muted`       | `--secondary`      | Secondary: snippets, descriptions, inactive tabs          |
+| `--color-text-subtle`      | `--muted`          | Tertiary: metadata, counts, labels, hints                 |
+| `--color-text-faint`       | `--faint`          | Decorative only: strike lines, separators, empty icons    |
+| `--color-placeholder`      | `--placeholder`    | Placeholders (non-essential, ≥ 2.8:1)                     |
+| `--color-icon`             | `--icon`           | Standalone icons                                          |
+| `--color-accent`           | accent + text mix  | Accent text: links, "today" (AA with every accent)        |
+| `--color-accent-fill`      | `--accent`         | Checked checkbox, switch (white mark on top)              |
+| `--color-accent-mark`      | `--indicator`      | The active tab's top line, the current-row bar            |
+| `--color-focus-ring`       | `--focus-ring`     | Keyboard focus (the accent)                               |
+| `--color-danger`           | danger + text mix  | Overdue dates, destructive menu items                     |
+| `--color-danger-fill`      | `--danger`         | Destructive hover, the window close button                |
+| notice / success / warning | `--notice-*`, ...  | Inline notices, always with text                          |
+| `--color-highlight`        | `--edited-bg`      | Search match `<mark>` (also bold: never colour-only)      |
+| `--color-edited`           | `--edited-accent`  | The unsaved-changes square                                |
+| `--color-selection`        | `--selected`       | Text selection                                            |
+| `--color-code-*`           | Piw's own          | Code blocks (AA on `--color-code-bg`, the kit's `--soft`) |
+| `--sticky-<name>-*`        | Piw's own          | Sticky surfaces and space dots (7 colours)                |
 
 ### 2.2 Shadows, radii, borders
 
-| Token                                 | Value                                                                |
-| ------------------------------------- | -------------------------------------------------------------------- |
-| `--shadow-sm`                         | `0 0 0 .5px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.08)`: raised seg. |
-| `--shadow-md`                         | `0 0 0 .5px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.12)`: popovers   |
-| `--shadow-lg`                         | `0 0 0 .5px rgba(0,0,0,.12), 0 16px 48px rgba(0,0,0,.16)`: dialogs   |
-| `--shadow-drawer`                     | `-8px 0 24px rgba(0,0,0,.08)`: overlaying inspector                  |
-| dark `--shadow-md` / `--shadow-lg`    | an inner 0.5px white hairline + a 0.5px black ring + a deeper shadow |
-| `--radius-sm` / `-md` / `-lg` / `-xl` | 4 (checklist box, kbd, badge) / 6 / 8 / 10                           |
-| `--radius-full`                       | task checkboxes, dots, swatches                                      |
-| `--border-width`                      | 1px                                                                  |
-| `--focus-ring-width` / offset         | 2px, 1px outside (`--focus-ring-inset` −2px inside rows and tabs)    |
-| `--focus-ring-*-mark`                 | 2px ring, 2px offset for checkboxes and swatches                     |
-| `--focus-halo-width`                  | 3px soft halo on boxed fields                                        |
-| `--opacity-disabled`                  | 0.4                                                                  |
+| Token                                 | Value                                                      |
+| ------------------------------------- | ---------------------------------------------------------- |
+| `--shadow-md`                         | `0 3px 10px var(--shadow)`: menus, toasts (the kit's menu) |
+| `--shadow-lg`                         | `0 6px 24px var(--shadow)`: dialogs, Quick Capture         |
+| `--shadow-drawer`                     | `-6px 0 24px var(--shadow)`: overlaying inspector          |
+| `--radius-sm` / `-md` / `-lg` / `-xl` | 0: square, as the kit                                      |
+| `--radius-full`                       | dots and swatches only                                     |
+| `--border-width`                      | 1px                                                        |
+| `--focus-ring-width` / offset         | 1px on the control's edge (offset −1px), the kit's ring    |
+| `--focus-ring-*-mark`                 | 1px ring, 1px outside, for checkboxes and swatches         |
+| `--opacity-disabled`                  | 0.45, the kit's                                            |
 
-The floating layers have no border: the 0.5px ring inside the shadow is their edge.
+Floating layers have a 1px `--color-border-floating` edge and a soft shadow.
 
 ### 2.3 Motion and layers
 
-`--duration-fast` 120ms (hover, press, selection, checkbox), `--duration-normal` 140ms (menus,
-toasts), `--duration-slow` 160ms (inspector, dialogs); `--ease-standard` and `--ease-enter` are
+`--duration-fast` 80ms (hover, press, selection, checkbox), `--duration-normal` 120ms (menus,
+toasts), `--duration-slow` 150ms (inspector, dialogs); `--ease-standard` and `--ease-enter` are
 ease-out curves. All durations are 0 under `prefers-reduced-motion`. Quick Capture has no
 open/close animation. Layers: sticky group labels 10, overlaying inspector 300, modal 400,
 menus 500, toasts 600.
 
 ## 3. Type
 
-**Stack:** `-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text',
-'Segoe UI', 'Inter Variable', system-ui, sans-serif`. Inter Variable (with its optical-size
-axis) is imported in `tokens.css` and only reached on Linux. Mono (`--font-mono`) is for code
-only: never for counts, kbd or status text. No uppercase or letter-spaced labels. All sizes are
-`rem`, so the Text size preference (Small 93.75%, Default 100%, Large 112.5%) scales everything;
-there is no `zoom` or `scale` in CSS.
+**Stack:** the kit's, `-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` (the
+desktop's own sans-serif on Linux), then colour emoji. **Mono** (`--font-mono`, the kit's
+`--mono`) carries code and, as in Zap, metadata: badges, counts, shortcut hints, status lines.
+Group labels are 10px uppercase. All sizes are `rem`, so the Text size preference (Small
+93.75%, Default 100%, Large 112.5%) scales Piw's own text; the kit's components keep their px
+sizes. There is no `zoom` or `scale` in CSS.
 
-| Role                     | Size / weight / line  | Token                                           |
-| ------------------------ | --------------------- | ----------------------------------------------- |
-| UI: rows, tabs, buttons  | 13 / 400              | `--font-size-ui`                                |
-| Secondary: snippets, sm  | 12 / 400              | `--font-size-secondary`                         |
-| Metadata, counts, labels | 11 / 400 (labels 600) | `--font-size-meta`, `--font-weight-section`     |
-| Editor body              | 15 / 400 / 1.6        | `--font-size-editor`, `--line-height-relaxed`   |
-| Inspector title          | 16 / 600              | `--font-size-heading`                           |
-| Editor H3 / H4           | 17 / 600, 15 / 600    | `--font-size-xl`, `--font-size-lg`              |
-| View title, editor H2    | 20 / 650 / 28px       | `--font-size-view-title`, `--font-weight-title` |
-| Document title           | 26 / 700              | `--font-size-3xl`, `--font-weight-bold`         |
+| Role                      | Size / weight / line | Token                                           |
+| ------------------------- | -------------------- | ----------------------------------------------- |
+| UI: rows, tabs, buttons   | 12 / 400             | `--font-size-ui`                                |
+| Secondary: snippets, menu | 11 / 400             | `--font-size-secondary`                         |
+| Metadata, counts, labels  | 10 / 400             | `--font-size-meta`, `--font-weight-section`     |
+| Editor body               | 13 / 400 / 1.6       | `--font-size-editor`, `--line-height-relaxed`   |
+| View title, inspector     | 14 / 600             | `--font-size-view-title`, `--font-size-heading` |
+| Editor H3 / H2 / H1       | 14, 15, 17 / 600     | `--font-size-heading`, `-xl`, `-2xl`            |
+| Document title            | 22 / 600             | `--font-size-3xl`, `--font-weight-bold`         |
 
-Letter spacing: `--letter-spacing-tight` −0.01em at ≥ 15px, `--letter-spacing-title` −0.02em at
-≥ 20px. Weights: 400, 500, 600, 650, 700 (`font-synthesis-weight: none`).
+Weights: 400, 500, 600 (`font-synthesis: none`). No letter spacing, except −0.01em on the
+document title.
 
 ## 4. Grid
 
 ```
-|<- inset ->|<- 16 glyph ->|<- 10 ->|text …                         … |<- inset ->|
-            16                      42                          right − 16
-   (20 and 46 in windows ≥ 1100px)
+|<- inset ->|<- 14 glyph ->|<- 8 ->|text …                          … |<- inset ->|
+            12                     34                          right − 12
+   (16 and 38 in windows ≥ 1100px)
 ```
 
-- `--content-inset` 16px; 20px in windows ≥ 1100px (a `:root` media query, so the top bar and
-  every pane, including the 300px split-view list, share it).
-- `--glyph-column` 16px holds every leading glyph: the app mark, checkboxes, `+`, row icons,
-  group icons. `--text-start` (inset + 26px) is where text starts.
+- `--content-inset` 12px (the kit's padding); 16px in windows ≥ 1100px (a `:root` media
+  query, so the title bar and every pane, including the 300px split-view list, share it).
+- `--glyph-column` 14px holds every leading glyph: the app mark, checkboxes, `+`, row icons,
+  group icons. `--text-start` (inset + 22px) is where text starts.
 - Right edges share the inset. Controls with no box at rest (icon buttons, the back link) hang
   their padding outside the grid so their **glyphs** sit on it (`--icon-button-hang` 6px;
-  `data-icon-button` marks them); row fills hang `--row-fill-inset` 6px outside the content.
-- Lists use the full canvas up to `--list-max-width` (880px), then stay left on the grid. The
-  editor is a centred 680px column (`--editor-max-width`); Settings a centred 640px column.
-- Vertical: the top bar is 44px (+1px hairline); the view header is 20px + a 28px line + 12px;
-  single-line rows 32px; note rows 56px (title 16px line, snippet 15px, meta 13px, 6px padding).
+  `data-icon-button` marks them). Row fills span the full width of their list.
+- Lists and the view header span the whole canvas, as in Zap. The editor is a centred 680px
+  column (`--editor-max-width`); Settings a centred 640px column.
+- Vertical: the title bar is 36px including its hairline, tab strips 32px, controls 26px
+  (small 22px), menu items and single-line rows 28px, status strips 24px.
 
 ## 5. Shell
 
-### Top bar (`src/views/workspace/TopBar.tsx`)
+### Title bar and area tabs (`src/views/workspace/TopBar.tsx`)
 
-- The top bar is the window's title bar. The workspace window has no system title bar: macOS
-  keeps its native traffic lights overlaid on the bar; Linux and Windows draw their own window
-  controls at the right end (`WindowChrome.tsx`), and Linux also draws resize edges.
-- 44px on `--color-bg-soft` with one hairline under it; its empty middle is a Tauri drag
-  region, never the controls.
-- **Left:** the 16px app mark in the glyph column, then `Inbox  Notes  Tasks  Pinned` as 13px
-  secondary text tabs, the first label on the text column. Hover: text ink on the hover fill.
-  Active (`aria-current="page"`): text ink on a soft 6px pill (`--color-bg-active`). The Inbox
-  count is an 11px tertiary number on the label's baseline (spoken as ", 3 unorganised").
-- **Right:** the space pill (dot or layers glyph, name, chevron; open = selected fill), the
-  220px search field (soft fill, 14px icon, "Search" in secondary, the `⌘K` / `Ctrl+K` hint in
-  tertiary; it opens the palette), then New (menu: note, task, document), Trash and Settings as
-  28px icon buttons (Trash and Settings show `aria-pressed` while open). The last glyph ends on
-  the inset.
-- **Narrow (< 800px):** the areas fold into one menu button named after the current area
-  (`Go to: Tasks`), its label still on the text column; search becomes an icon button.
+- The chrome is Zap's: the kit's `TitleBar`, then the kit's tab strip. The workspace window has
+  no system title bar: macOS keeps its native traffic lights overlaid on the bar (the kit's
+  `macInset`); Linux and Windows draw the kit's window controls at the right end
+  (`WindowChrome.tsx`, `.mnml-window-controls`: 29px borderless buttons the bar's full height,
+  close turns `--danger`), and Linux also draws resize edges.
+- **Title bar:** 36px on `--color-bg-soft` with one hairline under it. The bar is the Tauri drag
+  region; the kit makes its children ignore the pointer and every control opts back in.
+  - **Left:** the kit's `Brand`: the 14px app mark in `--color-icon`, "piw" at 12/600, and the
+    note "notes & tasks" after a hairline (hidden below 800px by the kit).
+  - **Centre:** the space switcher (square dot or layers glyph, name at 12/600, chevron; open =
+    hover fill), centred on the window like the connection in Zap's bar.
+  - **Right:** as Zap's: the kit's palette toggle (`.mnml-theme-toggle`), which opens the
+    Appearance dialog (colour mode and accent, the kit's `AppearanceDialog` look); the kit's
+    status square with "Local workspace"; then the window controls.
+- **Area tabs:** `Inbox  Notes  Tasks  Pinned` as the kit's tab strip (`.mnml-tabs`, Zap's open
+  tabs): a 32px soft strip with a hairline at its foot, square tabs split by hairlines, a 13px
+  icon and an 11px muted label. The current area (`aria-current="page"`, `data-active`) sits on
+  the canvas in text ink with a 1px accent line on top. The Inbox count is a 10px mono number
+  (spoken as ", 3 unorganised"). The tabs never close and stay at every width.
+- **Strip actions:** at the strip's end, the 220px search field (the kit's sidebar search: a 1px
+  box on the canvas, 13px icon, "Search" in placeholder ink; `Mod+K` lives in its tooltip and
+  `aria-keyshortcuts`; it opens the palette; an icon button below 800px), then New, which opens
+  the Quick Capture popup (§11; as a task in the Tasks area, as a note elsewhere), then Trash
+  and Settings as kit icon buttons (they show `aria-pressed` while open), the last glyph on the
+  content inset. New documents keep `Mod+Shift+N` and a note's "Convert to document".
 
 ### Content region
 
-`<main>` under the bar, full width, a size container named `content`. Views show their counts
+`<main>` under the tabs, full width, a size container named `content`. Views show their counts
 in their own header.
+
+### Status bar (`src/views/workspace/WorkspaceStatusBar.tsx`)
+
+The kit's `StatusBar`, as in Zap: 24px on `--color-bg-soft` with a hairline above it, 10px mono
+in secondary ink. Left: the app and the current space (`PIW / Work`, `PIW / All spaces`). Right:
+the Inbox count and where the data lives, split by the kit's `Separator` (`9 in inbox · Stored on
+this device`).
 
 ## 6. Page skeleton (`src/components/app/Page.tsx`)
 
-- **`ViewToolbar`** is the view header, not a second bar: the first line of the canvas, 20px
-  above and 12px below, no fill, and a hairline only once the content scrolls under it
-  (`scrolled`, from `useScrollContainer`). Props: `title` (20/650, `h1` by default), `count`
-  (13px tertiary on the title's baseline), `note` (12px secondary context, hidden below
-  560px), `filters` (a `Segmented variant="text" size="sm"`), `actions` (icon buttons 4px
-  apart, or one soft Button), `leading` (a back link whose arrow sits on the inset). With
-  `titleAs="span"` the title becomes a quiet 13px breadcrumb and the line spans the canvas:
-  the line above an editor. Its width follows `--list-max-width`, so filters line up with the
-  rows' right edge.
-- **`PageView`** (a size container) → **`PageScroll`** → **`PageColumn`** (`content` 880px
-  left, `editor` 680px centred, `narrow` 640px centred, `full`).
-- **`PageSectionHeader`**: the one group label, 11px/600 sentence case, secondary, on the text
-  column with an optional 16px glyph in the glyph column and a tertiary count, 16px above,
-  sticky on the canvas. **`PageGroup`**: groups are separated by that space, not by lines.
-  **`PageList`**: a `role="list"` without bullets.
+- **`ViewToolbar`** is the view header, as Zap's view heading: a 36px line plain on the canvas
+  with one hairline under it, spanning the canvas like the lists under it. Props: `title`
+  (14/600, `h1` by default), `count` (10px mono tertiary beside it), `note` (11px secondary
+  context, hidden below 560px), `filters` (a `Segmented variant="text" size="sm"`), `actions`
+  (icon buttons, or one Button), `leading` (a back link whose arrow sits on the inset). With
+  `titleAs="span"` the title becomes a quiet 12px breadcrumb: the line above an editor.
+- **`PageView`** (a size container) → **`PageScroll`** → **`PageColumn`** (`content` the full
+  canvas, `editor` 680px centred, `narrow` 640px centred, `full`).
+- **`PageSectionHeader`**: the one group label, the kit's sidebar label (10px uppercase,
+  tertiary), on the text column with an optional glyph in the glyph column and a mono count at
+  the right edge, sticky on the canvas. **`PageGroup`**: groups are separated by space, not by
+  lines. **`PageList`**: a `role="list"` without bullets.
 
 ## 7. Components (`src/components/ui`)
 
 Shared by every window. Nothing new outside this list without a design review.
 
-- **Button.** Rounded 6px, no border. `primary` the accent pill (one per surface: Save,
-  Create); `secondary` (default) a soft fill; `ghost` text in secondary ink with the soft hover
-  fill; `danger` the danger fill (confirm-delete only). `md` 28px / 13px / 0 12px (dialogs,
-  forms, empty states); `sm` 24px / 12px / 0 8px (headers, rows). Icon 14px, 6px gap. Hover and
-  pressed step the fill; toggled (`aria-pressed`) takes the selected fill; `loading` keeps the
-  label, swaps the icon for a spinner and sets `aria-busy`.
-- **IconButton.** 28px with a 16px icon (`md`), 24px with 14px (`sm`); rounded 6px; secondary
-  ink; hover: text ink on the hover fill; pressed: the stronger fill; `pressed` prop: the
-  selected fill; open menu: the hover fill. `variant="secondary"` rests on the soft fill. Name
-  and tooltip are required, the tooltip appends the formatted shortcut.
-- **Segmented.** Radiogroup (one tab stop; arrows move and select). `text`: soft-pill text tabs
-  for view filters (Today · Upcoming · All · Completed): secondary labels, the selected one text
-  ink on the soft selected pill. `contained`: a soft track (8px radius, 2px padding) whose
-  selected segment rises onto `--color-bg-raised` with `--shadow-sm` (Settings, Quick Capture).
-  `md` 28px / 13px, `sm` 24px / 12px.
-- **Tabs.** `document`: quiet 13px text tabs under a document title, no strip fill, hairline or
-  dividers; the selected tab is text ink with a 2px accent underline (rounded ends) under its
-  label; hover turns the label text ink; the first label sits on the inset; rename (F2,
-  double-click), reorder (Alt+←/→), overflow menu, `+`. `compact`: soft-pill text tabs.
-- **Checkbox.** `task`: **round** 16px (`sm` 14px), a 1.5px tertiary ring; hover turns the ring
-  secondary and previews the check; checked: the accent fill with a white check. `editorial`:
-  a 4px rounded square, same sizes. Focus: a 2px ring 2px outside. Native input, ≥ 24px hit
-  area.
+- **Button.** The kit's `Button` (`.mnml-button`): square, a 1px `--color-border` edge on the
+  canvas colour, the hover fill. `secondary` (default) is the kit's default; `primary` the
+  kit's primary (`--hover` fill, `--control-border` edge; one per surface: Save, Create);
+  `ghost` borderless text in secondary ink with the hover fill; `danger` secondary in danger
+  ink that fills `--danger` on hover (confirm-delete only). `md` 26px / 12px / 0 9px; `sm`
+  22px / 11px / 0 6px. Icon 13px, 6px gap. Toggled (`aria-pressed`) takes the selection fill;
+  `loading` keeps the label, swaps the icon for the kit's spinner and sets `aria-busy`.
+- **IconButton.** The kit's `IconButton` (`.mnml-icon-button`): borderless, `--color-icon`
+  ink, the hover fill. 26px with a 14px icon (`md`), 22px with 13px (`sm`); pressed: the
+  stronger fill; `pressed` prop: the selection fill; open menu: the hover fill. Name and
+  tooltip are required, the tooltip appends the formatted shortcut.
+- **Segmented.** Radiogroup (one tab stop; arrows move and select). `contained`: the kit's
+  `Segmented` (`.mnml-segmented`): joined square buttons in a 1px border with hairlines between
+  them, muted 11–12px labels, the selected one in text ink on the canvas (Settings, Quick
+  Capture). `text`: borderless text buttons for view filters (Today · Upcoming · All ·
+  Completed), the selected one on the selection fill. `md` 26px, `sm` 22px.
+- **Tabs.** The kit's `Tabs` (`.mnml-tabs`, `.mnml-tab`): a 32px soft strip with a hairline at
+  its foot; square tabs separated by hairlines, 11px muted labels; the selected tab
+  (`data-active`) is text ink on the canvas with a 1px line in the accent along its top. Rename
+  (F2, double-click), reorder (Alt+←/→), the overflow menu and `+` follow the last tab.
+- **Checkbox.** Square, as every kit control: 14px (`sm` 12px), a 1px tertiary ring; hover
+  turns the ring secondary and previews the check; checked: the accent fill with a white
+  check. Focus: a 1px ring 1px outside. Native input, ≥ 24px hit area.
 - **ListRow.** Full-bleed box, content on the grid; the hover and selection fills are drawn by
   `::before`, rounded 6px and inset 6px from the column edges. Selected: `--color-bg-active`;
   while focus is in the list: `--color-bg-active-accent`; tertiary metadata turns secondary on
   either. Keyboard focus: a 2px inset ring on the fill's shape. Single line ≥ 32px; with
   snippet/meta: title 13/600, snippet 12 secondary, meta 11 tertiary (56px). Completed:
   secondary ink; free-form rows add a faint 1px strike. Actions appear on hover and focus.
-- **Menu** (DropdownMenu, ContextMenu, submenus, DateQuickPicker). Elevated, radius 8,
-  `--shadow-md`, 4px padding, 200px (240px with shortcuts). Items 26px, 0 8px, 13px, radius 4;
-  icons 14px secondary; the highlighted item takes `--color-bg-hover-strong`; checked marks in
-  the accent; shortcuts 12px tertiary text; group labels 11px/600 sentence case; separators
-  inset 8px. Opens with a 140ms fade and a 2px slide. Context menus also open with Shift+F10
-  or the Menu key.
-- **Dialog / ConfirmDialog.** 360px (lg 480px), radius 10, `--shadow-lg`, no header bar; 20px
-  padding: title 15/600, description 13px secondary, body, then actions right-aligned 8px
-  apart with no hairline (Cancel secondary, then the accent pill or danger). The × is a 24px
-  icon button 12px from the corner. Buttons are `md`. Scrim `--color-bg-overlay`.
+- **Menu** (DropdownMenu, ContextMenu, submenus, DateQuickPicker). Radix behaviour, the kit's
+  `.mnml-menu` look: square, a 1px `--color-border-floating` edge, `--shadow-md`, 3px padding,
+  190px (230px with shortcuts). Items 28px, 4px 7px, 11px; icons 13px secondary; the
+  highlighted item takes the hover fill; checked marks in the accent; shortcuts plain muted
+  text (the kit's `.mnml-menu-shortcut`); group labels 10px uppercase muted; separators full
+  width. Context menus also open with Shift+F10 or the Menu key.
+- **Dialog / ConfirmDialog.** Radix behaviour, the kit's `Dialog` look: `.mnml-dialog` (square,
+  a 1px `--color-border-floating` edge, `--shadow-lg`) 360px wide over the `--overlay` scrim;
+  `.mnml-dialog-heading`, a 12/500 title on a soft bar with a hairline under it and the × at
+  its end; a 16px body; `.mnml-dialog-actions`, buttons right-aligned 7px apart (Cancel, then
+  the primary or danger action). ConfirmDialog is the kit's `.mnml-message-dialog`.
 - **Toast.** Bottom centre, 16px above the window edge; the menu surface (radius 8,
   `--shadow-md`); 13px text; the action is an accent ghost Button; the × a 24px icon button.
   8s by default, paused on hover and focus; one at a time (the newest replaces the previous).
   Errors lead with a danger icon and use `role="alert"`.
-- **TextInput / TextArea.** Boxed (`default`, `mono`): rounded 6px, a 1px control border, 0 8px
-  (TextArea 6px 8px); hover: the stronger border; focus: a 1px accent border and the 3px soft
-  halo, no outline. `ghost`: caret-only, no box, no padding (rename, add rows, descriptions).
-  `editor`: no chrome at the reading measure. `sm` 24 / 12px, `md` 28 / 13px, `lg` 32 / 13px.
-  Labels 12px/500 secondary; descriptions 12px tertiary; errors 12px danger.
-- **Kbd.** 11px/500 in the UI font, secondary ink on the soft fill, radius 4, no border.
-  `inline`: one chip; `chip`: one cap per key, 2px apart. Plain text inside menus. Rendered per
-  OS: macOS symbols in the order ⌃⌥⇧⌘ (`⌘⇧Space`); elsewhere words joined by `+`
-  (`Ctrl+Shift+Space`).
-- **EmptyState.** Centred in its region: a 28px thin (1.25) icon in tertiary, a 13/600 title in
-  text ink, a 12px secondary line, one soft (secondary) Button 16px below. `compact` for tabs
-  and the inspector.
-- **SpaceDot.** An 8px round dot; never colour-only (a label, or `role="img"` with a name).
-- **Badge.** 11px/500 on a soft fill, radius 4, 2px 6px; tones use their tint and ink.
+- **TextInput / TextArea.** After the kit's `Fields` inputs: square, a 1px control border on
+  the canvas, 0 7px (TextArea 6px 7px); hover: the stronger border; focus: the border takes the
+  focus colour, no halo. `ghost`: caret-only, no box, no padding (rename, add rows,
+  descriptions). `editor`: no chrome at the reading measure. `sm` 22 / 11px, `md` 26 / 12px,
+  `lg` 28 / 12px. Labels 11px secondary; errors 11px danger.
+- **Kbd.** The kit's shortcut hint (`.mnml-search-shortcut`): 9–10px mono, muted, on the soft
+  fill in a 1px border with a 2px radius. `inline`: one hint; `chip`: one cap per key, 2px
+  apart. Plain text inside menus. Rendered per OS: macOS symbols in the order ⌃⌥⇧⌘
+  (`⌘⇧Space`); elsewhere words joined by `+` (`Ctrl+Shift+Space`).
+- **EmptyState.** The kit's `.mnml-empty-state`, centred in its region: a 28px icon in faint
+  ink, a 13/500 title in secondary ink, an 11px muted line, at most one Button 16px below.
+- **SpaceDot.** A 6px square, like the kit's status dot; never colour-only (a label, or
+  `role="img"` with a name).
+- **Badge.** The kit's `.mnml-badge`: 10px mono secondary ink in a 1px border, 3px 6px.
 - **SaveIndicator.** 11px tertiary text with no box ("Saving…", "✓ Saved"); errors in danger
   with a Retry text button.
 - **Drawer** (the task inspector, 360px). The canvas surface with one hairline on the left;
   overlay mode adds `--shadow-drawer`; 20px padding; the header line aligns with the view
   header beside it (13/600 secondary title, 28px icon buttons, the last glyph on the padding).
-- **Spinner.** A turning arc in `currentColor`, frozen under reduced motion.
+- **Spinner.** The kit's `Spinner`: a turning Loader2 in `currentColor`.
+- **AccentPicker.** The kit's appearance swatches (`.mnml-appearance-accents`): one toggle per
+  accent, a 23px round swatch over its 10px name, the pressed one ringed in text ink.
 
-Icons: one outline set (Lucide, ISC), 16px, `currentColor`; decorative icons are `aria-hidden`,
-and an icon always sits next to text or has an accessible name.
+Icons: one outline set (Lucide, ISC), 14px at Lucide's own 2px stroke (as the kit draws them),
+`currentColor`; decorative icons are `aria-hidden`, and an icon always sits next to text or has
+an accessible name.
 
 ## 8. States
 
@@ -531,7 +548,7 @@ App shortcuts never use Ctrl+Alt or Alt+letter either.
 ## 18. For view authors and reviewers
 
 - Put the title, count, filters and actions in `ViewToolbar`; never draw a bar inside a view.
-- Use `PageColumn` for lists so they stop at 880px; use `ListRow` (or its classes) for rows and
+- Use `PageColumn` for lists; use `ListRow` (or its classes) for rows and
   never set a row background directly: the fill lives in `::before`.
 - Leading glyphs are 16px in the glyph column; text starts on `--text-start`; trailing parts end
   on the inset. Overdue dates use `--color-danger`; other metadata `--color-text-subtle`.

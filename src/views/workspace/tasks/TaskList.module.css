@@ -1,8 +1,9 @@
 /*
  * Task list (docs/ui-design-system.md, "Page skeleton", "ListRow"). Groups use the one section
- * label (PageSectionHeader: 11px/600 sentence case, secondary, on the text column, 16px above,
- * sticky on the canvas) with the Overdue glyph in the glyph column. Rows and groups are
- * separated by space only: no hairlines.
+ * label (PageSectionHeader, sticky on the canvas, on the text column, 16px above) drawn as the
+ * kit's sidebar label (@mnml-tools/ui `.mnml-sidebar-label`, Zap's "TABLES 2"): 10px uppercase,
+ * regular weight, tertiary ink, the count beside it; the Overdue glyph in the glyph column.
+ * Rows and groups are separated by space only: no hairlines.
  */
 .list {
   display: flex;
@@ -15,8 +16,8 @@
   flex-direction: column;
 }
 
-/* The label on a 14px line, the height of the Overdue glyph: every group label is the same
-   36px (16 above, 14, 6 below), on whole pixels. */
+/* The label on a 13px line, the height of the Overdue glyph: every group label is the same
+   35px (16 above, 13, 6 below), on whole pixels. */
 .section > :is(h2, h3):first-child {
   line-height: var(--icon-size-sm);
 }
@@ -38,7 +39,7 @@
   flex-direction: column;
 }
 
-/* "Show 2 more": a quiet ghost text button whose label sits on the text column (its 8px
+/* "Show 2 more": a quiet ghost text button whose label sits on the text column (its 6px
    padding hangs outside it). */
 .more {
   align-self: flex-start;

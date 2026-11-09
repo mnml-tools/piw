@@ -19,9 +19,9 @@ export interface SegmentedProps<T extends string> {
   'aria-labelledby'?: string;
   size?: 'sm' | 'md';
   /**
-   * `contained` (default): a soft pill control (a soft track with a raised selected segment),
-   * for Settings and Quick Capture. `text`: soft-pill text tabs with no track, for view filters
-   * in a view header.
+   * `contained` (default): the kit's `Segmented` (joined buttons in a 1px border), for Settings
+   * and Quick Capture. `text`: borderless text buttons, the selected one on the selection fill,
+   * for view filters in a view header.
    */
   variant?: 'contained' | 'text';
   disabled?: boolean;
@@ -66,7 +66,13 @@ export function Segmented<T extends string>({
       ref={ref}
       role="radiogroup"
       aria-disabled={disabled || undefined}
-      className={cx(styles.group, styles[variant], styles[size], className)}
+      className={cx(
+        variant === 'contained' && 'mnml-segmented',
+        styles.group,
+        styles[variant],
+        styles[size],
+        className,
+      )}
       {...aria}
     >
       {options.map((option, index) => {
@@ -82,7 +88,7 @@ export function Segmented<T extends string>({
             aria-checked={checked}
             tabIndex={index === tabStop ? 0 : -1}
             disabled={isDisabled(index)}
-            className={styles.segment}
+            className={cx('mnml-button', styles.segment)}
             onClick={() => {
               if (!checked) onValueChange(option.value);
             }}

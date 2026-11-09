@@ -31,7 +31,9 @@ export interface DialogProps {
 
 /**
  * Modal dialog (`role="dialog"`, `aria-modal`): scrim, focus trap, Esc and outside click close
- * it, and focus returns to the invoker.
+ * it, and focus returns to the invoker. Radix supplies the behaviour; the look is the kit's
+ * `Dialog` (@mnml-tools/ui): `.mnml-dialog` with its soft `.mnml-dialog-heading` bar and a
+ * `.mnml-dialog-actions` row.
  */
 export function Dialog({
   open,
@@ -54,6 +56,7 @@ export function Dialog({
         <DialogPrimitive.Overlay className={styles.overlay} />
         <DialogPrimitive.Content
           className={cx(
+            'mnml-dialog',
             styles.dialog,
             styles[placement],
             padding === 'none' && styles.flush,
@@ -69,7 +72,9 @@ export function Dialog({
             if (restoreFocus()) event.preventDefault();
           }}
         >
-          <div className={cx(styles.header, hideTitle && styles.headerHidden)}>
+          <div
+            className={cx(hideTitle ? styles.headerHidden : 'mnml-dialog-heading', styles.header)}
+          >
             <DialogPrimitive.Title className={cx(styles.title, hideTitle && 'visually-hidden')}>
               {title}
             </DialogPrimitive.Title>
@@ -79,13 +84,13 @@ export function Dialog({
                   aria-label={closeLabel}
                   icon={<X {...iconProps} />}
                   size="sm"
-                  className={styles.close}
+                  className={cx('mnml-dialog-close', styles.close)}
                 />
               </DialogPrimitive.Close>
             )}
           </div>
           {children != null && <div className={styles.body}>{children}</div>}
-          {footer && <div className={styles.footer}>{footer}</div>}
+          {footer && <div className={cx('mnml-dialog-actions', styles.footer)}>{footer}</div>}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

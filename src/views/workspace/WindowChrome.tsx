@@ -38,45 +38,40 @@ function useMaximized(): boolean {
   return maximized;
 }
 
-const iconSize = 14;
-
+/** Minimise, maximise and close, drawn as the kit's `WindowControls` (@mnml-tools/ui/tauri). */
 export function WindowControls() {
   const maximized = useMaximized();
   if (!drawsWindowControls) return null;
   const window = getCurrentWindow();
   return (
-    <div className={styles.controls} role="group" aria-label={t.window.controls}>
+    <div className="mnml-window-controls" role="group" aria-label={t.window.controls}>
       <button
         type="button"
-        className={styles.control}
+        className="mnml-button"
         aria-label={t.window.minimize}
         title={t.window.minimize}
         onClick={() => void window.minimize()}
       >
-        <Minus size={iconSize} aria-hidden />
+        <Minus size={14} aria-hidden />
       </button>
       <button
         type="button"
-        className={styles.control}
+        className="mnml-button"
         aria-label={maximized ? t.window.restore : t.window.maximize}
         title={maximized ? t.window.restore : t.window.maximize}
         onClick={() => void window.toggleMaximize()}
       >
-        {maximized ? (
-          <Copy size={iconSize - 2} aria-hidden className={styles.restore} />
-        ) : (
-          <Square size={iconSize - 3} aria-hidden />
-        )}
+        {maximized ? <Copy size={13} aria-hidden /> : <Square size={13} aria-hidden />}
       </button>
       <button
         type="button"
-        className={`${styles.control} ${styles.close}`}
+        className="mnml-button mnml-window-close"
         aria-label={t.window.close}
         title={t.window.close}
         // Same path as the window manager's close: hides to the tray or quits (Rust decides).
         onClick={() => void window.close()}
       >
-        <X size={iconSize} aria-hidden />
+        <X size={15} aria-hidden />
       </button>
     </div>
   );

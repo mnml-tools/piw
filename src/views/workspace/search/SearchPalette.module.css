@@ -1,24 +1,29 @@
-/* Search palette (docs/ui-design-system.md, "Dialog", "ListRow", "Kbd"): the elevated dialog
-   surface (10px radius, --shadow-lg) at 560px, 15vh from the top, no header bar. It keeps the
-   view grid inside its own edges: 16px inset, the 16px glyph column, text 10px after it.
-   - Query row: 48px, the 16px search glyph, a borderless 15px input, the Esc key cap at the end;
-     one hairline below.
-   - Results: soft rows like the lists (the fill inset 6px from the edges, radius 6), a 16px type
-     glyph on the title line, 13px title, 11px tertiary context, a 12px secondary snippet whose
-     matches are marked (highlight fill and 600 weight, never colour alone). The active result
-     takes the soft selected fill. Group labels: 11px/600 secondary on the text column.
-   - Footer: the palette's keys in 11px tertiary, after one hairline, no fill. */
+/* Search palette (docs/ui-design-system.md, "Dialog", "ListRow", "Kbd"), drawn as Zap's "Go to"
+   palette: the kit dialog surface (square, a 1px --color-border-floating edge, --shadow-lg) at
+   560px, 15vh from the top, no heading bar. It keeps the view grid inside its own edges: the
+   12px inset, the 14px glyph column, text 8px after it.
+   - Query row: the kit's search field at palette size: 36px on the canvas, the 14px search
+     glyph in muted ink, a borderless 13px input, the Esc hint (the kit's `.mnml-search-shortcut`)
+     at the end as the close control; one hairline below.
+   - Results: full-width square rows, a 14px type glyph on the title line, 12px title, the
+     context in 10px mono muted ink (Zap's "public"), an 11px secondary snippet whose matches
+     are marked (highlight fill and 600 weight, never colour alone). The active result is the
+     kit's selected sidebar row: the --selected fill with a 2px accent bar on its left edge.
+     Group labels are the kit's sidebar labels: 10px uppercase, muted, on the inset.
+   - Footer: the kit's status bar: 24px on --soft after one hairline, the keys as plain 10px
+     mono text in secondary ink. */
 .dialog.dialog {
   width: min(var(--palette-width), calc(100vw - 2 * var(--space-4)));
   overflow: hidden;
 }
 
 .palette {
-  --palette-inset: var(--space-4);
+  --palette-inset: var(--space-3);
   --palette-text: calc(var(--palette-inset) + var(--glyph-column) + var(--glyph-gap));
   display: flex;
   flex-direction: column;
   max-height: min(70vh, 35rem);
+  font-size: var(--font-size-ui);
 }
 
 /* ---- Query row ---- */
@@ -27,9 +32,10 @@
   flex: none;
   align-items: center;
   gap: var(--glyph-gap);
-  height: 3rem;
+  height: var(--titlebar-height);
   padding: 0 calc(var(--palette-inset) - var(--space-1)) 0 var(--palette-inset);
   border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-bg);
 }
 
 .fieldIcon {
@@ -45,6 +51,7 @@
   height: 100%;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
   color: var(--color-text);
   font: inherit;
@@ -63,14 +70,17 @@
   appearance: none;
 }
 
-/* The close control is the Esc key cap itself: its 4px padding hangs outside the inset. */
+/* The close control is the Esc hint itself: its 4px padding hangs outside the inset. */
 .escape {
   display: inline-flex;
   flex: none;
   align-items: center;
   height: var(--control-height-sm);
+  min-height: 0;
   padding: 0 var(--space-1);
-  border-radius: var(--radius-md);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -88,23 +98,29 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-bottom: var(--space-1-5);
+  padding: var(--space-1) 0;
 }
 
 .hint {
   margin: 0;
-  padding: var(--space-3) var(--palette-inset) var(--space-1-5) var(--palette-text);
+  padding: var(--space-2) var(--palette-inset);
   color: var(--color-text-subtle);
   font-size: var(--font-size-secondary);
   line-height: var(--line-height-snug);
 }
 
+/* The kit's sidebar label. */
 .groupTitle {
-  padding: var(--space-3) var(--palette-inset) var(--space-1) var(--palette-text);
+  padding: var(--space-2) var(--palette-inset) var(--space-1-5);
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-section);
   line-height: var(--line-height-tight);
-  color: var(--color-text-muted);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+.group + .group .groupTitle {
+  padding-top: var(--space-3);
 }
 
 .list {
@@ -115,7 +131,7 @@
   list-style: none;
 }
 
-/* A result: full-bleed, its soft fill drawn by ::before, inset 6px (as ListRow). */
+/* A result: full-bleed, its fill (and the selected row's bar) drawn by ::before. */
 .row {
   position: relative;
   display: flex;
@@ -133,7 +149,7 @@
   position: absolute;
   inset: 0 var(--row-fill-inset);
   z-index: -1;
-  border-radius: var(--radius-md);
+  border-radius: 0;
   background: transparent;
   transition: background-color var(--duration-fast) var(--ease-standard);
   pointer-events: none;
@@ -143,11 +159,13 @@
   align-items: center;
 }
 
+/* The kit's selected sidebar row: the selection fill and a 2px accent bar on the left. */
 .active::before {
-  background: var(--color-bg-active-accent);
+  background: var(--color-bg-active);
+  box-shadow: inset var(--accent-bar-width) 0 0 var(--color-accent-mark);
 }
 
-/* On the selection fill, tertiary text turns secondary (AA). */
+/* On the selection fill, muted text turns secondary (AA). */
 .active :is(.context, .icon) {
   color: var(--color-text-muted);
 }
@@ -157,7 +175,7 @@
   flex: none;
   width: var(--icon-size-md);
   height: calc(var(--font-size-ui) * var(--line-height-row));
-  color: var(--color-text-subtle);
+  color: var(--color-icon);
 }
 
 .text {
@@ -180,15 +198,17 @@
   overflow: hidden;
   color: var(--color-text);
   font-size: var(--font-size-ui);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Metadata: the kit's mono face, muted. */
 .context {
   flex: 0 1000 auto;
   min-width: 0;
   overflow: hidden;
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   color: var(--color-text-subtle);
   text-overflow: ellipsis;
@@ -207,7 +227,7 @@
 /* A match: the highlight fill, text ink and 600 weight (never colour alone). */
 .snippet mark {
   padding: 0 var(--space-0-5);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--color-highlight);
   color: var(--color-text);
   font-weight: var(--font-weight-semibold);
@@ -220,7 +240,7 @@
   font-size: var(--font-size-secondary);
 }
 
-/* ---- Footer: the palette's keys, quiet ---- */
+/* ---- Footer: the kit's status bar ---- */
 .footer {
   display: flex;
   flex: none;
@@ -229,8 +249,11 @@
   height: var(--statusbar-height);
   padding: 0 var(--palette-inset);
   border-top: var(--border-width) solid var(--color-border);
-  color: var(--color-text-subtle);
+  background: var(--color-bg-soft);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
+  line-height: var(--line-height-tight);
   white-space: nowrap;
 }
 
@@ -243,6 +266,19 @@
 .footerKeys {
   display: inline-flex;
   gap: var(--space-0-5);
+}
+
+/* Keys as plain text in the bar's ink, not hints in boxes. */
+.footer kbd {
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
 }
 
 @media (forced-colors: active) {

@@ -8,16 +8,16 @@ function classes(...names: Array<string | false | null | undefined>): string {
 interface ViewToolbarProps {
   /** Back link or other leading controls, before the title. */
   leading?: ReactNode;
-  /** The view title. A heading (`h1`/`h2`) reads as the 20px/650 view title; `span` is quiet. */
+  /** The view title. A heading (`h1`/`h2`) reads as the 14px/600 view title; `span` is quiet. */
   title?: ReactNode;
   /** Id of the title heading (for `aria-labelledby`). */
   titleId?: string;
   /**
-   * Heading level of `title` (default 1). `span` renders it as plain text in the 13px secondary
+   * Heading level of `title` (default 1). `span` renders it as plain text in the 12px secondary
    * style: the line above an editor, whose document carries the real title.
    */
   titleAs?: 'h1' | 'h2' | 'span';
-  /** The quiet count after the title ("9 open", "12 notes"): 13px tertiary. */
+  /** The quiet count after the title ("9 open", "12 notes"): 10px mono tertiary. */
   count?: ReactNode;
   /** Context after the title or count ("Archived"): 12px secondary; hidden below 560px. */
   note?: ReactNode;
@@ -26,19 +26,19 @@ interface ViewToolbarProps {
   /** Actions on the right: IconButtons (or one soft Button), 4px apart. */
   actions?: ReactNode;
   /**
-   * True once the view's scroll container has scrolled (`useScrollContainer`): a hairline appears
-   * under the header, where the content scrolls under it.
+   * True once the view's scroll container has scrolled (`useScrolled`). Set as `data-scrolled`;
+   * the header's hairline is always drawn now (the kit's bar), so it is only a styling hook.
    */
   scrolled?: boolean;
   className?: string;
 }
 
 /**
- * The view header (docs/ui-design-system.md, "View header"): not a second bar but the first line
- * of the canvas. The title (20px/650) and a quiet count on the left, filters and actions on the
- * right; 20px above, 12px below, no fill and no hairline until the content scrolls under it. The
- * title starts on the content inset and the last action ends on it. Its width follows the list
- * column (`--list-max-width`), so the filters line up with the rows' right edge.
+ * The view header (docs/ui-design-system.md, "View header"): a 36px line plain on the canvas
+ * with one hairline under it, as Zap's view heading. The title (14px/600) and a quiet count on
+ * the left, filters and actions on the right. The title starts on the content inset and the
+ * last action ends on it. It spans the canvas, as the lists under it do, so the filters and
+ * actions line up with the rows' right edge.
  */
 export function ViewToolbar({
   leading,
@@ -110,8 +110,7 @@ export function PageScroll({ className, children, ...rest }: ComponentPropsWithR
 interface PageColumnProps {
   children: ReactNode;
   /**
-   * `content` (default) for lists: the full canvas up to `--list-max-width` (880px), then
-   * left-aligned on the grid. `editor`: the centred 680px reading column. `narrow`: the centred
+   * `content` (default) for lists: the full canvas, as Zap's lists. `editor`: the centred 680px reading column. `narrow`: the centred
    * 640px column of forms such as Settings. `full`: no limit.
    */
   width?: 'content' | 'editor' | 'narrow' | 'full';
@@ -136,7 +135,7 @@ export function PageColumn({ children, width = 'content', className }: PageColum
 
 interface PageSectionHeaderProps {
   title: string;
-  /** Decorative 16px glyph in the rows' glyph column (the label stays on the text column). */
+  /** Decorative 14px glyph in the rows' glyph column (the label stays on the text column). */
   icon?: ReactNode;
   /** Shown after the title in tertiary text ("Overdue 2"). */
   count?: number;
@@ -146,9 +145,9 @@ interface PageSectionHeaderProps {
 }
 
 /**
- * A group heading inside a list (Pinned "On the desktop 3"): the one section style, an
- * 11px/600 sentence-case secondary label on the rows' text column with a tertiary count, 16px
- * above the group, sticky on the canvas.
+ * A group heading inside a list (Pinned "On the desktop 3"): the one section style, the kit's
+ * sidebar label (10px uppercase, tertiary) on the rows' text column with its count at the right
+ * inset, 16px above the group, sticky on the canvas.
  */
 export function PageSectionHeader({ title, icon, count, countLabel, id }: PageSectionHeaderProps) {
   return (

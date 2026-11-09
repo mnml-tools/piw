@@ -1,3 +1,8 @@
+/* Notes area (docs/ui-design-system.md, "Grid"). Single view: the list or the editor on the
+   canvas. Split view: the list is a 300px column (--list-width) on the kit's sidebar colour
+   (--color-bg-sidebar, as Zap's sidebar) with one 1px hairline at its edge; the editor beside it
+   on the canvas, where extra width goes to its margins. Both panes start with the same
+   view-header line, so their first lines read as one. */
 .area {
   display: flex;
   height: 100%;
@@ -6,12 +11,13 @@
   background: var(--color-bg);
 }
 
-/* Split view: the list is a 300px column (--list-width) on the canvas with one hairline, the
-   editor beside it on the same canvas; extra width goes to the editor's margins. Both panes
-   start with the same view-header line, so their first lines read as one. */
+/* The pane restates --color-bg, so everything drawn "on the canvas" inside it (the view, the
+   sticky group labels) takes the sidebar colour too. */
 .split .listPane {
+  --color-bg: var(--color-bg-sidebar);
   flex: 0 0 var(--list-width);
   border-inline-end: var(--border-width) solid var(--color-border);
+  background: var(--color-bg);
 }
 
 .editorPane {

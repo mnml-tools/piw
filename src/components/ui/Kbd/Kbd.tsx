@@ -11,17 +11,25 @@ export interface KbdProps extends Omit<ComponentPropsWithRef<'kbd'>, 'children'>
 }
 
 /**
- * Shows a keyboard shortcut in the current OS notation. The visible glyphs are hidden from
+ * Shows a keyboard shortcut in the current OS notation, drawn as the kit's shortcut hint. The visible glyphs are hidden from
  * assistive technology, which reads the spelled-out version ("Control Shift Space") instead.
  */
 export function Kbd({ shortcut, variant = 'inline', className, ...rest }: KbdProps) {
   const spoken = describeShortcut(shortcut);
   return (
-    <kbd className={cx(styles.kbd, styles[variant], className)} {...rest}>
+    <kbd
+      className={cx(
+        styles.kbd,
+        variant === 'inline' && 'mnml-search-shortcut',
+        styles[variant],
+        className,
+      )}
+      {...rest}
+    >
       <span aria-hidden="true" className={styles.visual}>
         {variant === 'chip'
           ? formatShortcutParts(shortcut).map((part, index) => (
-              <kbd key={index} className={styles.key}>
+              <kbd key={index} className={cx('mnml-search-shortcut', styles.key)}>
                 {part}
               </kbd>
             ))

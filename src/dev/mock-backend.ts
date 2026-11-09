@@ -9,6 +9,7 @@ import { detectPlatform } from '@/app/theme';
 import { todayString } from '@/lib/dates';
 import type { AppStatus } from '@/lib/ipc/bindings/AppStatus';
 import type { CaptureDraft } from '@/lib/ipc/bindings/CaptureDraft';
+import type { CaptureMode } from '@/lib/ipc/bindings/CaptureMode';
 import type { ChangeSet } from '@/lib/ipc/bindings/ChangeSet';
 import type { ColorName } from '@/lib/ipc/bindings/ColorName';
 import type { CreateDocument } from '@/lib/ipc/bindings/CreateDocument';
@@ -104,6 +105,7 @@ export interface Commands {
   // App and platform
   app_status: [Empty, AppStatus];
   platform_info: [Empty, PlatformInfo];
+  show_capture: [{ mode: CaptureMode }, null];
   hide_capture: [Empty, null];
   open_link: [{ url: string }, null];
   open_in_workspace: [Target, null];
@@ -738,6 +740,10 @@ const HANDLERS: Handlers = {
     schemaVersion: SCHEMA_VERSION,
   })),
   platform_info: read((_, { store }) => platformInfo(store.settings)),
+  show_capture: read(({ mode }, { host }) => {
+    host.log(`show_capture: ${mode} (the dev mock has no capture window)`);
+    return null;
+  }),
   hide_capture: read(() => null),
   open_link: read(({ url }, { host }) => {
     if (!/^(https?:\/\/|mailto:)/i.test(url)) invalid('only web and email links can be opened');

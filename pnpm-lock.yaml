@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@fontsource-variable/inter':
-        specifier: 5.3.0
-        version: 5.3.0
+      '@mnml-tools/ui':
+        specifier: 0.1.0
+        version: 0.1.0(@tauri-apps/api@2.12.4)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)
       '@tanstack/react-query':
         specifier: 5.106.1
         version: 5.106.1(@types/react@19.3.0)(react@19.3.1)
@@ -272,9 +272,6 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fontsource-variable/inter@5.3.0':
-    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
-
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
     engines: {node: '>=18.18.0'}
@@ -319,6 +316,23 @@ packages:
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
+
+  '@mnml-tools/ui@0.1.0':
+    resolution: {integrity: sha512-L2eOwaYIduNEdcA9UA92IB6OUZ9boSI1J/KQIEypS6dubSpF/V6vg8azwZQaz9aCcxCIRgd++3LrQEKthXhqwA==}
+    engines: {node: '>=22.19'}
+    peerDependencies:
+      '@tauri-apps/api': ^2.9.0
+      '@tauri-apps/plugin-process': ^2.2.0
+      '@tauri-apps/plugin-updater': ^2.9.0
+      lucide-react: '>=0.468.0'
+      react: ^19.2.0
+    peerDependenciesMeta:
+      '@tauri-apps/api':
+        optional: true
+      '@tauri-apps/plugin-process':
+        optional: true
+      '@tauri-apps/plugin-updater':
+        optional: true
 
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
@@ -2687,8 +2701,6 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fontsource-variable/inter@5.3.0': {}
-
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -2731,6 +2743,13 @@ snapshots:
       keyv: 5.6.0
 
   '@keyv/serialize@1.1.1': {}
+
+  '@mnml-tools/ui@0.1.0(@tauri-apps/api@2.12.4)(lucide-react@1.70.0(@types/react@19.3.0)(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      lucide-react: 1.70.0(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+    optionalDependencies:
+      '@tauri-apps/api': 2.12.4
 
   '@oxc-project/types@0.156.0': {}
 

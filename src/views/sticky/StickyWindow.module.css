@@ -1,13 +1,14 @@
-/* Sticky window (docs/ui-design-system.md §9; brief v6 §5): a muted paper with nothing on it but
- * the text. The window is opaque and undecorated, so the paper fills it and a 1px
- * --sticky-border hairline is its edge (no CSS shadow).
+/* Sticky window (docs/ui-design-system.md §9): a muted paper with nothing on it but the text,
+ * squared off like every kit surface. The window is opaque and undecorated, so the paper fills
+ * it and a 1px --sticky-border hairline is its edge (no CSS shadow, no radius).
  *
- *   strip  a 24px drag strip on the paper's own colour, with no divider: an 11px/500 secondary
+ *   strip  a 24px drag strip on the paper's own colour, with no divider: a 10px/500 secondary
  *          title on the 12px side inset, then the controls (keep on top, open, more, hide) as
- *          22px soft icon buttons whose last glyph ends on the inset. The controls appear on
- *          hover or focus-within (120ms fade) over the end of the title; keyboard focus always
+ *          20px square kit icon buttons whose last glyph ends on the inset. The controls appear
+ *          on hover or focus-within (80ms fade) over the end of the title; keyboard focus always
  *          reveals them. While "keep on top" is on, a small filled pin marks it at rest.
- *   body   the paper itself (StickyBody.module.css). */
+ *   body   the paper itself (StickyBody.module.css).
+ * Shared components read the paper's ink through the [data-sticky-color] remap in tokens.css. */
 
 .sticky {
   --sticky-inset: var(--space-3);
@@ -20,6 +21,8 @@
   background: var(--sticky-bg);
   color: var(--sticky-text);
   border: var(--border-width) solid var(--sticky-border);
+  border-radius: 0;
+  font-size: var(--font-size-ui);
   overflow: hidden;
 }
 
@@ -75,7 +78,7 @@
   opacity: 1;
 }
 
-/* 22px soft icon buttons: transparent at rest, the paper's hover fill (IconButton states, on
+/* 20px square icon buttons: transparent at rest, the paper's hover fill (IconButton states, on
    the sticky's remapped tokens). */
 .controls .control {
   width: var(--sticky-control-size);
@@ -94,7 +97,7 @@
   color: var(--sticky-text);
 }
 
-/* The 22px controls fill the 24px strip, so the focus ring is drawn inside them. */
+/* The 20px controls nearly fill the 24px strip, so the focus ring is drawn inside them. */
 .controls .control:focus-visible {
   outline-offset: var(--focus-ring-inset);
 }
@@ -127,8 +130,8 @@
 }
 
 /* ---- Colour swatches in the menus (rendered outside the sticky, on app tokens) ----
-   Round paper chips, edged in the colour's dot: the paper's own hairline vanishes on the menu
-   surface. */
+   Round paper chips (swatches are the one round mark, as the kit's accent swatches), edged in
+   the colour's dot: the paper's own hairline vanishes on the menu surface. */
 
 .swatch {
   display: inline-block;
