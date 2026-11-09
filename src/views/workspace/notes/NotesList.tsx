@@ -1,4 +1,4 @@
-import { Ellipsis, FileText } from 'lucide-react';
+import { Ellipsis, FileText, ListChecks, Pin, StickyNote } from 'lucide-react';
 import {
   useId,
   useImperativeHandle,
@@ -295,17 +295,15 @@ function NoteRow({
   const shownTags = item.tags.slice(0, MAX_TAGS);
   const hiddenTags = item.tags.length - shownTags.length;
 
-  // One quiet meta line under the snippet: date · space · tasks · tags · On desktop. Never a
-  // date at the far right of a wide row (docs/ui-design-system.md, "ListRow").
+  // Each part has one place (docs/ui-design-system.md, "Notes"): the kind in the glyph column,
+  // the state (checklist progress or tasks, On desktop) at the end of the title line, and the
+  // context (date · space · tags) on the meta line. Never a date at the far right of a wide row.
   const metaParts: Array<[string, ReactNode]> = [
     ['date', <time dateTime={item.updatedAt}>{formatRelative(item.updatedAt)}</time>],
   ];
   if (space) {
     metaParts.push(['space', <SpaceDot color={spaceColor(space)} label={space.name} />]);
   }
-  // The kind is the row's glyph (note or document) in the glyph column; the meta line names it
-  // for assistive tech only, so it stays on one line at any width.
-  if (isDocument && item.taskCount > 0) metaParts.push(['tasks', t.list.tasks(item.taskCount)]);
   for (const tag of shownTags) metaParts.push([`tag-${tag}`, `#${tag}`]);
   if (hiddenTags > 0) {
     metaParts.push([
@@ -316,7 +314,20 @@ function NoteRow({
       </>,
     ]);
   }
-  if (item.pinned) metaParts.push(['desktop', t.list.onDesktop]);
+
+  // The state, shown short on the title line; the row's description says it in full.
+  const progress = isDocument
+    ? item.taskCount > 0 && t.list.tasks(item.taskCount)
+    : item.checklistCount > 0 && t.list.checklistShort(item.checklistDone, item.checklistCount);
+  const stateLabels = [
+    isDocument && item.taskCount > 0 && t.list.tasks(item.taskCount),
+    !isDocument &&
+      item.checklistCount > 0 &&
+      t.list.checklist(item.checklistDone, item.checklistCount),
+    item.pinned && t.list.onDesktop,
+  ].filter(Boolean);
+  const hasChecklist = !isDocument && item.checklistCount > 0;
+  const Glyph = isDocument ? FileText : hasChecklist ? ListChecks : StickyNote;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     // `detail` is 0 for clicks synthesised by Enter/Space.
@@ -331,14 +342,11 @@ function NoteRow({
           current={current ? 'true' : undefined}
           density={compact ? 'compact' : 'default'}
           className={compact ? styles.rowCompact : styles.row}
-          // Documents carry a doc glyph in the glyph column; quick notes leave it empty and keep
-          // their text on the text column, like every row.
+          // The kind: a document, a quick note, or a quick note with a checklist.
           leading={
-            isDocument ? (
-              <span className={styles.glyph}>
-                <FileText {...iconProps} />
-              </span>
-            ) : undefined
+            <span className={styles.glyph}>
+              <Glyph {...iconProps} />
+            </span>
           }
           title={
             <button
@@ -353,6 +361,12 @@ function NoteRow({
               onFocus={onFocus}
             >
               <span className={cx(styles.titleText, untitled && styles.untitled)}>{title}</span>
+              {(progress || item.pinned) && (
+                <span className={styles.state} aria-hidden="true">
+                  {progress && <span>{progress}</span>}
+                  {item.pinned && <Pin size={12} />}
+                </span>
+              )}
             </button>
           }
           // Every row keeps three lines (56px): an empty snippet gets a quiet stand-in.
@@ -373,6 +387,9 @@ function NoteRow({
                   {part}
                 </span>
               ))}
+              {stateLabels.length > 0 && (
+                <span className="visually-hidden">, {stateLabels.join(', ')}</span>
+              )}
             </span>
           }
           actions={

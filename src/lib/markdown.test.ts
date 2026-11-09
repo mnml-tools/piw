@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { continueList, indentList, inferTitle, toggleWrap } from './markdown';
+import {
+  continueList,
+  indentList,
+  inferTitle,
+  taskProgress,
+  textLines,
+  toggleTaskLine,
+  toggleWrap,
+} from './markdown';
 
 describe('toggleWrap', () => {
   it('wraps the selection and keeps it selected', () => {
@@ -63,5 +71,45 @@ describe('inferTitle', () => {
     expect(inferTitle('- [ ] comprar café')).toBe('comprar café');
     expect(inferTitle('   \n ')).toBe('');
     expect(inferTitle('x'.repeat(100))).toHaveLength(80);
+  });
+});
+
+describe('textLines', () => {
+  it('leaves out Markdown markers, empty lines and rules, as the database does', () => {
+    const body =
+      '## Mykid\n\n- [ ] Verify bug;\n-  [x] Menus\n  * nested\n2. Call\n> - [ ] Quoted\n___\nTest';
+    expect(textLines(body)).toEqual([
+      'Mykid',
+      'Verify bug;',
+      'Menus',
+      'nested',
+      'Call',
+      'Quoted',
+      'Test',
+    ]);
+    expect(textLines('#tag -1 2.5 [x]y')).toEqual(['#tag -1 2.5 [x]y']);
+  });
+});
+
+describe('taskProgress', () => {
+  it('counts ticked and open task items, at any depth and with any marker', () => {
+    expect(
+      taskProgress('## Title\n- [ ] a\n  * [x] b\n1. [X] c\n- plain\n[ ] not an item'),
+    ).toEqual({ done: 2, total: 3 });
+    expect(taskProgress('No tasks')).toEqual({ done: 0, total: 0 });
+  });
+});
+
+describe('toggleTaskLine', () => {
+  it('ticks and unticks a task item', () => {
+    expect(toggleTaskLine('- [ ] Call Rita')).toBe('- [x] Call Rita');
+    expect(toggleTaskLine('  - [X] Call Rita')).toBe('  - [ ] Call Rita');
+  });
+
+  it('turns a list item or a plain line into a task item', () => {
+    expect(toggleTaskLine('- Call Rita')).toBe('- [ ] Call Rita');
+    expect(toggleTaskLine('2. Call Rita')).toBe('2. [ ] Call Rita');
+    expect(toggleTaskLine('  Call Rita')).toBe('  - [ ] Call Rita');
+    expect(toggleTaskLine('   ')).toBeNull();
   });
 });

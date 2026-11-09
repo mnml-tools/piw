@@ -1,0 +1,153 @@
+/* Live Markdown editor (live-markdown.ts, docs/ui-design-system.md §10): the text is the page,
+ * with no box, no hover fill and no ring; the caret is the focus indicator. The host sets the
+ * typography (font, size, line height) on the root and the side inset of the lines in
+ * --md-inset; every colour is a semantic token, so a sticky paper's remap applies as is.
+ *
+ * Rendered lines: headings on the editor scale (17 / 15 / 14), list items on the task grid (the
+ * box or bullet centred in the 14px glyph column, then the 8px gap; wrapped lines hang under
+ * the text), a ticked item struck in the muted ink. Lines being edited show their markers in the
+ * muted ink. The CodeMirror base theme is overridden here. */
+
+.root {
+  --md-inset: 0px;
+  --md-box: var(--checkbox-size-sm);
+  --md-indent: calc(var(--glyph-column) + var(--glyph-gap));
+  --md-box-inset: calc((var(--glyph-column) - var(--md-box)) / 2);
+}
+
+.root :global(.cm-editor) {
+  height: 100%;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.root :global(.cm-editor.cm-focused) {
+  outline: none;
+}
+
+.root :global(.cm-editor .cm-scroller) {
+  font-family: inherit;
+  line-height: inherit;
+}
+
+.root :global(.cm-editor .cm-content) {
+  padding: 0;
+  caret-color: var(--color-text);
+}
+
+.root :global(.cm-editor .cm-line) {
+  padding: 0 var(--md-inset);
+}
+
+.root :global(.cm-editor .cm-placeholder) {
+  color: var(--color-placeholder);
+}
+
+/* Markers on the lines being edited: there, but quiet. */
+.liveMark {
+  color: var(--color-text-muted);
+}
+
+.liveStrong {
+  font-weight: var(--font-weight-semibold);
+}
+
+.liveEmphasis {
+  font-style: italic;
+}
+
+.liveStrike {
+  text-decoration: line-through;
+}
+
+.liveCode {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+}
+
+.liveLink {
+  text-decoration: underline;
+  text-decoration-color: var(--color-text-muted);
+  text-underline-offset: 2px;
+}
+
+.liveDone {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.root :global(.cm-editor) .liveH1,
+.root :global(.cm-editor) .liveH2,
+.root :global(.cm-editor) .liveH3 {
+  font-weight: var(--font-weight-title);
+  line-height: var(--line-height-heading);
+  padding-block: var(--space-1) var(--space-0-5);
+}
+
+.liveH1 {
+  font-size: var(--font-size-2xl);
+}
+
+.liveH2 {
+  font-size: var(--font-size-xl);
+}
+
+.liveH3 {
+  font-size: var(--font-size-heading);
+}
+
+.root :global(.cm-editor) .liveItem {
+  padding-inline-start: calc(var(--md-inset) + var(--md-indent));
+  text-indent: calc(-1 * var(--md-indent));
+}
+
+/* The kit Checkbox's markup; its box takes --md-box (doubled class: above `.root.sm`). */
+.liveCheck.liveCheck {
+  --box: var(--md-box);
+  margin-inline: var(--md-box-inset) calc(var(--md-box-inset) + var(--glyph-gap));
+  vertical-align: -0.125em;
+  text-indent: 0;
+}
+
+.liveBullet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--md-indent);
+  height: 1lh;
+  padding-inline-end: var(--glyph-gap);
+  vertical-align: top;
+  text-indent: 0;
+}
+
+.liveBullet::before {
+  content: '';
+  width: var(--space-1);
+  height: var(--space-1);
+  background: var(--color-text-muted);
+}
+
+.liveRule {
+  display: inline-block;
+  width: 100%;
+  vertical-align: middle;
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.root :global(.cm-editor) .liveQuote {
+  padding-inline-start: calc(var(--md-inset) + var(--space-2-5));
+  background: linear-gradient(var(--color-text-muted), var(--color-text-muted)) var(--md-inset) 0 /
+    var(--border-width) 100% no-repeat;
+  color: var(--color-text-muted);
+}
+
+.root :global(.cm-editor) .liveCodeBlock {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-code);
+}
+
+@media (forced-colors: active) {
+  .root :global(.cm-editor.cm-focused) {
+    outline: var(--border-width) solid Highlight;
+  }
+}

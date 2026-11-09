@@ -1,7 +1,7 @@
 /* The Notes list (docs/ui-design-system.md, "ListRow"): full-bleed three-line rows on the one
-   grid, square like every kit row. Title 12/600, a one-line 11px secondary snippet, a 10px
-   tertiary meta line (date · space · tags). Documents carry a doc glyph in the glyph column;
-   every title sits on the text column. The hover / selection fill is ListRow's ::before, never a
+   grid, square like every kit row. The kind glyph in the glyph column; title 12/600 with the
+   row's state at its end; a one-line 11px secondary snippet; a 10px tertiary meta line with the
+   context (date · space · tags). The hover / selection fill is ListRow's ::before, never a
    background here, and ListRow also draws Zap's current-row bar on the note open in the editor
    (split view, aria-current). */
 .scroller {
@@ -64,7 +64,34 @@
   color: var(--color-text-subtle);
 }
 
-/* The doc glyph, centred in the glyph column on the title line. */
+/* The row's state at the end of the title line, before the "More actions" slot (which stays
+   reserved, so the state never moves or hides under it): checklist progress or a document's
+   tasks, then a pin when the note is on the desktop. 10px mono tertiary, as ListRow's trailing
+   metadata; secondary on the selection (AA). */
+.state {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-inline-start: auto;
+  padding-inline-start: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-regular);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-subtle);
+}
+
+.state > svg {
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
+}
+
+[data-selected] .state {
+  color: var(--color-text-muted);
+}
+
+/* The kind glyph (document, note, checklist), centred in the glyph column on the title line. */
 .glyph {
   display: inline-flex;
   align-items: center;

@@ -350,17 +350,25 @@ per document. The task inspector's open state is never persisted.
 
 ## 10. Views
 
-- **Notes.** Note rows (title, one-line snippet, meta: date · space dot); documents get a doc
-  glyph; a Favourites group sits at the top ("Add to favourites" in a document's menu). Sort:
-  Last edited (default), Created, Title. `⋯` › Show archived. Split view: ↑/↓ load the editor
-  while focus stays in the list; Enter or → moves focus to the editor; Esc returns it.
-- **Note editor.** One plain `<textarea>`, no toolbar. The title is the first non-empty line
-  without leading Markdown markers, cut to 80 characters: **display only, the text is never
-  rewritten.** Helpers (the only ones): Enter continues a list line and removes an empty
-  marker; Tab / Shift+Tab indent only on list lines (elsewhere Tab moves focus); Mod+B / Mod+I
-  wrap the selection in `**` / `_`. Mod+N opens an unsaved draft; the record is created on the
-  first non-whitespace character and an empty draft is discarded silently. Autosave runs 400ms
-  after the last keystroke and on blur, navigation, hide and quit. **Convert to document** is
+- **Notes.** Each part of a row has one place: the kind in the glyph column (a document, a
+  quick note, or a quick note with a checklist); the title, with the row's state at its end
+  (checklist progress `1/5` or a document's tasks, then a pin when on the desktop; 10px mono,
+  before the reserved `⋯` slot, so it never moves); a one-line snippet; and the context on the
+  meta line (date · space dot · tags). A Favourites group sits at the top ("Add to favourites"
+  in a document's menu). Sort: Last edited (default), Created, Title. `⋯` › Show archived. Split
+  view: ↑/↓ load the editor while focus stays in the list; Enter or → moves focus to the
+  editor; Esc returns it.
+- **Note editor.** The text as live Markdown (CodeMirror, `MarkdownEditor`), no toolbar: the
+  text stays plain Markdown, **never rewritten**, but every line renders its formatting
+  (headings, bold, italic, strikethrough, inline code, links, quotes, rules). Only the lines
+  under the caret or selection show their markers, muted. Task list items (`- [ ]`, `- [x]`)
+  render as a square checkbox; a click ticks it in the text and a ticked item is struck in the
+  muted ink. The title is the first non-empty line without leading Markdown markers, cut to 80
+  characters; list excerpts leave the markers (and rules) out too: display only. Helpers (the only ones): Enter continues a list line and removes an empty marker;
+  Tab / Shift+Tab indent only on list lines (elsewhere Tab moves focus); Mod+B / Mod+I wrap the
+  selection in `**` / `_`; Mod+Enter ticks a task item or turns the line into one. Mod+N opens an unsaved draft;
+  the record is created on the first non-whitespace character and an empty draft is discarded
+  silently. Autosave runs 400ms after the last keystroke and on blur, navigation, hide and quit. **Convert to document** is
   immediate: the full text moves unchanged into one Content tab named "Overview", with Undo.
   If another window saved first, the editor shows "Changed in another window" with Reload and
   Keep mine.
@@ -435,6 +443,8 @@ per document. The task inspector's open state is never persisted.
   for undecorated windows); Windows and macOS use the native shadow.
 - **Bodies:** a note (editable, autosaved), a task (title, description, subtasks) or a
   document's Tasks tab (its rows and Add task).
+- **A note sticky** uses the note editor (§10) at the sticky's size. The strip shows the count
+  of ticked task items after the title (`2/5`, 10px mono) when the note has any.
 - **Four distinct actions:** _Pin to desktop_ creates the sticky; _Keep on top_ is optional;
   _Hide from desktop_ closes the window but keeps it in Pinned; _Remove from desktop_ unpins
   it. Closing through the window manager means Hide.
@@ -471,7 +481,7 @@ Every drag has a keyboard or menu alternative.
 | Task inspector | Mod+Shift+P pin or hide the task · Esc close                                                                                                                                                                                                   |
 | Documents      | Ctrl+PgDn / Ctrl+PgUp next / previous tab · in the tab bar: ←/→ Home End, Alt+←/→ reorder, F2 or double-click rename · Mod+T turn the line into a task · Mod+B / Mod+I / Mod+E bold, italic, code · Mod+S save now                             |
 | Quick Capture  | Mod+1 / Mod+2 Note / Task · Mod+Enter save (Enter in the task title) · Tab / Shift+Tab fields · Mod+Shift+P pin after saving · Esc close, keeping the draft                                                                                    |
-| Sticky         | Mod+W hide · Mod+O open in Piw · Shift+F10 strip menu                                                                                                                                                                                          |
+| Sticky         | Mod+W hide · Mod+O open in Piw · Shift+F10 strip menu · Mod+Enter tick a note's task item                                                                                                                                                      |
 
 **Esc order:** Esc closes the innermost layer first: menu or date picker → inline rename or
 shortcut recorder (cancel) → dialog or palette → inspector → editor (back to the list). **Esc

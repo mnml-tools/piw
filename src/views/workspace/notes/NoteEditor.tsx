@@ -10,16 +10,11 @@ import {
   Tag,
   Trash2,
 } from 'lucide-react';
+import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 import {
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type KeyboardEvent,
-  type Ref,
-} from 'react';
+  MarkdownEditor,
+  type MarkdownEditorHandle,
+} from '@/components/app/MarkdownEditor/MarkdownEditor';
 import { ViewToolbar } from '@/components/app/Page';
 import { SpaceMenu } from '@/components/app/SpaceMenu';
 import {
@@ -27,27 +22,19 @@ import {
   DropdownMenu,
   IconButton,
   SaveIndicator,
-  TextArea,
   iconProps,
   useToast,
   type MenuEntry,
 } from '@/components/ui';
 import { useNote, useSettings, useSpaces, useTags } from '@/lib/hooks/data';
-import { matches, useHotkeys } from '@/lib/hooks/useHotkeys';
+import { useHotkeys } from '@/lib/hooks/useHotkeys';
 import { api } from '@/lib/ipc/api';
 import type { Note } from '@/lib/ipc/bindings/Note';
 import { useWorkspace } from '@/state/workspace';
 import { notesStrings as t } from '@/strings/notes';
+import { inferTitle } from '@/lib/markdown';
 import { initialSpace } from '@/lib/spaces';
 import { copyText } from './clipboard';
-import {
-  applyEdit,
-  continueList,
-  indentList,
-  inferTitle,
-  toggleWrap,
-  type TextEdit,
-} from './markdown';
 import { LoadingLine, RegionError } from './RegionStates';
 import { TagDialog } from './TagDialog';
 import { useNoteActions } from './useNoteActions';
@@ -85,7 +72,7 @@ export interface NoteEditorProps {
 
 type SessionProps = Omit<NoteEditorProps, 'noteId'> & { initialNote: Note | null };
 
-/** Plain-text note editor (docs/ui-design-system.md §10): one textarea, autosave, no toolbar. */
+/** Quick-note editor (docs/ui-design-system.md §10): live Markdown text, autosave, no toolbar. */
 export function NoteEditor({ noteId, ...props }: NoteEditorProps) {
   // A draft keeps its editor when it becomes a record, so later `noteId` changes are ignored.
   const [initialId] = useState(noteId);
@@ -139,9 +126,6 @@ function ExistingNote({ noteId, ...props }: Omit<NoteEditorProps, 'noteId'> & { 
   );
 }
 
-const NO_MODIFIERS = (event: KeyboardEvent) =>
-  !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
-
 function EditorSession({
   initialNote,
   onBack,
@@ -152,7 +136,7 @@ function EditorSession({
   onEscape,
   ref,
 }: SessionProps) {
-  const fieldRef = useRef<HTMLTextAreaElement>(null);
+  const fieldRef = useRef<MarkdownEditorHandle>(null);
   const moreRef = useRef<HTMLButtonElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const spaces = useSpaces();
@@ -190,12 +174,7 @@ function EditorSession({
   const spaceValue = note?.spaceId ?? newSpace;
   const currentTitle = () => inferTitle(session.text()) || t.untitledNote;
 
-  const focusEnd = useCallback(() => {
-    const field = fieldRef.current;
-    if (!field) return;
-    field.focus();
-    field.setSelectionRange(field.value.length, field.value.length);
-  }, []);
+  const focusEnd = useCallback(() => fieldRef.current?.focus('end'), []);
 
   useEffect(() => {
     if (focusOnOpen) focusEnd();
@@ -222,32 +201,9 @@ function EditorSession({
     setManualSave(result === 'saved' ? 'saved' : null);
   };
 
-  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (text: string) => {
     if (manualSave) setManualSave(null);
-    session.onText(event.target.value);
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    const native = event.nativeEvent;
-    if (native.isComposing) return;
-    if (event.key === 'Escape' && NO_MODIFIERS(event)) {
-      event.preventDefault();
-      (onEscape ?? onBack)();
-      return;
-    }
-    const field = event.currentTarget;
-    if (field.readOnly) return;
-    const { value, selectionStart: start, selectionEnd: end } = field;
-    const plain = !event.ctrlKey && !event.metaKey && !event.altKey;
-    let edit: TextEdit | 'none' | null = null;
-    if (matches('Mod+B', native)) edit = toggleWrap(value, start, end, '**');
-    else if (matches('Mod+I', native)) edit = toggleWrap(value, start, end, '_');
-    else if (event.key === 'Enter' && plain && !event.shiftKey)
-      edit = continueList(value, start, end);
-    else if (event.key === 'Tab' && plain) edit = indentList(value, start, end, event.shiftKey);
-    if (edit === null) return;
-    event.preventDefault();
-    if (edit !== 'none') applyEdit(field, edit);
+    session.onText(text);
   };
 
   /** Saves, then hands the record to a command that takes it out of this editor. */
@@ -491,15 +447,13 @@ function EditorSession({
             ))}
           </ul>
         )}
-        <TextArea
+        <MarkdownEditor
           ref={fieldRef}
-          variant="editor"
-          autoGrow
           className={styles.text}
           defaultValue={initialNote?.body ?? ''}
           onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          aria-label={t.editor.text}
+          onEscape={onEscape ?? onBack}
+          label={t.editor.text}
           placeholder={t.editor.placeholder}
           readOnly={readOnly}
         />

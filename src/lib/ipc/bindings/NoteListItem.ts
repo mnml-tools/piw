@@ -8,4 +8,9 @@ export type NoteListItem = { id: string, spaceId: string, kind: NoteKind, displa
 /**
  * Number of tasks linked to a document (0 for quick notes).
  */
-taskCount: number, createdAt: string, updatedAt: string, archivedAt: string | null, deletedAt: string | null, };
+taskCount: number, 
+/**
+ * Checklist items (`- [ ]`, `- [x]`) in a quick note's text, and how many are ticked.
+ * Editorial only, never real tasks; 0 for documents.
+ */
+checklistCount: number, checklistDone: number, createdAt: string, updatedAt: string, archivedAt: string | null, deletedAt: string | null, };

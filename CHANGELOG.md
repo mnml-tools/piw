@@ -12,6 +12,11 @@ All notable changes are documented here. The format follows
   one-colour glyph.
 - **Minimal chrome:** a title bar, the Inbox, Notes, Tasks and Pinned tabs, and a status bar;
   no sidebar.
+- **Live Markdown in quick notes** (editor and stickies): headings, emphasis, links and clickable
+  task checkboxes, with the markers shown only on the line being edited. Note titles and list
+  excerpts leave the Markdown markers out, and note rows show their checklist progress (`1/5`).
+- **Notes list rows** give each part one place: the kind as a glyph, the state (checklist
+  progress, tasks, on desktop) at the end of the title, the context (date · space · tags) below.
 - **Quick notes and quick tasks** under one minimal top bar, with spaces as a global filter,
   tags, Inbox, Trash with undo, and a search palette with highlighted matches.
 - **Tasks:**
@@ -29,6 +34,7 @@ All notable changes are documented here. The format follows
   - Keep on top, hide and remove.
   - Position and size are remembered and kept on a connected monitor.
   - Optional restore at launch.
+  - A `2/5` task count in a note sticky's strip.
 - Tray menu, single instance, close to tray, start at login (off by default).
 - Light and dark themes, text size, and a configurable shortcut with conflict detection.
 - Settings › Data: consistent backup and an open export (Markdown, JSON and CSV).

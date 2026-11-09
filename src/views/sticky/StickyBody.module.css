@@ -26,32 +26,18 @@
   height: 100%;
 }
 
-/* The text area itself fills the body (so its scrollbar sits at the window edge) and carries
-   the padding. No box, no hover fill and no ring: the caret is the focus indicator. */
-.note .noteField {
+/* The note's live Markdown editor (MarkdownEditor) fills the body, so its scrollbar sits at the
+   window edge, at the sticky's 12px / 1.5 with its lines on the 12px side inset. */
+.note .editor {
+  --md-inset: var(--sticky-inset);
   flex: 1;
   min-height: 0;
-  padding: var(--space-0-5) var(--sticky-inset) var(--sticky-inset);
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--sticky-text);
-  caret-color: var(--sticky-text);
   font-size: var(--font-size-ui);
   line-height: var(--line-height-normal);
-  resize: none;
 }
 
-.note .noteField:hover:not(:disabled) {
-  background: transparent;
-}
-
-.note .noteField:focus-visible {
-  outline: none;
-}
-
-.note .noteField::placeholder {
-  color: var(--sticky-text-muted);
+.note .editor :global(.cm-editor .cm-content) {
+  padding-block: var(--space-0-5) var(--sticky-inset);
 }
 
 /* Save error / conflict: a soft notice line under the text, which is kept. Wraps in narrow
@@ -284,7 +270,6 @@
     opacity: 1;
   }
 
-  .note .noteField:focus-visible,
   .task .titleInput:focus-visible,
   .addInput:focus-visible {
     outline: var(--border-width) solid Highlight;

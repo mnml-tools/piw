@@ -24,6 +24,14 @@ export function installDomPolyfills(): void {
     });
   }
   if (typeof proto.scrollIntoView !== 'function') proto.scrollIntoView = () => {};
+  // CodeMirror measures text ranges.
+  if (typeof Range.prototype.getClientRects !== 'function') {
+    Range.prototype.getClientRects = () =>
+      ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as DOMRectList;
+  }
+  if (typeof Range.prototype.getBoundingClientRect !== 'function') {
+    Range.prototype.getBoundingClientRect = () => new DOMRect();
+  }
   if (typeof proto.hasPointerCapture !== 'function') proto.hasPointerCapture = () => false;
   if (typeof proto.setPointerCapture !== 'function') proto.setPointerCapture = () => {};
   if (typeof proto.releasePointerCapture !== 'function') proto.releasePointerCapture = () => {};

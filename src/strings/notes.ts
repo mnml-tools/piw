@@ -41,6 +41,8 @@ export const notesStrings = {
     label: 'Notes',
     archivedLabel: 'Archived notes',
     tasks: (count: number) => plural(count, 'task', 'tasks'),
+    checklist: (done: number, count: number) => `${done} of ${count} done`,
+    checklistShort: (done: number, count: number) => `${done}/${count}`,
     moreTags: (count: number) => `+${count}`,
     moreTagsLabel: (count: number) => plural(count, 'more tag', 'more tags'),
     onDesktop: 'On desktop',

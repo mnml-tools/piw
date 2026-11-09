@@ -3,7 +3,7 @@
  * it and a 1px --sticky-border hairline is its edge (no CSS shadow, no radius).
  *
  *   strip  a 24px drag strip on the paper's own colour, with no divider: a 10px/500 secondary
- *          title on the 12px side inset, then the controls (keep on top, open, more, hide) as
+ *          title on the 12px side inset (then a note's task count, 10px mono), then the controls (keep on top, open, more, hide) as
  *          20px square kit icon buttons whose last glyph ends on the inset. The controls appear
  *          on hover or focus-within (80ms fade) over the end of the title; keyboard focus always
  *          reveals them. While "keep on top" is on, a small filled pin marks it at rest.
@@ -52,9 +52,29 @@
   text-overflow: ellipsis;
 }
 
-/* The resting on-top pin takes the last glyph slot: the title stops before it. */
-.strip:has(.onTopMark) .title {
-  padding-inline-end: calc(var(--icon-size-sm) + var(--space-1-5));
+/* A note's task list progress ("2/5"): 10px mono metadata right after the title, so it stays
+   clear of the controls; the strip behind both is still the drag area. */
+.strip:has(.count) .title {
+  flex: 0 1 auto;
+}
+
+.count {
+  flex: none;
+  padding-inline-start: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  line-height: var(--sticky-titlebar-height);
+  font-variant-numeric: tabular-nums;
+  color: var(--sticky-text-muted);
+}
+
+.title:empty + .count {
+  padding-inline-start: 0;
+}
+
+/* The resting on-top pin takes the last glyph slot: the strip's text stops before it. */
+.strip:has(.onTopMark) {
+  padding-inline-end: calc(var(--sticky-inset) + var(--icon-size-sm) + var(--space-1-5));
 }
 
 /* The controls sit over the end of the title on the paper, which fades the title out under

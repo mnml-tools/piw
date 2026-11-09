@@ -127,7 +127,20 @@
   padding: var(--space-6) var(--space-6) var(--space-10); /* 24px 24px 64px, as a document */
 }
 
-.text {
+/* The text (MarkdownEditor) on the reading column at the editor's 13px / 1.6. It fills the pane,
+   so a click under the last line still places the caret there; the editor's own 14px boxes
+   for task items, as in documents. */
+.scroller .text {
+  --md-box: var(--checkbox-size);
+  max-width: var(--editor-max-width);
+  min-height: 100%;
+  margin-inline: auto;
+  font-family: var(--font-editor);
+  font-size: var(--font-size-editor);
+  line-height: var(--line-height-relaxed);
+}
+
+.text :global(.cm-editor) {
   min-height: 100%;
 }
 

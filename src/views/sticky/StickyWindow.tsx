@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, MoreHorizontal, Pin, X } from 'lucide-react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import {
   ContextMenu,
   DropdownMenu,
@@ -17,12 +18,15 @@ import type { Note } from '@/lib/ipc/bindings/Note';
 import type { StickyTarget } from '@/lib/ipc/bindings/StickyTarget';
 import { keys } from '@/lib/query/keys';
 import { stickyStrings as t } from '@/strings/sticky';
-import { NoteSticky } from './NoteSticky';
+import type { TaskProgress } from '@/lib/markdown';
 import { TaskSticky } from './TaskSticky';
 import { TasksTabSticky } from './TasksTabSticky';
 import styles from './StickyWindow.module.css';
 
 const ICON = { ...iconProps, size: 14 } as const;
+
+// The note editor (CodeMirror) loads only in note stickies.
+const NoteSticky = lazy(() => import('./NoteSticky').then((m) => ({ default: m.NoteSticky })));
 
 function labelOf(target: StickyTarget): string {
   return `sticky:${target.kind}:${target.id}`;
@@ -36,6 +40,14 @@ export default function StickyWindow({ target }: { target: StickyTarget }) {
   });
   const onTop = record.data?.placement.alwaysOnTop ?? false;
   const color: StickyColor = record.data?.color ?? 'plain';
+  const [progress, setProgress] = useState<TaskProgress | null>(null);
+  const onProgress = useCallback(
+    (next: TaskProgress) =>
+      setProgress((prev) =>
+        prev && prev.done === next.done && prev.total === next.total ? prev : next,
+      ),
+    [],
+  );
 
   const hide = () => void api.closeSticky(target);
   const openInPiw = () => void api.openInWorkspace(target);
@@ -81,6 +93,15 @@ export default function StickyWindow({ target }: { target: StickyTarget }) {
       <ContextMenu items={menu}>
         <header className={styles.strip} data-tauri-drag-region>
           <StickyTitle target={target} />
+          {progress && progress.total > 0 && (
+            <span
+              className={styles.count}
+              data-tauri-drag-region
+              aria-label={t.progress(progress.done, progress.total)}
+            >
+              {progress.done}/{progress.total}
+            </span>
+          )}
           <div className={styles.controls} data-tauri-drag-region>
             <IconButton
               size="sm"
@@ -123,7 +144,11 @@ export default function StickyWindow({ target }: { target: StickyTarget }) {
         </header>
       </ContextMenu>
       <div className={styles.body}>
-        {target.kind === 'note' && <NoteSticky id={target.id} />}
+        {target.kind === 'note' && (
+          <Suspense fallback={null}>
+            <NoteSticky id={target.id} onProgress={onProgress} />
+          </Suspense>
+        )}
         {target.kind === 'task' && <TaskSticky id={target.id} />}
         {target.kind === 'tasks_tab' && <TasksTabSticky tabId={target.id} />}
       </div>
