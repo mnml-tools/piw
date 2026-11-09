@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/AppIcon.png" width="112" height="112" alt="Piw app icon">
+  <img src="src/assets/AppIcon.png?v=1" width="112" height="112" alt="Piw app icon">
 </p>
 
 <h1 align="center">Piw</h1>
