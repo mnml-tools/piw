@@ -1,8 +1,9 @@
 /* Toast (docs/ui-design-system.md, "Toast"): bottom centre, 16px above the window edge, on the
- * menu surface (--color-bg-elevated, radius 8, --shadow-md, no border); 13px text with 12px
- * leading padding. The action (Undo, Retry) is a ghost Button sm in the accent; the × a 24px
- * icon button. Errors keep the surface and lead with a danger icon. Enters with a 140ms fade
- * and a 4px rise. */
+ * kit's menu surface (`.mnml-menu`: square, a 1px --color-border-floating edge, the canvas
+ * colour, --shadow-md, 3px padding); 11px text (the menu's) with 7px leading padding, as a
+ * menu item. The action (Undo, Retry) is a ghost Button sm in text ink at 500; the × a 22px
+ * icon button. Errors keep the surface and lead with a 13px danger icon. Enters with a 120ms
+ * fade and a 4px rise. */
 .viewport {
   position: fixed;
   inset-inline: 0;
@@ -30,17 +31,18 @@
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-0-5);
   width: fit-content;
   max-width: 100%;
   min-width: min(16rem, 100%);
-  min-height: var(--control-height-lg);
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  min-height: var(--menu-item-height);
+  padding: 3px 3px 3px 7px;
   background: var(--color-bg-elevated);
   color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-floating);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  font-size: var(--font-size-ui);
+  font-size: var(--font-size-secondary);
   line-height: var(--line-height-snug);
   animation: toast-in var(--duration-normal) var(--ease-enter);
 }
@@ -51,27 +53,24 @@
 
 .toneIcon {
   flex-shrink: 0;
-  width: var(--icon-size-md);
-  height: var(--icon-size-md);
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   margin-inline-end: var(--space-1);
 }
 
 .message {
   flex: 1 1 auto;
   min-width: 0;
+  margin: 0;
   padding-block: var(--space-0-5);
   padding-inline-end: var(--space-2);
   overflow-wrap: anywhere;
 }
 
-/* A text button in the accent. */
+/* A text button in text ink: the accent marks focus and selection only. */
 .toast .action {
-  color: var(--color-accent);
+  color: var(--color-text);
   font-weight: var(--font-weight-medium);
-}
-
-.toast .action:hover:not(:disabled) {
-  color: var(--color-accent-hover);
 }
 
 @keyframes toast-in {

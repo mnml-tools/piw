@@ -1,22 +1,23 @@
 /* Menu surface (DropdownMenu, ContextMenu, submenus, DateQuickPicker; docs/ui-design-system.md,
- * "Menu"). Elevated: --color-bg-elevated, radius 8, --shadow-md (its 0.5px ring is the edge),
- * 4px padding, 200px wide (240px with shortcuts). Items 26px, 0 8px, 13px text, radius 4
- * (concentric with the surface), 14px secondary icons; the highlighted item (pointer or
- * keyboard) takes a soft fill, no outline. Shortcuts are plain tertiary text on the right. Group
- * labels are the one section style: 11px/600 sentence case, secondary. Opens with a 140ms fade
- * and a 2px slide. */
+ * "Menu"), drawn as the kit's `.mnml-menu` (@mnml-tools/ui; Radix keeps the behaviour and the
+ * positioning): square, a 1px --faint edge, the canvas colour, a soft shadow, 3px padding,
+ * 190px wide (230px with shortcuts). Items 28px, 4px 7px, 11px text, 13px secondary icons; the
+ * highlighted item (pointer or keyboard) takes the --hover fill, no outline. Shortcuts are the
+ * kit's `.mnml-menu-shortcut`: muted text on the right. Group labels are the kit's sidebar
+ * label: 10px uppercase, muted. */
 .content {
   z-index: var(--z-dropdown);
   min-width: min(var(--menu-width), calc(100vw - 1rem)); /* small sticky windows */
   max-width: min(22rem, calc(100vw - 1rem));
   max-height: var(--radix-popper-available-height, 70vh);
   overflow-y: auto;
-  padding: var(--space-1);
+  padding: 3px;
   background: var(--color-bg-elevated);
   color: var(--color-text);
+  border: var(--border-width) solid var(--color-border-floating);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  font-size: var(--font-size-ui);
+  font-size: var(--font-size-secondary);
   line-height: var(--line-height-snug);
   transform-origin: var(--radix-popper-transform-origin);
   -webkit-user-select: none;
@@ -47,7 +48,7 @@
 
 /* Wider when the menu lists shortcuts, so labels and keys never crowd. */
 .content:has(.shortcut) {
-  min-width: min(240px, calc(100vw - 1rem));
+  min-width: min(230px, calc(100vw - 1rem));
 }
 
 .content:focus-visible {
@@ -57,23 +58,23 @@
 .item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1-5);
   min-height: var(--menu-item-height);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) 7px;
   border-radius: var(--radius-sm);
   color: var(--color-text);
   cursor: default;
   outline: none;
 }
 
-/* Pointer and keyboard share one cue: a soft fill. */
+/* Pointer and keyboard share one cue: the kit's hover fill. */
 .item[data-highlighted],
 .item:focus-visible {
-  background: var(--color-bg-hover-strong);
+  background: var(--color-bg-hover);
   outline: none;
 }
 
-/* An open submenu's trigger keeps a quieter fill while the pointer is in the submenu. */
+/* An open submenu's trigger keeps the fill while the pointer is in the submenu. */
 .item[data-state='open']:not([data-highlighted]) {
   background: var(--color-bg-hover);
 }
@@ -128,14 +129,14 @@
   height: var(--icon-size-sm);
 }
 
-/* Plain text in the UI font, not a chip. */
+/* The kit's `.mnml-menu-shortcut`: plain muted text, not a chip. */
 .shortcut {
   display: inline-flex;
   flex-shrink: 0;
   margin-inline-start: auto;
-  padding-inline-start: var(--space-4);
+  padding-inline-start: var(--space-3);
   color: var(--color-text-subtle);
-  font-size: var(--font-size-secondary);
+  font-size: inherit;
 }
 
 .shortcut kbd {
@@ -146,6 +147,8 @@
   font-size: inherit;
   font-weight: inherit;
   color: inherit;
+  min-width: 0;
+  height: auto;
 }
 
 .subChevron {
@@ -155,18 +158,19 @@
   color: var(--color-text-subtle);
 }
 
-/* Group label: the one section style, 11px/600 sentence case. */
+/* Group label: the kit's sidebar label, 10px uppercase in muted ink. */
 .label {
-  padding: var(--space-1-5) var(--space-2) var(--space-0-5);
+  padding: var(--space-1-5) 7px var(--space-1);
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-section);
   line-height: var(--line-height-tight);
-  color: var(--color-text-muted);
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
 }
 
 .separator {
   height: var(--border-width);
-  margin: var(--space-1) var(--space-2);
+  margin: 3px -3px;
   background: var(--color-border);
 }
 

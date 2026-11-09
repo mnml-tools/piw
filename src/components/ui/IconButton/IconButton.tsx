@@ -1,3 +1,4 @@
+import { IconButton as KitIconButton } from '@mnml-tools/ui';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { formatShortcut, toAriaKeyShortcuts } from '../Kbd/shortcut';
 import { cx } from '../utils';
@@ -20,13 +21,14 @@ export interface IconButtonProps extends Omit<
   shortcut?: string;
   /** Toggle buttons: sets `aria-pressed` and the pressed style. */
   pressed?: boolean;
-  /** `md` = 28px with a 16px icon (bars, headers); `sm` = 24px with a 14px icon (rows, tabs). */
+  /** `md` = 26px with a 14px icon (bars, headers); `sm` = 22px with a 13px icon (rows, tabs). */
   size?: 'sm' | 'md';
 }
 
 /**
- * Icon-only button with a required accessible name and a tooltip that includes its shortcut.
- * `data-icon-button` lets a container hang its padding outside the grid (Page.module.css).
+ * Icon-only button on the kit's `IconButton` (@mnml-tools/ui), with a required accessible name
+ * and a tooltip that includes its shortcut. `data-icon-button` lets a container hang its padding
+ * outside the grid (Page.module.css).
  */
 export function IconButton({
   'aria-label': label,
@@ -44,7 +46,7 @@ export function IconButton({
       ? undefined
       : `${tooltip ?? label}${shortcut ? ` (${formatShortcut(shortcut)})` : ''}`;
   return (
-    <button
+    <KitIconButton
       type={type}
       aria-label={label}
       title={tip}
@@ -55,6 +57,6 @@ export function IconButton({
       {...rest}
     >
       {icon}
-    </button>
+    </KitIconButton>
   );
 }

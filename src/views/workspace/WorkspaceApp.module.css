@@ -1,5 +1,6 @@
-/* App shell (docs/ui-design-system.md, "Shell"): the 44px top bar, then one content region at
-   full width on the canvas. No sidebar and no status bar. */
+/* App shell (docs/ui-design-system.md, "Shell"), as the kit's `AppShell` in Zap: the title bar
+   and area tabs (TopBar), one content region at full width on the canvas, then the kit's 24px
+   status bar. No sidebar. */
 .shell {
   display: flex;
   flex-direction: column;
@@ -41,7 +42,7 @@
   display: block;
   margin-top: var(--space-2);
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-meta);
   overflow-wrap: anywhere;
   user-select: text;
 }

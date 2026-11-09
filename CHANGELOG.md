@@ -10,8 +10,8 @@ All notable changes are documented here. The format follows
 
 - **App icon** (a pen nib) for the packages, the window and the tray; the top bar shows it as a
   one-colour glyph.
-- **Minimal top-bar UI:** one top bar with Inbox, Notes, Tasks and Pinned, the space filter,
-  search, New, Trash and Settings; no sidebar or status bar.
+- **Minimal chrome:** a title bar, the Inbox, Notes, Tasks and Pinned tabs, and a status bar;
+  no sidebar.
 - **Quick notes and quick tasks** under one minimal top bar, with spaces as a global filter,
   tags, Inbox, Trash with undo, and a search palette with highlighted matches.
 - **Tasks:**
@@ -49,6 +49,21 @@ All notable changes are documented here. The format follows
 
 ### Changed
 
+- **The shared mnml-tools UI kit.** Piw now takes its look from
+  [`@mnml-tools/ui`](https://github.com/mnml-tools/ui-kit), the kit extracted from Zap: square
+  controls, the system font at 12px, warm neutral greys, hairline borders, soft title bar and
+  tab strips, and the kit's 1px focus ring. Buttons, icon buttons, dialogs, menus, segmented
+  controls, tabs, badges, shortcut hints, empty states, the spinner and the window controls are
+  the kit's components or class names. The bundled Inter font is gone (the kit uses the system
+  font).
+- **Zap's chrome:** the kit's title bar (the "piw" brand with its note, the space filter in the
+  centre, the appearance palette, "Local workspace" and the window controls) over a tab strip
+  with Inbox, Notes, Tasks and Pinned, and search, New (it opens the Quick Capture popup),
+  Trash and Settings at its end, and the
+  kit's status bar at the window's foot (`PIW / <space>`, the Inbox count, where the data
+  lives). The areas no longer fold into a menu in narrow windows.
+- **Accent colour:** the title bar's palette and Settings › Appearance offer the kit's five
+  accents (pink, blue, orange, green, purple); blue is the default.
 - **Documentation** follows the layout of its sister project Zap: a shorter README, one
   [architecture guide](docs/architecture.md) that absorbs the former data-format, platform,
   release, security, status, testing and decision records, and the

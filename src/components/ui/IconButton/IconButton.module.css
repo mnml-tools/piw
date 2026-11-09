@@ -1,23 +1,15 @@
-/* IconButton (docs/ui-design-system.md, "IconButton"). Rounded 6px, no border, secondary ink.
- * md 28×28 with a 16px icon (the top bar, view headers, the inspector); sm 24×24 with a 14px
+/* IconButton (docs/ui-design-system.md, "IconButton"). The look is the kit's
+ * `.mnml-icon-button` (@mnml-tools/ui): square, borderless, --icon ink, --hover on hover, the
+ * kit's 1px focus ring. This module fixes the two sizes and adds the states the kit leaves to
+ * apps:
+ * md 26×26 with a 14px icon (the top bar, view headers, the inspector); sm 22×22 with a 13px
  * icon (row actions, tab close, sticky strips, toasts).
- * Hover: the soft hover fill and text ink. Pressed: a stronger fill. Toggled on (aria-pressed):
- * the selected fill. Open menu (aria-expanded): the hover fill. Disabled: --opacity-disabled.
- * Focus: the global 2px ring. 120ms ease-out. */
+ * Toggled on (aria-pressed): the selected fill. Open menu (aria-expanded): the hover fill. */
 
 .iconButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   padding: 0;
-  border: 0;
-  border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  background: transparent;
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+  min-height: 0;
 }
 
 .iconButton > svg {
@@ -57,10 +49,6 @@
 
 .iconButton[aria-pressed='true']:hover:not(:disabled, [aria-disabled='true']) {
   background: var(--color-bg-hover-strong);
-}
-
-.iconButton:disabled {
-  opacity: var(--opacity-disabled);
 }
 
 .iconButton[aria-pressed='true']:disabled {

@@ -56,8 +56,8 @@ export interface TabsProps {
 const PAGE_MOVES: Record<string, RovingKey> = { PageDown: 'next', PageUp: 'prev' };
 
 /**
- * Tab bar (`tablist` / `tab`): quiet text tabs under a document or Settings title, the selected
- * one marked by a 2px accent underline; renamable, reorderable. A roving tab stop: ←/→ (wrap,
+ * Tab bar (`tablist` / `tab`) drawn as the kit's `Tabs` (@mnml-tools/ui): a soft strip of square
+ * tabs, the selected one on the canvas colour with an accent line on top; renamable, reorderable. A roving tab stop: ←/→ (wrap,
  * and select), Home/End, Ctrl+PgUp/PgDn. Overflowing tabs scroll horizontally with an edge fade.
  */
 export function Tabs({
@@ -163,7 +163,7 @@ export function Tabs({
   const showOverflowMenu = Boolean(overflowLabel) && (overflow.start || overflow.end);
 
   return (
-    <div className={cx(styles.tabs, className)}>
+    <div className={cx('mnml-tabs', styles.tabs, className)}>
       <div
         ref={scrollerRef}
         className={styles.scroller}
@@ -192,10 +192,11 @@ export function Tabs({
                   else tabRefs.current.delete(item.id);
                 }}
                 aria-selected={selected}
+                data-active={selected || undefined}
                 aria-controls={selected ? panelId : undefined}
                 tabIndex={index === tabStop ? 0 : -1}
                 disabled={item.disabled}
-                className={cx(styles.tab, 'focus-inset')}
+                className={cx('mnml-tab', styles.tab, 'focus-inset')}
                 onClick={() => onValueChange(item.id)}
                 onDoubleClick={onRename ? () => onRename(item.id) : undefined}
                 onKeyDown={(event) => handleKeyDown(event, index)}

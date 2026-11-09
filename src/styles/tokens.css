@@ -1,68 +1,49 @@
-/* Inter Variable (OFL-1.1) is bundled only as the Linux fallback: the stack below reaches it
-   after SF Pro (macOS) and Segoe UI (Windows), so those platforms never download it. */
-@import '@fontsource-variable/inter/opsz.css';
-@import '@fontsource-variable/inter/opsz-italic.css';
-
 /* =============================================================================
- * Piw — design tokens (minimal direction, brief v6)
+ * Piw — design tokens on top of @mnml-tools/ui
  * Spec: docs/ui-design-system.md (the contract: tokens, grid, components, states).
  * Components use SEMANTIC tokens only (--color-*, --font-*, --space-*, ...). No raw colour value
  * may appear outside this file.
  *
  * PROVENANCE
- *   Principles from Apple-platform note apps (Bear, Minimal, NotePlan): white canvas, two greys
- *   and one accent, soft rounded selection, almost no borders. No assets or code from them.
- *   Zap (github.com/rafmst/zap), a sister app, stays the reference for density and finish.
+ *   The palette, the five accents and the focus ring come from the shared mnml-tools kit
+ *   (`@mnml-tools/ui/tokens.css`, imported first in main.tsx), extracted from Zap: square
+ *   controls, a 12px system font, warm neutral greys, hairline borders. This file maps Piw's
+ *   semantic tokens onto the kit's (--background, --soft, --border, --text, --secondary,
+ *   --muted, --hover, --selected, --accent, --focus-ring, ...) and adds only what Piw needs on
+ *   top: the sticky palettes, code syntax colours and the editor's type scale.
  *
  * THEMING
- *   :root                                   light (default)
- *   :root[data-theme="dark"]                dark, chosen manually
- *   @media (prefers-color-scheme: dark)
- *     :root:not([data-theme="light"])       dark, following the system
- *   The two dark blocks are generated from one source and MUST stay identical. Alias tokens
- *   (whose value is another token) live only in :root and follow the theme they point to.
+ *   :root                       light (default)
+ *   :root[data-theme="dark"]    dark. "System" is resolved in JS (src/app/theme.ts), which
+ *                               always writes data-theme, as the kit expects.
+ *   :root[data-accent="…"]      pink | blue | orange | green | purple (kit accents).
+ *   Aliases of kit tokens live only in :root and follow the theme and accent; the dark
+ *   block below holds Piw's own colours only.
  *
  * SURFACES
- *   --color-bg              the canvas: views, editor, inspector, notes list
- *   --color-bg-soft         the top bar; Settings groups
- *   --color-bg-elevated     menus, popovers, dialogs, toasts, Quick Capture (+ shadow)
- *   --color-bg-raised       the selected segment on a contained Segmented track
- *   --color-bg-control      soft fill of secondary buttons, the search field, segmented tracks
- *   --color-bg-hover        hover on rows and borderless controls
- *   --color-bg-hover-strong pressed borderless controls; hover on soft-filled controls
- *   --color-bg-pressed      pressed soft-filled controls
- *   --color-bg-active       selected (soft): rows, the active area pill, toggled controls
- *   --color-bg-active-accent selected row while focus is in its list (accent tint)
+ *   --color-bg              the canvas: views, editor, inspector, notes list   (kit --background)
+ *   --color-bg-soft         the top bar, tab strips, dialog headings          (kit --soft)
+ *   --color-bg-elevated     menus, popovers, dialogs, toasts, Quick Capture   (kit --background)
+ *   --color-bg-control      soft fill of fields and tracks                    (kit --soft)
+ *   --color-bg-hover        hover on rows and controls                        (kit --hover)
+ *   --color-bg-hover-strong pressed controls; hover on the primary button     (kit --hover-strong)
+ *   --color-bg-active       selected rows, the active area, toggled controls  (kit --selected)
  *
- * WCAG CONTRAST (relative luminance, checked by tokens.test.ts)
- *   Targets: text 4.5:1 (AA), UI components / focus / graphics 3:1.
- *   Pair                                          Light               Dark
- *   text on bg / soft / elevated                  16.83/15.69/16.83   15.63/14.41/13.14
- *   secondary on bg / soft                        5.71/5.32           6.61/6.10
- *   secondary on selected / accent-selected       5.01/4.81           5.12/4.84
- *   tertiary on bg / soft / elevated              4.93/4.59/4.93      5.64/5.20/4.74
- *   accent (links, marks) on bg / soft            5.69/5.30           6.93/6.39
- *   accent-contrast on accent-fill / its hover    5.69/7.18           4.58/5.44
- *   danger on bg / danger-contrast on its fill    5.44/5.44           6.09/4.90
- *   placeholder on bg / elevated (exempt)         2.87/2.87           3.55/2.99
- *   Deviations from the brief's starting values (minimal, for AA):
- *     --color-text-muted   #6E6E73 -> #66666B light (4.45 -> 5.01 on the soft selection,
- *                          4.28 -> 4.81 on the accent selection)
- *     --color-text-subtle  #76767B -> #707075 light (4.21 -> 4.59 on the top bar);
- *                          #8E8E93 -> #949499 dark (4.39 -> 4.74 in menus)
- *     --color-placeholder  #A1A1A6 -> #98989D light, #636366 -> #727276 dark (>= 2.8 floor)
- *     --color-accent-fill  dark #2E76CD (the brief's #5AA9FF carries a white check at only
- *                          2.46:1); light keeps #0A66C2, which needed no tuning
- *     --color-danger-fill  dark #C4463A, for the same reason
- *   Exempt (non-essential, never the only carrier of information): --color-text-faint,
- *   --color-placeholder (every field also has a label), --color-border, --color-border-subtle,
- *   --color-control-border (the label, fill or focus carries the meaning).
+ * WCAG CONTRAST (checked by tokens.test.ts against the kit's values, every accent)
+ *   Text 4.5:1 (AA), UI components / focus / graphics 3:1, with these kit-level exceptions:
+ *     --color-text-subtle (kit --muted) is 3.6:1 on the canvas in light mode: labels, counts
+ *       and hints at 10–11px, as in Zap. Tested at 3:1.
+ *     --color-text-muted on a selected row (accent tint) is ~4:1 in light mode. Tested at 3.5:1.
+ *     The 1px focus ring is ~2.8:1 for some accents on their own tint and on light stickies.
+ *       Tested at 2.75:1.
+ *   Accent TEXT (links, "today") mixes the accent with --text so every accent passes AA; the
+ *   accent itself (fills, marks, the focus ring) is the kit's, which passes 3:1.
  *   Re-run `pnpm vitest run src/styles` whenever a colour token changes.
  *
  * BREAKPOINTS (custom properties cannot be used inside @media / @container;
  * mirror these numbers in src/lib/layout.ts)
- *   Window  <  800px : the top bar folds the areas into a menu and search into an icon
- *   Window  >= 1100px: the content inset grows from 16 to 20px
+ *   Window  <  800px : search folds into an icon; the brand's note hides
+ *   Window  >= 1100px: the content inset grows from 12 to 16px
  *   Content >= 800px : Notes split view (list + editor) available
  *   Content >= 820px : task inspector docks (list narrows); below, it overlays
  *   Content <  560px : compact paddings; inspector and dialogs go full width
@@ -70,68 +51,69 @@
  * ============================================================================= */
 
 :root {
-  color-scheme: light;
-
   /* ---- Surfaces ---- */
-  --color-bg: #ffffff;
+  --color-bg: var(--background);
   --color-bg-app: var(--color-bg); /* window base and secondary panes: the canvas too */
-  --color-bg-soft: #f7f7f5;
-  --color-bg-elevated: #ffffff;
-  --color-bg-raised: #ffffff;
-  --color-bg-control: rgba(0, 0, 0, 0.05);
-  --color-bg-hover: rgba(0, 0, 0, 0.04);
-  --color-bg-hover-strong: rgba(0, 0, 0, 0.08);
-  --color-bg-pressed: rgba(0, 0, 0, 0.11);
-  --color-bg-active: rgba(0, 0, 0, 0.06);
-  --color-bg-active-accent: rgba(10, 102, 194, 0.12);
-  --color-bg-overlay: rgba(0, 0, 0, 0.2); /* scrim behind modal dialogs only */
+  --color-bg-soft: var(--soft);
+  --color-bg-elevated: var(--background);
+  --color-bg-raised: var(--background);
+  --color-bg-control: var(--soft);
+  --color-bg-hover: var(--hover);
+  --color-bg-hover-strong: var(--hover-strong);
+  --color-bg-pressed: var(--hover-strong);
+  --color-bg-active: var(--selected);
+  --color-bg-active-accent: var(--selected);
+  --color-bg-overlay: var(--overlay); /* scrim behind modal dialogs only */
+  --color-bg-sidebar: var(--sidebar);
 
   /* ---- Lines ---- */
-  --color-border: rgba(0, 0, 0, 0.08); /* the one hairline: bar | canvas, panes, groups */
-  --color-border-subtle: rgba(0, 0, 0, 0.05); /* hairlines inside a group (Settings rows) */
-  --color-border-strong: var(--color-text-subtle); /* the task checkbox ring: tertiary, >= 3:1 */
-  --color-border-hover: rgba(0, 0, 0, 0.22); /* boxed input on hover */
-  --color-control-border: rgba(0, 0, 0, 0.14); /* boxed input at rest */
+  --color-border: var(--border); /* the one hairline: bars, panes, controls, groups */
+  --color-border-subtle: var(--border); /* hairlines inside a group (Settings rows) */
+  --color-border-strong: var(--muted); /* the task checkbox ring (>= 3:1) */
+  --color-border-hover: var(--control-border); /* boxed control on hover */
+  --color-control-border: var(--border); /* boxed control at rest */
+  --color-border-floating: var(--faint); /* the edge of menus, popovers and dialogs */
 
   /* ---- Text ---- */
-  --color-text: #1d1d1f;
-  --color-text-muted: #66666b; /* secondary: snippets, descriptions, inactive tabs */
-  --color-text-subtle: #707075; /* tertiary: metadata, counts, hints (>= 4.5:1) */
-  --color-text-faint: #a1a1a6; /* decorative: strike-through lines, separators (exempt) */
-  --color-text-disabled: #a1a1a6; /* exempt; controls also dim to --opacity-disabled */
-  --color-placeholder: #98989d; /* exempt (>= 2.8:1) */
-  --color-icon: var(--color-text-muted); /* standalone icons */
+  --color-text: var(--text);
+  --color-text-muted: var(--secondary); /* secondary: snippets, descriptions, inactive tabs */
+  --color-text-subtle: var(--muted); /* tertiary: metadata, counts, hints */
+  --color-text-faint: var(--faint); /* decorative: strike-through lines, separators (exempt) */
+  --color-text-disabled: var(--faint); /* exempt; controls also dim to --opacity-disabled */
+  --color-placeholder: var(--placeholder); /* exempt (>= 2.8:1) */
+  --color-icon: var(--icon); /* standalone icons */
 
-  /* ---- Accent: one calm blue ---- */
-  --color-accent: #0a66c2; /* text and marks: links, active tab line, focus, today */
-  --color-accent-hover: #0857a6;
-  --color-accent-fill: #0a66c2; /* fills: primary button, checked checkbox */
-  --color-accent-fill-hover: #0857a6;
-  --color-accent-contrast: #ffffff; /* check mark / label on an accent fill */
-  --color-accent-mark: var(--color-accent); /* marks: tab underline, current-row bar */
-  --color-focus-ring: var(--color-accent);
-  --color-focus-halo: rgba(10, 102, 194, 0.15); /* 3px soft ring around a focused field */
+  /* ---- Accent: the kit accent the user picked (data-accent) ---- */
+  --color-accent: color-mix(in srgb, var(--accent) 70%, var(--text)); /* text: links, "today" */
+  --color-accent-hover: var(--text);
+  --color-accent-fill: var(--accent); /* fills: checked checkbox, switches */
+  --color-accent-fill-hover: color-mix(in srgb, var(--accent) 85%, var(--text));
+  --color-accent-contrast: var(--on-danger); /* the white check mark on an accent fill */
+  --color-accent-mark: var(--indicator); /* marks: tab line, current-row bar, status squares */
+  --color-focus-ring: var(--focus-ring);
+  --color-focus-halo: transparent; /* the kit draws no halo: a 1px ring only */
 
   /* ---- Status ---- */
-  --color-danger: #c0392b;
-  --color-danger-fill: #c0392b;
-  --color-danger-fill-hover: #a33024;
-  --color-danger-contrast: #ffffff;
-  --color-danger-subtle: #fdecea;
-  --color-danger-border: rgba(192, 57, 43, 0.4);
-  --color-success: #1e7a3c;
-  --color-warning: #7a5a00;
-  --color-notice-bg: #fbf6ee; /* inline notice box */
-  --color-notice-border: rgba(122, 90, 0, 0.22);
-  --color-notice-text: #6b5434;
+  --color-danger: color-mix(in srgb, var(--danger) 60%, var(--text));
+  --color-danger-fill: var(--danger);
+  --color-danger-fill-hover: color-mix(in srgb, var(--danger) 85%, var(--text));
+  --color-danger-contrast: var(--on-danger);
+  --color-danger-subtle: color-mix(in srgb, var(--danger) 10%, var(--background));
+  --color-danger-border: color-mix(in srgb, var(--danger) 40%, var(--background));
+  --color-success: var(--success-text);
+  --color-warning: var(--edited-text);
+  --color-notice-bg: var(--notice-bg); /* inline notice box */
+  --color-notice-border: var(--notice-border);
+  --color-notice-text: var(--notice-text);
+  --color-edited: var(--edited-accent); /* unsaved-changes square */
 
   /* ---- Misc ---- */
-  --color-highlight: #fce9a6; /* search match <mark> */
-  --color-selection: rgba(10, 102, 194, 0.18); /* text selection */
-  --color-scrollbar: rgba(0, 0, 0, 0.18);
-  --color-scrollbar-hover: rgba(0, 0, 0, 0.3);
-  --color-code-bg: #f7f7f5; /* code blocks and inline code: a soft fill, no border */
-  --color-link-underline: rgba(10, 102, 194, 0.4);
+  --color-highlight: var(--edited-bg); /* search match <mark> */
+  --color-selection: var(--selected); /* text selection */
+  --color-scrollbar: var(--control-border);
+  --color-scrollbar-hover: var(--faint);
+  --color-code-bg: var(--soft); /* code blocks and inline code */
+  --color-link-underline: color-mix(in srgb, var(--color-accent) 45%, transparent);
 
   /* ---- Code syntax (AA on --color-code-bg) ---- */
   --color-code-keyword: #8053a2;
@@ -157,7 +139,7 @@
   --sticky-yellow-border: #e6dcbc;
   --sticky-yellow-text: #3b3322;
   --sticky-yellow-text-muted: #675428;
-  --sticky-yellow-dot: #a28d57;
+  --sticky-yellow-dot: #9d8852;
   --sticky-peach-bg: #f6e9df;
   --sticky-peach-border: #e6d3c4;
   --sticky-peach-text: #40291d;
@@ -186,62 +168,60 @@
   --sticky-hover: rgba(42, 42, 42, 0.05);
   --sticky-active: rgba(42, 42, 42, 0.085);
 
-  /* ---- Shadows: only floating layers cast one; the 0.5px ring replaces a border ---- */
-  --shadow-sm: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08); /* raised seg. */
-  --shadow-md: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.12); /* popovers */
-  --shadow-lg: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.16); /* dialogs */
-  --shadow-drawer: -8px 0 24px rgba(0, 0, 0, 0.08); /* overlaying inspector */
+  /* ---- Shadows: only floating layers cast one, always with a --color-border-floating edge ---- */
+  --shadow-sm: none;
+  --shadow-md: 0 3px 10px var(--shadow); /* menus, popovers, toasts (kit .mnml-menu) */
+  --shadow-lg: 0 6px 24px var(--shadow); /* dialogs, Quick Capture (kit .mnml-dialog) */
+  --shadow-drawer: -6px 0 24px var(--shadow); /* overlaying inspector */
 
   /* ---- Typography ----
-   * The platform UI font first (SF Pro, Segoe UI Variable / Segoe UI), then the bundled
-   * Inter Variable for Linux, then the generic system font. */
+   * The kit's system font stack (SF Pro, Segoe UI, the desktop's sans-serif on Linux), then
+   * colour emoji. Mono (the kit's --mono) carries metadata: badges, counts, status lines. */
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI',
-    'Inter Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Noto Color Emoji';
-  --font-mono:
-    ui-monospace, 'SF Mono', 'SFMono-Regular', 'Cascadia Mono', Consolas, 'JetBrains Mono',
-    'DejaVu Sans Mono', 'Liberation Mono', monospace; /* code only */
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Noto Color Emoji';
+  --font-mono: var(--mono);
   --font-editor: var(--font-sans);
 
-  /* The scale, as rem (root stays 16px so the text-size setting keeps working). */
-  --font-size-xs: 0.6875rem; /* 11px  metadata, counts, group labels, kbd */
-  --font-size-sm: 0.75rem; /* 12px  secondary text, small controls, snippets */
-  --font-size-md: 0.8125rem; /* 13px  UI: rows, tabs, buttons, menus, fields */
-  --font-size-lg: 0.9375rem; /* 15px  editor body, Quick Capture input, editor H4 */
-  --font-size-heading: 1rem; /* 16px  inspector title */
-  --font-size-xl: 1.0625rem; /* 17px  editor H3 */
-  --font-size-2xl: 1.25rem; /* 20px  view title, editor H2 */
-  --font-size-3xl: 1.625rem; /* 26px  document title */
+  /* The scale, as rem (root stays 16px so the text-size setting keeps working). The UI sits
+   * on the kit's 12px; 10 and 11px carry labels and secondary text, as in Zap. */
+  --font-size-xs: 0.625rem; /* 10px  group labels, counts, kbd, status lines */
+  --font-size-sm: 0.6875rem; /* 11px  secondary text, small controls, menus, fields */
+  --font-size-md: 0.75rem; /* 12px  UI: rows, tabs, buttons */
+  --font-size-lg: 0.8125rem; /* 13px  editor body, Quick Capture input, dialog titles */
+  --font-size-heading: 0.875rem; /* 14px  inspector title, view title, editor H3 */
+  --font-size-xl: 0.9375rem; /* 15px  editor H2 */
+  --font-size-2xl: 1.0625rem; /* 17px  editor H1 */
+  --font-size-3xl: 1.375rem; /* 22px  document title */
   --font-size-body: var(--font-size-md);
   --font-size-editor: var(--font-size-lg);
 
   /* Roles: components pick a role, not a step of the scale. */
-  --font-size-ui: var(--font-size-md); /* 13  row titles, navigation, buttons */
-  --font-size-secondary: var(--font-size-sm); /* 12  snippets, descriptions */
-  --font-size-meta: var(--font-size-xs); /* 11  metadata, counts, group labels, hints */
-  --font-size-view-title: var(--font-size-2xl); /* 20  view header title (650) */
-  --font-weight-section: var(--font-weight-semibold); /* the one group label: 11px/600 */
+  --font-size-ui: var(--font-size-md); /* 12  row titles, navigation, buttons */
+  --font-size-secondary: var(--font-size-sm); /* 11  snippets, descriptions, menus */
+  --font-size-meta: var(--font-size-xs); /* 10  metadata, counts, group labels, hints */
+  --font-size-view-title: var(--font-size-heading); /* 14  view header title (600) */
+  --font-weight-section: var(--font-weight-regular); /* the group label: 10px uppercase */
 
   --line-height-tight: 1.2; /* single-line controls, labels, badges */
   --line-height-snug: 1.4; /* rows, menus */
-  --line-height-row: 1.25; /* multi-line rows: a 16px line for 13px titles */
+  --line-height-row: 1.3; /* multi-line rows */
   --line-height-normal: 1.5; /* UI paragraphs */
   --line-height-relaxed: 1.6; /* editor and long-form text */
-  --line-height-title: 1.4; /* 20px titles on a 28px line */
+  --line-height-title: 1.4; /* view titles */
   --line-height-heading: 1.3; /* editor headings */
   --line-height-code: 1.55; /* code blocks */
-  --font-size-code: 0.8667em; /* 13px in the 15px editor; relative to its text */
+  --font-size-code: 0.9231em; /* 12px in the 13px editor; relative to its text */
 
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --font-weight-title: 650; /* view title, editor H2 (variable fonts; others round to 700) */
-  --font-weight-bold: 700; /* document title */
+  --font-weight-title: 600; /* view title, editor headings */
+  --font-weight-bold: 600; /* document title */
 
-  --letter-spacing-tight: -0.01em; /* text >= 15px */
-  --letter-spacing-title: -0.02em; /* text >= 20px */
-  --letter-spacing-display: -0.02em; /* document title */
+  --letter-spacing-tight: 0;
+  --letter-spacing-title: 0;
+  --letter-spacing-display: -0.01em; /* document title */
 
   /* ---- Spacing (4px grid with 2/6/10px half steps; rem follows the text size) ---- */
   --space-0-5: 0.125rem; /* 2  */
@@ -259,38 +239,38 @@
 
   /* ---- The grid (docs/ui-design-system.md, "Grid") ----
    * Every content element starts on --content-inset from the canvas edge; leading glyphs
-   * (checkbox, "+", item icon, app mark) sit in one 16px --glyph-column, and text starts
-   * --glyph-gap after it, at --text-start. Right edges share --content-inset. Soft fills hang
-   * --row-fill-inset outside the content, so rows keep their text on the grid.
-   *   |<-16->|<-16 glyph->|<-10->|text…                               …|<-16->|
-   *          16                  42                                 right - 16
-   * (20 and 46 in windows >= 1100px.) */
-  --content-inset: var(--space-4); /* 16 */
-  --glyph-column: 1rem; /* 16 */
-  --glyph-gap: var(--space-2-5); /* 10 */
-  --text-start: calc(var(--content-inset) + var(--glyph-column) + var(--glyph-gap)); /* 42 */
-  --row-fill-inset: var(--space-1-5); /* 6: rows' hover/selection fill from the column edge */
-  --view-header-above: var(--space-5); /* 20 */
+   * (checkbox, "+", item icon, app mark) sit in one 14px --glyph-column, and text starts
+   * --glyph-gap after it, at --text-start. Right edges share --content-inset. Row fills span
+   * the full width of their list, as Zap's rows do.
+   *   |<-12->|<-14 glyph->|<-8->|text…                                …|<-12->|
+   *          12                 34                                  right - 12
+   * (16 and 38 in windows >= 1100px.) */
+  --content-inset: var(--space-3); /* 12 */
+  --glyph-column: 0.875rem; /* 14 */
+  --glyph-gap: var(--space-2); /* 8 */
+  --text-start: calc(var(--content-inset) + var(--glyph-column) + var(--glyph-gap)); /* 34 */
+  --row-fill-inset: 0px; /* rows' hover/selection fill runs to the column edge */
+  --view-header-above: var(--space-3); /* 12 */
   --view-header-below: var(--space-3); /* 12 */
 
-  /* ---- Radii: soft geometry ---- */
-  --radius-sm: 4px; /* checklist box, kbd, badge */
-  --radius-md: 6px; /* controls and rows: buttons, fields, tabs, row fills, menu items */
-  --radius-lg: 8px; /* menus, popovers, toasts, code blocks, segmented tracks */
-  --radius-xl: 10px; /* dialogs, Quick Capture, stickies, Settings groups */
-  --radius-full: 9999px; /* checkboxes (task), dots, swatches */
+  /* ---- Radii: square, as the kit ---- */
+  --radius-sm: 0; /* kbd, badge, checklist box */
+  --radius-md: 0; /* controls and rows */
+  --radius-lg: 0; /* menus, popovers, code blocks */
+  --radius-xl: 0; /* dialogs, Quick Capture, stickies */
+  --radius-full: 9999px; /* dots and swatches only */
 
-  /* ---- Borders & focus ---- */
+  /* ---- Borders & focus: the kit's 1px ring, drawn on the control's edge ---- */
   --border-width: 1px;
-  --accent-bar-width: 2px; /* the active document tab's underline */
-  --check-stroke: 1.5px; /* checkbox ring */
-  --focus-ring-width: 2px; /* keyboard focus: a 2px accent ring ... */
-  --focus-ring-offset: 1px; /* ... just outside the control, following its radius */
-  --focus-ring-inset: -2px; /* ... or inside it, for rows and tabs in scroll containers */
-  --focus-ring-width-mark: 2px; /* small marks (checkbox, swatch) */
-  --focus-ring-offset-mark: 2px;
-  --focus-halo-width: 3px; /* boxed fields: 1px accent border + this soft halo */
-  --opacity-disabled: 0.4;
+  --accent-bar-width: 2px; /* the active tab line, the current-row bar */
+  --check-stroke: 1px; /* checkbox ring */
+  --focus-ring-width: 1px;
+  --focus-ring-offset: -1px;
+  --focus-ring-inset: -1px;
+  --focus-ring-width-mark: 1px; /* small marks (checkbox, swatch) */
+  --focus-ring-offset-mark: 1px;
+  --focus-halo-width: 0px;
+  --opacity-disabled: 0.45;
 
   /* ---- Z-index layers ---- */
   --z-sticky-header: 10; /* list group labels */
@@ -299,101 +279,55 @@
   --z-dropdown: 500; /* menus, date picker (can open from a dialog) */
   --z-toast: 600;
 
-  /* ---- Motion: 120–160ms ease-out; zero under prefers-reduced-motion ---- */
-  --duration-fast: 120ms; /* hover, press, selection, checkbox fill */
-  --duration-normal: 140ms; /* menus, popovers, toasts */
-  --duration-slow: 160ms; /* inspector, dialogs, task completion */
+  /* ---- Motion: short and plain; zero under prefers-reduced-motion ---- */
+  --duration-fast: 80ms; /* hover, press, selection, checkbox fill */
+  --duration-normal: 120ms; /* menus, popovers, toasts */
+  --duration-slow: 150ms; /* inspector, dialogs, task completion */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* ease-out */
   --ease-enter: cubic-bezier(0, 0, 0.2, 1);
 
-  /* ---- Layout sizes ---- */
-  --topbar-height: 2.75rem; /* 44 */
+  /* ---- Layout sizes (the kit's: 36px title bar, 32px tabs, 26px controls, 24px status) ---- */
+  --topbar-height: 2.25rem; /* 36 */
   --list-width: 300px; /* notes list in split view */
-  --list-max-width: 55rem; /* 880: lists grow to this, then stay left on the grid */
-  --drawer-width: 360px; /* task inspector */
+  --drawer-width: 340px; /* task inspector */
   --editor-max-width: 42.5rem; /* 680: the centred reading column */
   --form-max-width: 40rem; /* 640: Settings */
   --titlebar-height: var(--topbar-height); /* bars inside small windows (palette, capture) */
   --tabbar-height: 2rem; /* 32: document tabs */
-  --statusbar-height: 2rem; /* 32: footer strips of the palette and Quick Capture */
+  --statusbar-height: 1.5rem; /* 24: footer strips of the palette and Quick Capture */
   --sticky-titlebar-height: 1.5rem; /* 24: sticky drag strip */
   --palette-width: 560px;
   --dialog-width: 360px; /* confirm and small forms */
-  --menu-width: 200px; /* menus (240px with shortcuts) */
+  --menu-width: 190px; /* menus (230px with shortcuts) */
   --toast-max-width: 420px;
-  --control-height-sm: 1.5rem; /* 24: compact controls (row actions, tab close, filters) */
-  --control-height-md: 1.75rem; /* 28: buttons, icon buttons, fields, segmented, pills */
-  --control-height-lg: 2rem; /* 32: Quick Capture save, large fields */
-  --button-padding-sm: var(--space-2); /* 8 */
-  --button-padding-md: var(--space-3); /* 12 */
+  --control-height-sm: 1.375rem; /* 22: compact controls (row actions, tab close, filters) */
+  --control-height-md: 1.625rem; /* 26: buttons, icon buttons, segmented */
+  --control-height-lg: 1.75rem; /* 28: fields, Quick Capture save */
+  --button-padding-sm: var(--space-1-5); /* 6 */
+  --button-padding-md: 0.5625rem; /* 9 */
   --icon-button-hang: calc((var(--control-height-md) - var(--icon-size-md)) / 2); /* 6 */
-  --menu-item-height: 1.625rem; /* 26 */
-  --row-min-height: 2rem; /* 32: single-line rows (tasks) */
-  --checkbox-size: 1rem; /* 16: task checkbox (round), editorial checklist (4px square) */
-  --checkbox-size-sm: 0.875rem; /* 14: subtasks, stickies */
+  --menu-item-height: 1.75rem; /* 28 */
+  --row-min-height: 1.75rem; /* 28: single-line rows (tasks) */
+  --checkbox-size: 0.875rem; /* 14: task checkbox, editorial checklist */
+  --checkbox-size-sm: 0.75rem; /* 12: subtasks, stickies */
   --icon-size-xs: 12px; /* chevrons, meta glyphs */
-  --icon-size-sm: 14px; /* small buttons, menus, inline glyphs */
-  --icon-size-md: 16px; /* the default: toolbars, rows, the top bar */
-  --icon-size-empty: 28px; /* empty states, drawn with --icon-stroke-thin */
-  --icon-stroke: 1.75; /* Lucide units on its 24-unit grid */
-  --icon-stroke-thin: 1.25; /* empty-state icons */
+  --icon-size-sm: 13px; /* small buttons, menus, inline glyphs */
+  --icon-size-md: 14px; /* the default: toolbars, rows, the top bar */
+  --icon-size-empty: 28px; /* empty states */
+  --icon-stroke: 2; /* Lucide's own stroke, as the kit draws it */
+  --icon-stroke-thin: 1.5; /* empty-state icons */
 }
 
-/* ---- Wide windows: a 20px inset (text column at 46px) ---- */
+/* ---- Wide windows: a 16px inset (text column at 38px) ---- */
 @media (min-width: 1100px) {
   :root {
-    --content-inset: var(--space-5);
-    --text-start: calc(var(--space-5) + var(--glyph-column) + var(--glyph-gap));
+    --content-inset: var(--space-4);
+    --text-start: calc(var(--space-4) + var(--glyph-column) + var(--glyph-gap));
   }
 }
 
-/* ---- Dark, chosen manually (generated: identical to the media block below) ---- */
+/* ---- Dark: Piw's own colours only (the kit switches everything else) ---- */
 :root[data-theme='dark'] {
-  color-scheme: dark;
-  --color-bg: #1c1c1e;
-  --color-bg-soft: #232325;
-  --color-bg-elevated: #2a2a2d;
-  --color-bg-raised: #3a3a3d;
-  --color-bg-control: rgba(255, 255, 255, 0.08);
-  --color-bg-hover: rgba(255, 255, 255, 0.06);
-  --color-bg-hover-strong: rgba(255, 255, 255, 0.11);
-  --color-bg-pressed: rgba(255, 255, 255, 0.14);
-  --color-bg-active: rgba(255, 255, 255, 0.09);
-  --color-bg-active-accent: rgba(90, 169, 255, 0.18);
-  --color-bg-overlay: rgba(0, 0, 0, 0.5);
-  --color-border: rgba(255, 255, 255, 0.09);
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-hover: rgba(255, 255, 255, 0.24);
-  --color-control-border: rgba(255, 255, 255, 0.14);
-  --color-text: #f5f5f7;
-  --color-text-muted: #a1a1a6;
-  --color-text-subtle: #949499;
-  --color-text-faint: #636366;
-  --color-text-disabled: #636366;
-  --color-placeholder: #727276;
-  --color-accent: #5aa9ff;
-  --color-accent-hover: #7ab9ff;
-  --color-accent-fill: #2e76cd;
-  --color-accent-fill-hover: #2a6ab9;
-  --color-accent-contrast: #ffffff;
-  --color-focus-halo: rgba(90, 169, 255, 0.25);
-  --color-danger: #ff6b5e;
-  --color-danger-fill: #c4463a;
-  --color-danger-fill-hover: #b13a2f;
-  --color-danger-contrast: #ffffff;
-  --color-danger-subtle: #3a2422;
-  --color-danger-border: rgba(255, 107, 94, 0.4);
-  --color-success: #6fd08c;
-  --color-warning: #e5c07b;
-  --color-notice-bg: #2e2a22;
-  --color-notice-border: rgba(229, 192, 123, 0.25);
-  --color-notice-text: #d9be8f;
-  --color-highlight: #5a4a1f;
-  --color-selection: rgba(90, 169, 255, 0.3);
-  --color-scrollbar: rgba(255, 255, 255, 0.2);
-  --color-scrollbar-hover: rgba(255, 255, 255, 0.32);
-  --color-code-bg: #26262a;
-  --color-link-underline: rgba(90, 169, 255, 0.45);
   --color-code-keyword: #c49be0;
   --color-code-string: #a0c58b;
   --color-code-number: #dfb47c;
@@ -439,123 +373,12 @@
   --sticky-lavender-dot: #b293d8;
   --sticky-hover: rgba(255, 255, 255, 0.06);
   --sticky-active: rgba(255, 255, 255, 0.1);
-  --shadow-sm: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md:
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.6),
-    0 12px 32px rgba(0, 0, 0, 0.45);
-  --shadow-lg:
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.6),
-    0 20px 56px rgba(0, 0, 0, 0.55);
-  --shadow-drawer: -8px 0 24px rgba(0, 0, 0, 0.35);
-}
-
-/* ---- Dark, following the system (generated: identical to the block above) ---- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-    --color-bg: #1c1c1e;
-    --color-bg-soft: #232325;
-    --color-bg-elevated: #2a2a2d;
-    --color-bg-raised: #3a3a3d;
-    --color-bg-control: rgba(255, 255, 255, 0.08);
-    --color-bg-hover: rgba(255, 255, 255, 0.06);
-    --color-bg-hover-strong: rgba(255, 255, 255, 0.11);
-    --color-bg-pressed: rgba(255, 255, 255, 0.14);
-    --color-bg-active: rgba(255, 255, 255, 0.09);
-    --color-bg-active-accent: rgba(90, 169, 255, 0.18);
-    --color-bg-overlay: rgba(0, 0, 0, 0.5);
-    --color-border: rgba(255, 255, 255, 0.09);
-    --color-border-subtle: rgba(255, 255, 255, 0.06);
-    --color-border-hover: rgba(255, 255, 255, 0.24);
-    --color-control-border: rgba(255, 255, 255, 0.14);
-    --color-text: #f5f5f7;
-    --color-text-muted: #a1a1a6;
-    --color-text-subtle: #949499;
-    --color-text-faint: #636366;
-    --color-text-disabled: #636366;
-    --color-placeholder: #727276;
-    --color-accent: #5aa9ff;
-    --color-accent-hover: #7ab9ff;
-    --color-accent-fill: #2e76cd;
-    --color-accent-fill-hover: #2a6ab9;
-    --color-accent-contrast: #ffffff;
-    --color-focus-halo: rgba(90, 169, 255, 0.25);
-    --color-danger: #ff6b5e;
-    --color-danger-fill: #c4463a;
-    --color-danger-fill-hover: #b13a2f;
-    --color-danger-contrast: #ffffff;
-    --color-danger-subtle: #3a2422;
-    --color-danger-border: rgba(255, 107, 94, 0.4);
-    --color-success: #6fd08c;
-    --color-warning: #e5c07b;
-    --color-notice-bg: #2e2a22;
-    --color-notice-border: rgba(229, 192, 123, 0.25);
-    --color-notice-text: #d9be8f;
-    --color-highlight: #5a4a1f;
-    --color-selection: rgba(90, 169, 255, 0.3);
-    --color-scrollbar: rgba(255, 255, 255, 0.2);
-    --color-scrollbar-hover: rgba(255, 255, 255, 0.32);
-    --color-code-bg: #26262a;
-    --color-link-underline: rgba(90, 169, 255, 0.45);
-    --color-code-keyword: #c49be0;
-    --color-code-string: #a0c58b;
-    --color-code-number: #dfb47c;
-    --color-code-function: #80bdcf;
-    --color-code-comment: #8b9180;
-    --color-code-identifier: #dac18e;
-    --color-code-parameter: #df95a9;
-    --color-code-operator: #b3b9c4;
-    --sticky-plain-bg: #2a2a27;
-    --sticky-plain-border: #3c3b36;
-    --sticky-plain-text: #e0ded9;
-    --sticky-plain-text-muted: #b6b1a5;
-    --sticky-plain-dot: #a9a28f;
-    --sticky-yellow-bg: #353022;
-    --sticky-yellow-border: #4d4530;
-    --sticky-yellow-text: #ece3c8;
-    --sticky-yellow-text-muted: #cdbb8e;
-    --sticky-yellow-dot: #baa064;
-    --sticky-peach-bg: #372c24;
-    --sticky-peach-border: #4f4034;
-    --sticky-peach-text: #f0e0d3;
-    --sticky-peach-text-muted: #cfae95;
-    --sticky-peach-dot: #d0906b;
-    --sticky-rose-bg: #372a2b;
-    --sticky-rose-border: #4f3c3e;
-    --sticky-rose-text: #f0dee0;
-    --sticky-rose-text-muted: #cfa9ad;
-    --sticky-rose-dot: #d48a95;
-    --sticky-mint-bg: #273028;
-    --sticky-mint-border: #384539;
-    --sticky-mint-text: #dce8da;
-    --sticky-mint-text-muted: #a9bca6;
-    --sticky-mint-dot: #8fb98f;
-    --sticky-sky-bg: #222f36;
-    --sticky-sky-border: #33454f;
-    --sticky-sky-text: #d9e7ee;
-    --sticky-sky-text-muted: #a2bccb;
-    --sticky-sky-dot: #5aa9ff;
-    --sticky-lavender-bg: #2d2935;
-    --sticky-lavender-border: #413a4b;
-    --sticky-lavender-text: #e4dff0;
-    --sticky-lavender-text-muted: #b5abc9;
-    --sticky-lavender-dot: #b293d8;
-    --sticky-hover: rgba(255, 255, 255, 0.06);
-    --sticky-active: rgba(255, 255, 255, 0.1);
-    --shadow-sm: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.6),
-      0 12px 32px rgba(0, 0, 0, 0.45);
-    --shadow-lg:
-      inset 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.6),
-      0 20px 56px rgba(0, 0, 0, 0.55);
-    --shadow-drawer: -8px 0 24px rgba(0, 0, 0, 0.35);
-  }
 }
 
 /* ---- Sticky window surface: set data-sticky-color on the sticky root.
- * Remaps semantic tokens so shared components (Checkbox, TextArea, IconButton)
- * render correctly on the coloured surface without per-colour code. ---- */
+ * Remaps the semantic tokens AND the kit's (an alias resolves on :root, so both are restated
+ * here), so shared components (Checkbox, TextArea, IconButton, kit buttons) render correctly
+ * on the coloured surface without per-colour code. ---- */
 [data-sticky-color='plain'] {
   --sticky-bg: var(--sticky-plain-bg);
   --sticky-border: var(--sticky-plain-border);
@@ -599,6 +422,21 @@
   --sticky-text-muted: var(--sticky-lavender-text-muted);
 }
 [data-sticky-color] {
+  /* The kit's tokens, for kit-classed controls on the sticky. */
+  --background: var(--sticky-bg);
+  --soft: var(--sticky-hover);
+  --hover: var(--sticky-hover);
+  --hover-strong: var(--sticky-active);
+  --selected: var(--sticky-active);
+  --border: var(--sticky-border);
+  --control-border: var(--sticky-text-muted);
+  --text: var(--sticky-text);
+  --secondary: var(--sticky-text-muted);
+  --muted: var(--sticky-text-muted);
+  --icon: var(--sticky-text-muted);
+  --placeholder: var(--sticky-text-muted);
+  --faint: var(--sticky-text-muted);
+  /* Piw's semantic tokens. */
   --color-bg: var(--sticky-bg);
   --color-bg-app: var(--sticky-bg);
   --color-bg-elevated: var(--sticky-bg);
@@ -630,11 +468,11 @@
 /* ---- User preference: more contrast (all themes) ---- */
 @media (prefers-contrast: more) {
   :root:not([data-contrast='normal']) {
-    --color-border: var(--color-text-subtle);
-    --color-border-subtle: var(--color-text-subtle);
-    --color-control-border: var(--color-text-subtle);
-    --color-text-subtle: var(--color-text-muted);
-    --color-placeholder: var(--color-text-muted);
+    --color-border: var(--secondary);
+    --color-border-subtle: var(--secondary);
+    --color-control-border: var(--secondary);
+    --color-text-subtle: var(--secondary);
+    --color-placeholder: var(--secondary);
   }
 }
 

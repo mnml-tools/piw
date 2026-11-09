@@ -1,149 +1,159 @@
-/* The top bar (docs/ui-design-system.md, "Top bar"): the app's only chrome.
+/* The workspace chrome (docs/ui-design-system.md, "Title bar and area tabs"), as Zap's.
  *
- * 44px on --color-bg-soft with one hairline under it (the box is 45px, so 28px controls sit on
- * whole pixels). One grid with the canvas: the 16px app mark sits in the glyph column on
- * --content-inset and the first area label starts on the text column (inset + 26px). Right
- * side: the space pill, the 220px search field, then New, Trash and Settings as 28px icon
- * buttons; the last glyph ends on the content inset (its padding hangs outside, as in the view
- * headers). Area tabs: 13px secondary text; the active one is text ink on a soft 6px pill.
- * Everything else in the bar is a drag region. */
+ * The title bar is the kit's `TitleBar` (`.mnml-titlebar`): 36px on --soft with a hairline
+ * under it, 12px padding; the kit's `Brand` (the 14px mark in --icon ink, "piw" 12/600, the
+ * note after a hairline, hidden below 800px); the space switcher centred on the window; on the
+ * right, as in Zap, the kit's palette toggle (appearance), a status square with "Local
+ * workspace", and the kit's window controls. The bar is the Tauri drag region: the kit makes
+ * its children ignore the pointer, so controls opt back in.
+ *
+ * Under it, the areas are the kit's tab strip (`.mnml-tabs`, Zap's open tabs): a 32px --soft
+ * strip with a hairline at its foot, square tabs split by hairlines, 13px icon + 11px label in
+ * muted ink; the current area on the canvas with a 1px accent line on top. Search (the kit's
+ * sidebar search field), New, Trash and Settings sit at the strip's end. */
 
 .bar {
-  display: flex;
-  flex: none;
-  align-items: center;
   min-width: 0;
-  height: calc(var(--topbar-height) + var(--border-width));
-  padding: 0 var(--content-inset);
-  border-bottom: var(--border-width) solid var(--color-border);
-  background: var(--color-bg-soft);
-  color: var(--color-text);
-  font-size: var(--font-size-ui);
-  line-height: var(--line-height-tight);
-  -webkit-user-select: none;
-  user-select: none;
+  gap: var(--space-3);
 }
 
-/* ---- Left: mark + areas ---- */
-.mark {
-  display: inline-flex;
+/* The drag region's children ignore the pointer (kit); every control takes it back. */
+.bar :is(button, a, input) {
+  pointer-events: auto;
+}
+
+.bar > :first-child {
   flex: none;
-  width: var(--glyph-column);
-  height: var(--glyph-column);
-  color: var(--color-text);
 }
 
-.mark > svg {
-  width: 100%;
-  height: 100%;
+.bar :global(.mnml-titlebar-end) {
+  min-width: 0;
 }
 
-/* Tabs are 6px apart, so two pills (hover next to current) never touch. The first tab's
-   10px padding hangs before the text column: its label lands on it. */
-.tabs {
+/* ---- The tab strip: the areas, then their actions ---- */
+.strip {
+  align-items: stretch;
+  overflow: visible;
+}
+
+.areas {
   display: flex;
   flex: 0 1 auto;
-  align-items: center;
-  gap: var(--space-1-5);
+  align-items: stretch;
   min-width: 0;
-  margin-inline-start: calc(var(--glyph-gap) - var(--space-2-5));
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.tab,
-.areaMenu,
-.switcher {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
+.areas::-webkit-scrollbar {
+  display: none;
+}
+
+.area button {
   gap: var(--space-1-5);
-  height: var(--control-height-md);
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: transparent;
-  font: inherit;
-  white-space: nowrap;
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+  color: inherit;
 }
 
-.tab {
-  padding: 0 var(--space-2-5);
-  color: var(--color-text-muted);
-}
-
-.tab:hover,
-.areaMenu:hover,
-.switcher:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-text);
-}
-
-.tab:active,
-.areaMenu:active,
-.switcher:active {
-  background: var(--color-bg-hover-strong);
-}
-
-.tab[aria-current='page'] {
-  background: var(--color-bg-active);
-  color: var(--color-text);
-}
-
-.areaMenu[data-state='open'],
-.switcher[data-state='open'] {
-  background: var(--color-bg-active);
+.area:not([data-active]):hover {
   color: var(--color-text);
 }
 
 .count {
   margin-inline-start: var(--space-1-5);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   color: var(--color-text-subtle);
   font-variant-numeric: tabular-nums;
 }
 
-.tab[aria-current='page'] .count {
-  color: var(--color-text-muted);
+.actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-0-5);
+  margin-inline-start: auto;
+  padding-inline: var(--space-2) calc(var(--content-inset) - var(--icon-button-hang));
 }
 
-/* Narrow: the areas fold into one menu button; its label keeps the text column. */
-.areaMenu {
-  flex: 0 1 auto;
-  min-width: 0;
-  margin-inline-start: calc(var(--glyph-gap) - var(--space-2));
-  color: var(--color-text);
+/* The kit's sidebar search field: a 1px box on the canvas colour, muted icon, the 11px label
+   in placeholder ink. A button: the palette is where you type. */
+.search {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  width: 13.75rem; /* 220 */
+  height: var(--control-height-sm);
+  margin-inline-end: var(--space-1);
+  padding: 0 var(--space-1-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-bg);
+  color: var(--color-placeholder);
+  font: inherit;
+  font-size: var(--font-size-secondary);
+  text-align: start;
+  transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
-.areaMenuName {
+.search:hover {
+  border-color: var(--color-border-hover);
+}
+
+.searchIcon {
+  flex: none;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--color-text-subtle);
+}
+
+.searchLabel {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* The empty middle of the bar: it drags the window. */
-.drag {
-  flex: 1 1 auto;
-  align-self: stretch;
-  min-width: var(--space-4);
+@media (forced-colors: active) {
+  .area[data-active] {
+    text-decoration: underline;
+  }
+
+  .search {
+    border: var(--border-width) solid ButtonText;
+  }
 }
 
-/* ---- Right: space pill, search, New / Trash / Settings ---- */
-.actions {
-  display: flex;
-  flex: 0 1 auto;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  margin-inline-end: calc(-1 * var(--icon-button-hang));
+/* ---- The space switcher, centred on the window like the connection in Zap's title bar ---- */
+.bar > .switcher {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .switcher {
+  display: inline-flex;
   flex: 0 1 auto;
+  align-items: center;
+  gap: var(--space-1-5);
   min-width: 0;
-  max-width: 12rem;
+  max-width: 14rem;
+  height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.switcher:hover,
+.switcher[data-state='open'] {
+  background: var(--color-bg-hover);
 }
 
 .switcherGlyph {
@@ -172,79 +182,4 @@
   width: var(--icon-size-xs);
   height: var(--icon-size-xs);
   color: var(--color-text-subtle);
-}
-
-/* The search field's look (TextInput's soft sibling), as a button that opens the palette. */
-.search {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--space-1-5);
-  width: 13.75rem; /* 220 */
-  height: var(--control-height-md);
-  padding: 0 var(--space-1-5) 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-control);
-  color: var(--color-text-muted);
-  font: inherit;
-  text-align: start;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-.search:hover {
-  background: var(--color-bg-hover-strong);
-}
-
-.search:active {
-  background: var(--color-bg-pressed);
-}
-
-.searchIcon {
-  flex: none;
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-  color: var(--color-text-subtle);
-}
-
-.searchLabel {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Plain text in the UI font, not a mono chip. */
-.searchKey {
-  flex: none;
-  font-size: var(--font-size-meta);
-  color: var(--color-text-subtle);
-  white-space: nowrap;
-}
-
-.icons {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: var(--space-0-5);
-}
-
-.bar[data-narrow] .switcher {
-  max-width: 8rem;
-}
-
-@media (forced-colors: active) {
-  .tab[aria-current='page'] {
-    outline: var(--border-width) solid Highlight;
-  }
-
-  .search {
-    border: var(--border-width) solid ButtonText;
-  }
-}
-
-/* macOS: the native traffic lights sit over the bar's leading edge (overlay title bar). */
-:global(:root[data-platform='macos'][data-window='main']) .bar {
-  padding-inline-start: calc(var(--content-inset) + 4.25rem);
 }

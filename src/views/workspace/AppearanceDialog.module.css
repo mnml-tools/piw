@@ -1,0 +1,16 @@
+/* The appearance dialog at the kit's size (`.mnml-appearance-dialog`, 330px), its accents
+   spread across the row as in Zap. */
+.dialog.dialog {
+  width: min(330px, calc(100vw - 2 * var(--space-5)));
+}
+
+.accents.accents > button {
+  flex: 1 0 2.75rem;
+}
+
+/* Done sits on the canvas, as the kit's dialog actions do (no soft footer bar). */
+.dialog.dialog :global(.mnml-dialog-actions) {
+  border-top: 0;
+  background: transparent;
+  padding: var(--space-3) var(--space-4);
+}

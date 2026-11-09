@@ -1,7 +1,9 @@
-/* The Notes list (docs/ui-design-system.md, "ListRow"): full-bleed 56px rows on the one grid.
-   Title 13/600, a one-line 12px secondary snippet, an 11px tertiary meta line (date · space).
-   Documents carry a doc glyph in the glyph column; every title sits on the text column. The
-   soft hover / selection fill is ListRow's ::before, never a background here. */
+/* The Notes list (docs/ui-design-system.md, "ListRow"): full-bleed three-line rows on the one
+   grid, square like every kit row. Title 12/600, a one-line 11px secondary snippet, a 10px
+   tertiary meta line (date · space · tags). Documents carry a doc glyph in the glyph column;
+   every title sits on the text column. The hover / selection fill is ListRow's ::before, never a
+   background here, and ListRow also draws Zap's current-row bar on the note open in the editor
+   (split view, aria-current). */
 .scroller {
   display: flex;
   flex: 1 1 0;
@@ -49,7 +51,7 @@
   }
 }
 
-/* ListRow's title weight (13/600) on one line. */
+/* ListRow's title weight (12/600) on one line. */
 .titleText {
   min-width: 0;
   overflow: hidden;

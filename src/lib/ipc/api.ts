@@ -5,6 +5,7 @@
 import { call } from './client';
 import type { AppStatus } from './bindings/AppStatus';
 import type { CaptureDraft } from './bindings/CaptureDraft';
+import type { CaptureMode } from './bindings/CaptureMode';
 import type { ColorName } from './bindings/ColorName';
 import type { CreateDocument } from './bindings/CreateDocument';
 import type { CreateNote } from './bindings/CreateNote';
@@ -48,6 +49,7 @@ export const api = {
   // App and platform
   appStatus: () => call<AppStatus>('app_status'),
   platformInfo: () => call<PlatformInfo>('platform_info'),
+  showCapture: (mode: CaptureMode) => call<void>('show_capture', { mode }),
   hideCapture: () => call<void>('hide_capture'),
   /** Opens an http(s)/mailto link in the user's browser or mail client (validated in Rust). */
   openLink: (url: string) => call<void>('open_link', { url }),

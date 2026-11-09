@@ -29,6 +29,7 @@ macro_rules! app_commands {
     ($($extra:path),* $(,)?) => {
         tauri::generate_handler![
             $crate::commands::platform::platform_info,
+            $crate::commands::platform::show_capture,
             $crate::commands::platform::hide_capture,
             $crate::commands::platform::open_in_workspace,
             $crate::commands::platform::open_link,

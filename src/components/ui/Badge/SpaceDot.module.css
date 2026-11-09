@@ -1,9 +1,8 @@
 .dot {
   display: inline-block;
   flex-shrink: 0;
-  width: var(--space-2); /* 8px: a small round dot, the only place space colours appear */
-  height: var(--space-2);
-  border-radius: var(--radius-full);
+  width: var(--space-1-5); /* 6px: a small square, like the kit's status dot; the only place */
+  height: var(--space-1-5); /* space colours appear */
   background: var(--sticky-plain-dot);
 }
 

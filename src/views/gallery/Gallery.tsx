@@ -394,7 +394,7 @@ function StatesSection() {
             <ListRow
               title="Hovered row"
 
-              snippet="A soft rounded fill, inset 6px; content stays on the grid."
+              snippet="The square hover fill, full width; content stays on the grid."
               data-force="hover"
             />
           </li>

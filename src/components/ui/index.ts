@@ -3,6 +3,7 @@
  * Import from '@/components/ui'.
  */
 
+export { AccentPicker } from './AccentPicker/AccentPicker';
 export { Badge } from './Badge/Badge';
 export { STICKY_COLORS, type StickyColor } from './Badge/colors';
 export { SpaceDot } from './Badge/SpaceDot';

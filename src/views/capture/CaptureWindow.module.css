@@ -1,47 +1,47 @@
-/* Quick Capture (docs/ui-design-system.md §9; brief v6 §5): the whole window is the popup, an
- * elevated surface with no bars, strips or boxed fields. The window is opaque and square, so on
- * Linux a 1px --color-border hairline is its edge; Windows 11 and macOS draw a native shadow
- * and need none.
+/* Quick Capture (docs/ui-design-system.md §9): the whole window is the popup, drawn as a kit
+ * dialog (@mnml-tools/ui `.mnml-dialog`): square, the canvas colour, a 1px --color-border-floating
+ * edge drawn inside the window on every platform (the native shadow, where there is one, sits
+ * outside it).
  *
- *   header  the top row, 12px from the top and 16px in: Note/Task as the contained (soft pill)
- *           Segmented · drag space · space pill · date pill (task) · pin. All 24px.
- *   body    a 15px borderless input (500 for a task title), then the 13px secondary
- *           description filling the space. The caret is the focus indicator.
- *   error   a soft notice line with Retry; the text is kept.
- *   footer  a quiet line, no strip: 11px tertiary hints on the left, the accent Save pill (sm)
- *           on the right, 12px from the bottom.
+ *   header  the kit's dialog heading: a 36px --soft bar with one hairline under it, 12px side
+ *           inset. Note/Task as the contained Segmented · drag space · space pill · date (task) ·
+ *           pin. Controls are 22px; the bar between them is the drag region.
+ *   body    on the canvas, 12px in: a 13px borderless input (500 for a task title), then the
+ *           12px secondary description filling the space. The caret is the focus indicator.
+ *   error   the kit's notice line with Retry, 12px in; the text is kept.
+ *   footer  a --soft bar with one hairline above it, like the kit's status bar: the hints in
+ *           10px mono secondary ink with --faint separators on the left, the primary Save
+ *           button (sm) on the right.
  *
- * One grid: the segmented track, the text and the hints start on the 16px inset; the Save pill
- * and the pin's glyph (its padding hangs outside, as every borderless icon button) end on it. */
+ * One grid: the segmented track, the text and the hints start on the 12px inset; the Save
+ * button and the pin's glyph (its padding hangs outside, as every borderless icon button) end
+ * on it. */
 
 .root {
-  /* Vertical rhythm: 12px above the top row and below the footer, 10px from the row to the
-     text, 8px from the text to the footer. */
-  --capture-edge: var(--space-3);
+  --capture-inset: var(--space-3);
   --capture-pin-hang: calc((var(--control-height-sm) - var(--icon-size-sm)) / 2);
 
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding: var(--capture-edge) var(--content-inset);
+  border: var(--border-width) solid var(--color-border-floating);
   background: var(--color-bg-elevated);
   color: var(--color-text);
+  font-size: var(--font-size-ui);
   overflow: hidden;
 }
 
-/* Linux (and any platform without a native window shadow): the hairline edge, drawn inside. */
-:root:not([data-platform='macos'], [data-platform='windows']) .root {
-  box-shadow: inset 0 0 0 var(--border-width) var(--color-border);
-}
-
-/* ---- Top row (the drag area between the controls) ---- */
+/* ---- Header: the kit's dialog heading (the drag area between the controls) ---- */
 
 .header {
   display: flex;
   flex: none;
   align-items: center;
   gap: var(--space-1-5);
-  height: var(--control-height-sm);
+  height: var(--titlebar-height);
+  padding: 0 var(--capture-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-soft);
   user-select: none;
 }
 
@@ -73,7 +73,7 @@
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  padding: var(--space-2-5) 0 var(--space-2);
+  padding: var(--space-2-5) var(--capture-inset) var(--space-2);
 }
 
 .body .field {
@@ -84,7 +84,7 @@
   border-radius: 0;
   background: transparent;
   color: var(--color-text);
-  caret-color: var(--color-accent);
+  caret-color: var(--color-accent-mark);
   letter-spacing: var(--letter-spacing-tight);
 }
 
@@ -129,7 +129,7 @@
   color: var(--color-text-muted);
 }
 
-/* ---- Error: a soft notice line above the footer; the text above is kept ---- */
+/* ---- Error: the kit's notice line above the footer; the text above is kept ---- */
 
 .error {
   display: flex;
@@ -137,8 +137,9 @@
   align-items: center;
   gap: var(--space-2);
   min-height: var(--control-height-md);
-  margin-bottom: var(--space-2);
+  margin: 0 var(--capture-inset) var(--space-2);
   padding: var(--space-0-5) var(--space-0-5) var(--space-0-5) var(--space-2);
+  border: var(--border-width) solid var(--color-notice-border);
   border-radius: var(--radius-md);
   background: var(--color-notice-bg);
   color: var(--color-notice-text);
@@ -172,17 +173,20 @@
   color: var(--color-notice-text);
 }
 
-/* ---- Footer: a quiet line, no strip ---- */
+/* ---- Footer: a status bar holding the hints and Save ---- */
 
 .footer {
   display: flex;
   flex: none;
   align-items: center;
   gap: var(--space-3);
-  height: var(--control-height-sm);
+  padding: var(--space-1-5) var(--capture-inset);
+  border-top: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-soft);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   line-height: var(--line-height-tight);
-  color: var(--color-text-subtle);
   user-select: none;
 }
 
@@ -202,17 +206,19 @@
   gap: var(--space-1);
 }
 
-/* The keys as plain text (not chips): tertiary like the words, a step heavier. */
+/* The keys as plain text (not chips), in the status bar's own ink. */
 .hint .key {
   min-width: 0;
   height: auto;
   padding: 0;
+  border: 0;
   background: none;
   color: inherit;
   font-size: inherit;
   line-height: inherit;
 }
 
+/* The kit's `.mnml-separator`. */
 .separator {
   margin: 0 var(--space-1-5);
   color: var(--color-text-faint);
@@ -240,6 +246,11 @@
   text-underline-offset: 0.15em;
 }
 
+/* The Save button keeps the sans label of every kit button. */
+.footer > button {
+  font-family: var(--font-sans);
+}
+
 .saving {
   opacity: 0;
   animation: appear 0s linear 150ms forwards;
@@ -253,7 +264,7 @@
 
 @media (forced-colors: active) {
   .root {
-    border: var(--border-width) solid CanvasText;
+    border-color: CanvasText;
   }
 
   .body .field:focus-visible {

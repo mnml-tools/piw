@@ -1,12 +1,14 @@
 /* Content-tab editor (Tiptap / ProseMirror), docs/ui-design-system.md ("Grid", brief v6
    "Editor"). Global because ProseMirror renders plain DOM; every rule is scoped under
    .document-editor and uses semantic tokens only. Vertical rhythm is in em so it follows the
-   editor's text size. Bear/Minimal-like: the centred 680px column (PageColumn), 15px / 1.6 body,
-   headings 20/650, 17/600, 15/600 with 1.2em above; paragraphs 0.6em apart; checklists with
-   rounded-square boxes and task lines with the round task box, both hanging into the column's
-   glyph column; code on a soft fill (mono only here); quotes with a 2px rule. */
+   editor's text size. Square, as the kit: the centred 680px column (PageColumn), 13px / 1.6 body
+   (--font-size-editor), headings 17/15/14 at 600 with 1.2em above; paragraphs 0.6em apart;
+   checklists and task lines with the kit's square 14px box (as Checkbox and the Tasks rows),
+   hanging into the column's glyph column; code on the soft fill in mono, blocks boxed by a 1px
+   hairline; quotes with a 2px rule; dividers a 1px hairline. */
 
 .document-editor {
+  --check-weight: calc(var(--check-stroke) * 1.5);
   font-family: var(--font-editor);
   font-size: var(--font-size-editor);
   font-weight: var(--font-weight-regular);
@@ -52,7 +54,7 @@
   text-decoration-color: var(--color-text-subtle);
 }
 
-/* ---- Headings: 20/650, 17/600, 15/600; 1.2em above, 0.4em below ---- */
+/* ---- Headings: 17, 15, 14 at 600; 1.2em above, 0.4em below ---- */
 
 .document-editor h1,
 .document-editor h2,
@@ -75,7 +77,7 @@
 }
 
 .document-editor h3 {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-heading);
   letter-spacing: var(--letter-spacing-tight);
 }
 
@@ -160,7 +162,7 @@
   border-top-color: var(--color-focus-ring);
 }
 
-/* ---- Code: mono 13px / 1.55 on the soft code fill, no border (the only mono in Piw) ---- */
+/* ---- Code: mono 12px / 1.55 on the soft code fill; blocks square with a 1px hairline ---- */
 
 .document-editor code {
   padding: 0.1em 0.3em;
@@ -174,8 +176,8 @@
 
 .document-editor pre {
   margin: 0.4em 0 0.8em;
-  padding: var(--space-3) var(--space-4);
-  border: 0;
+  padding: var(--space-2-5) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-code-bg);
   color: var(--color-text);
@@ -271,14 +273,14 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* ---- Editorial checklist (content, never tasks): a 14px rounded square (0.9333em of the
-   15px text, radius 4) with the 1.5px tertiary ring, the accent fill and a white check when
-   checked. One grid: the box hangs into the column's glyph column, centred in it and on the
-   first line, and the text stays on the column's text start. Nested lists keep their indent. */
+/* ---- Editorial checklist (content, never tasks): the kit's square 14px box (Checkbox) with
+   the 1px tertiary ring, the accent fill and a white check when checked. One grid: the box
+   hangs into the column's glyph column, centred in it and on the first line, and the text stays
+   on the column's text start. Nested lists keep their indent. */
 
 .document-editor ul[data-type='checklist'],
 .document-editor ul[data-type='taskList'] {
-  --box: 0.9333em;
+  --box: var(--checkbox-size);
   padding-left: 0;
   list-style: none;
 }
@@ -354,7 +356,8 @@
   background: var(--color-accent-fill-hover);
 }
 
-/* The check: two borders of a rotated box, in the colour drawn on the accent. */
+/* The check: two borders of a rotated box, in the colour drawn on the accent, about as heavy as
+   Checkbox's drawn check (the ring itself stays 1px). */
 .document-editor ul[data-type='checklist'] input[type='checkbox']:checked::after,
 .document-editor ul[data-type='taskList'] input[type='checkbox']:checked::after {
   content: '';
@@ -364,7 +367,7 @@
   width: 28%;
   height: 56%;
   border: solid var(--color-accent-contrast);
-  border-width: 0 var(--check-stroke) var(--check-stroke) 0;
+  border-width: 0 var(--check-weight) var(--check-weight) 0;
   transform: rotate(45deg);
 }
 
@@ -385,10 +388,11 @@
   color: inherit;
 }
 
-/* ---- Real task reference: the round 16px task box of the Tasks area (1.0667em) + the title
+/* ---- Real task reference: the square 14px task box of the Tasks area (Checkbox) + the title
    in text ink; done: the accent fill and white check, the title secondary and struck. Hover
-   and selection: the rows' soft rounded fill. A line that starts with one hangs its box into
-   the glyph column, centred in it, with the title on the text column (one grid). ---- */
+   and selection: the rows' square fills (hover, then the selection tint). A line that starts
+   with one hangs its box into the glyph column, centred in it, with the title on the text
+   column (one grid). ---- */
 
 /* ProseMirror may put a separator <img> before an inline node at the start of a line. */
 .document-editor
@@ -404,7 +408,7 @@
 }
 
 .document-editor .task-ref {
-  --box: 1.0667em; /* 16px in the 15px editor */
+  --box: var(--checkbox-size);
   display: inline-flex;
   align-items: baseline;
   gap: 0.4em;
@@ -433,7 +437,7 @@
   height: var(--box);
   padding: 0;
   border: var(--check-stroke) solid var(--color-border-strong);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   background: var(--color-bg);
   cursor: default;
   transition:
@@ -458,12 +462,12 @@
 .document-editor .task-ref[data-status='done'] .task-ref__check::after {
   content: '';
   position: absolute;
-  top: 18%;
-  left: 34%;
-  width: 22%;
-  height: 42%;
+  top: 8%;
+  left: 30%;
+  width: 28%;
+  height: 56%;
   border: solid var(--color-accent-contrast);
-  border-width: 0 var(--check-stroke) var(--check-stroke) 0;
+  border-width: 0 var(--check-weight) var(--check-weight) 0;
   transform: rotate(45deg);
 }
 

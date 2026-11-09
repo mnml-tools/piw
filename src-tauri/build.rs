@@ -6,6 +6,7 @@
 
 const COMMANDS: &[&str] = &[
     "platform_info",
+    "show_capture",
     "hide_capture",
     "open_in_workspace",
     "open_link",

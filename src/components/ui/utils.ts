@@ -6,13 +6,13 @@ export function cx(...names: Array<string | false | null | undefined>): string {
 }
 
 /**
- * Default props for Lucide icons used inside components: 16px, decorative. The stroke follows
- * the icon's 24-unit grid at 1.75 (base.css sets it for every `svg.lucide`), so icons drawn with
- * and without these props share one stroke width.
+ * Default props for Lucide icons used inside components: 14px, decorative, as the kit
+ * (@mnml-tools/ui) draws them. The stroke is Lucide's own 2 (base.css sets it for every
+ * `svg.lucide`), so icons drawn with and without these props share one stroke width.
  */
 export const iconProps = {
-  size: 16,
-  strokeWidth: 1.75,
+  size: 14,
+  strokeWidth: 2,
   'aria-hidden': true,
 } as const;
 

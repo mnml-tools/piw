@@ -7,7 +7,7 @@
 
 .label {
   font-size: var(--font-size-secondary);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height-tight);
   color: var(--color-text-muted);
 }
@@ -17,17 +17,17 @@
   color: var(--color-danger);
 }
 
-/* TextInput (docs/ui-design-system.md, "TextInput").
- * default  boxed: rounded 6px, a 1px --color-control-border on the surface, padding 0 8px;
- *          hover: --color-border-hover. Focus (pointer or keyboard): a 1px accent border plus a
- *          3px soft accent halo, no outline.
+/* TextInput (docs/ui-design-system.md, "TextInput"), after the kit's `.mnml-fields input`.
+ * default  boxed: square, a 1px --color-control-border on the canvas, padding 0 7px;
+ *          hover: --color-border-hover. Focus (pointer or keyboard): the border takes the focus
+ *          colour (the kit's 1px ring), no outline.
  * ghost    caret-only: no box, no fill, no ring (inline rename, the Add task row); the caret
  *          and the selection are the focus indicator.
- * sm 24px / 12px · md 28px / 13px · lg 32px / 13px. Disabled: --opacity-disabled. */
+ * sm 22px / 11px · md 26px / 12px · lg 28px / 12px. Disabled: --opacity-disabled. */
 .input {
   width: 100%;
   min-width: 0;
-  padding: 0 var(--space-2);
+  padding: 0 7px;
   color: var(--color-text);
   background: var(--color-bg);
   border: var(--border-width) solid var(--color-control-border);

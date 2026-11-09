@@ -27,8 +27,9 @@ export interface ConfirmDialogProps {
 }
 
 /**
- * Confirmation for irreversible or multi-item actions (`role="alertdialog"`). Initial focus is on
- * Cancel; Esc cancels; focus returns to the invoker.
+ * Confirmation for irreversible or multi-item actions (`role="alertdialog"`), drawn as the kit's
+ * `ConfirmDialog` (a 360px `.mnml-message-dialog`). Initial focus is on Cancel; Esc cancels;
+ * focus returns to the invoker.
  */
 export function ConfirmDialog({
   open,
@@ -71,12 +72,12 @@ export function ConfirmDialog({
       <AlertPrimitive.Portal>
         <AlertPrimitive.Overlay className={styles.overlay} />
         <AlertPrimitive.Content
-          className={cx(styles.dialog, className)}
+          className={cx('mnml-dialog', 'mnml-message-dialog', styles.dialog, className)}
           onCloseAutoFocus={(event) => {
             if (restoreFocus()) event.preventDefault();
           }}
         >
-          <div className={styles.header}>
+          <div className={cx('mnml-dialog-heading', styles.header)}>
             <AlertPrimitive.Title className={styles.title}>{title}</AlertPrimitive.Title>
           </div>
           {description && (
@@ -85,7 +86,7 @@ export function ConfirmDialog({
             </AlertPrimitive.Description>
           )}
           {children != null && <div className={styles.body}>{children}</div>}
-          <div className={styles.confirmFooter}>
+          <div className={cx('mnml-dialog-actions', styles.confirmFooter)}>
             <AlertPrimitive.Cancel asChild>
               <Button disabled={busy}>{cancelLabel}</Button>
             </AlertPrimitive.Cancel>

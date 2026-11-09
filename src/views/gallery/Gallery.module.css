@@ -102,7 +102,10 @@
 }
 
 /* ---- Forced states (gallery only) ----
- * Mirrors of the components' own hover/focus rules, with the same tokens. */
+ * Mirrors of the components' own hover/focus rules, with the same tokens. The buttons follow
+ * the kit's `.mnml-button`: the default (secondary) button and the ghost hover to --hover, the
+ * primary hovers to --hover-strong; icon buttons take --hover; focus is the 1px ring on the
+ * control's edge. Rows take ListRow's square ::before fill. */
 .states {
   display: grid;
   grid-template-columns: 6.5rem repeat(6, minmax(0, 1fr));
@@ -128,7 +131,6 @@
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
   align-items: start;
-  max-width: var(--list-max-width);
   margin-top: var(--space-3);
 }
 
@@ -143,13 +145,14 @@
   border-color: var(--color-border-hover);
 }
 
-/* Soft-filled controls step from --color-bg-control to the stronger fill. */
+/* The default (secondary) button: the kit's `.mnml-button:hover`. */
 .states [data-force='hover-layer'] {
-  background-color: var(--color-bg-hover-strong);
+  background-color: var(--color-bg-hover);
 }
 
+/* The primary button: the kit's `[data-variant='primary']:hover`. */
 .states [data-force='hover-accent'] {
-  background-color: var(--color-accent-fill-hover);
+  background-color: var(--color-bg-hover-strong);
 }
 
 .states [data-force='focus'] {
@@ -221,6 +224,42 @@
   top: auto;
   transform: none;
   animation: none;
+  /* The kit's `.mnml-dialog.mnml-message-dialog` surface, which the real dialog gets from its
+     kit classes. */
+  width: min(var(--dialog-width), 100%);
+  border: var(--border-width) solid var(--color-border-floating);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+}
+
+/* `.mnml-dialog-heading`: the --soft bar with a hairline under it, a 12/500 title. */
+.surfaceFrame .staticDialog > :first-child {
+  display: flex;
+  align-items: center;
+  padding: 9px var(--space-3);
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-soft);
+}
+
+.surfaceFrame .staticDialog > :first-child > :is(h2, h3) {
+  font-size: var(--font-size-ui);
+  font-weight: var(--font-weight-medium);
+}
+
+/* `.mnml-message-dialog p`: the message, 12px secondary. */
+.surfaceFrame .staticDialog > p {
+  padding: var(--space-1) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-ui);
+}
+
+/* `.mnml-dialog-actions`: right-aligned, 7px apart, 12px 16px. */
+.surfaceFrame .staticDialog > :last-child {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: var(--space-3) var(--space-4);
 }
 
 .toastStack {
@@ -324,11 +363,12 @@
   background: var(--color-bg);
 }
 
+/* Rows are full-bleed: their square fills reach the list's edges. */
 .drawerList {
   flex: 1 1 auto;
   min-width: 0;
   overflow-y: auto;
-  padding: var(--space-2);
+  padding: 0;
 }
 
 .stickies {

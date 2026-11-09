@@ -115,6 +115,7 @@ export const DEFAULT_TASKS_TAB_SETTINGS: TasksTabSettings = { show: 'open', sort
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
+  accent: 'blue',
   textSize: 'default',
   closeToTray: true,
   launchAtLogin: false,

@@ -1,13 +1,15 @@
 /*
- * TaskRow (docs/ui-design-system.md, "ListRow", "Checkbox"): a 32px row on the one grid,
- * separated from its neighbours by space only. The hover and selection fills are ListRow's
- * (soft, rounded, inset 6px from the column edges). The round 16px checkbox sits in the 16px
- * glyph column on --content-inset, centred on the first text line; the 13/400 title starts on
- * --text-start, then the 11px tertiary metadata right after it, wrapping under the title when
- * the line is too short.
+ * TaskRow (docs/ui-design-system.md, "ListRow", "Checkbox"): a 28px row on the one grid, in the
+ * kit's look (@mnml-tools/ui, after Zap's sidebar and table rows): square fills, no hairlines
+ * between rows. Hover takes ListRow's --color-bg-hover fill, full width; the current row (the
+ * task open in the inspector) is the kit's active row: the --color-bg-active accent tint plus a
+ * 2px --color-accent-mark bar on its left edge, text in ink. The square 14px checkbox sits in
+ * the 14px glyph column on --content-inset, centred on the first text line; the 12/400 title
+ * starts on --text-start, then the metadata (10px mono, tertiary, like Zap's status line and
+ * badges) right after it, wrapping under the title when the line is too short.
  *
  * Every part lines up on the first line, a fixed 16px (--line, never derived from the row
- * height): 8px + 16px + 8px is the 32px row, and a wrapped row grows by 16px lines.
+ * height): 6px + 16px + 6px is the 28px row, and a wrapped row grows by 16px lines.
  * Selectors on the row repeat [data-task-id] so they win over the ListRow base styles.
  */
 .row[data-task-id] {
@@ -19,14 +21,14 @@
   cursor: default;
 }
 
-/* The glyph column: the 16px box centred in it and on the 16px title line. Its ListRow slot
+/* The glyph column: the 14px box centred in it and on the 16px title line. Its ListRow slot
    takes the line's height, not a height of its own. */
 .row[data-task-id] > :has(> .check) {
   width: var(--glyph-column);
   min-height: 0;
 }
 
-/* Optically centred on the title: 13px text sits low in its 16px line (its x-height centre is
+/* Optically centred on the title: 12px text sits low in its 16px line (its x-height centre is
    ~1px under the line's centre), so the box drops 1px to sit between cap and x-height. */
 .check {
   position: relative;
@@ -121,8 +123,8 @@
   text-decoration-thickness: var(--border-width);
 }
 
-/* ---- Metadata: 11px tertiary items without fills or chips, 12px icons, 10px apart ---- */
-/* Both lines are 16px boxes; the 11px text drops by the difference of the two fonts' baselines
+/* ---- Metadata: 10px mono tertiary items without fills or chips, 12px icons, 10px apart ---- */
+/* Both lines are 16px boxes; the 10px text drops by the difference of the two fonts' baselines
    in that box (about 0.36 of the size difference), so it shares the title's baseline without
    growing the line as baseline alignment would. */
 .meta {
@@ -133,6 +135,7 @@
   min-width: 0;
   max-width: 100%;
   color: var(--color-text-subtle);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   font-weight: var(--font-weight-regular);
   line-height: var(--line);
@@ -140,7 +143,7 @@
   white-space: normal;
 }
 
-/* On either selection fill, tertiary metadata turns secondary (AA). */
+/* On the selection tint, tertiary metadata turns secondary (AA). */
 .row[data-task-id][data-selected] .meta {
   color: var(--color-text-muted);
 }
@@ -190,7 +193,6 @@
   z-index: 1;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
   background: none;
   color: inherit;
   font: inherit;

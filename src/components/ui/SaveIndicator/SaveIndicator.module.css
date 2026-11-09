@@ -1,10 +1,14 @@
-/* SaveIndicator (docs/ui-design-system.md, "SaveIndicator"): 11px tertiary status text with no
- * box ("Saving…", "✓ Saved"), fading in over 140ms; errors in danger with an icon and a Retry
- * text button (rounded 4px, the danger tint on hover). */
+/* SaveIndicator (docs/ui-design-system.md, "SaveIndicator"), as Zap's status line: 10px mono in
+ * tertiary ink, no box, fading in over 120ms. "Saving…" leads with the kit's DirtyIndicator
+ * (`.mnml-dirty-dot`, a 5px square in --color-edited), "Saved" with the kit's status square
+ * (`.mnml-status-dot`, --color-accent-mark). Errors in danger ink with a 12px icon and a Retry
+ * text button (square, the danger tint on hover). This module keeps only the layout and the
+ * error state; the squares are the kit's. */
 .indicator {
   display: inline-flex;
   align-items: center;
   min-height: var(--control-height-sm);
+  font-family: var(--font-mono);
   font-size: var(--font-size-meta);
   line-height: var(--line-height-tight);
   white-space: nowrap;
@@ -13,9 +17,13 @@
 .status {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-1-5);
   color: var(--color-text-subtle);
   animation: appear var(--duration-normal) var(--ease-enter);
+}
+
+.dot {
+  flex: none;
 }
 
 .icon {
@@ -36,15 +44,14 @@
   min-height: 1.5rem; /* >= 24px target */
   padding: 0 var(--space-1);
   margin: 0 calc(-1 * var(--space-1));
+  border: 0;
   border-radius: var(--radius-sm);
+  background: transparent;
   color: inherit;
   font: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-}
-
-.retry {
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -55,5 +62,11 @@
 @keyframes appear {
   from {
     opacity: 0;
+  }
+}
+
+@media (forced-colors: active) {
+  .dot {
+    background: CanvasText;
   }
 }

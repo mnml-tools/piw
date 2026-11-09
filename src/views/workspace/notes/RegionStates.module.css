@@ -1,7 +1,7 @@
-/* Loading and error states of a list or editor region. Loading: one quiet 12px tertiary line
-   on the text column after 300ms (no skeletons). Error: laid out like EmptyState, centred in
-   the region: a 13/600 title, a 12px secondary line, then Try again (soft) and Copy details
-   (ghost), both 28px, 16px below. */
+/* Loading and error states of a list or editor region. Loading: one quiet 11px tertiary line
+   on the text column after 300ms (no skeletons). Error: laid out like the kit's EmptyState,
+   centred in the region: a 12/600 title, an 11px secondary line, then Try again and Copy
+   details (kit buttons), 16px below. */
 .loading {
   margin: 0;
   padding: var(--space-2) var(--content-inset) 0 var(--text-start);

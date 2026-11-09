@@ -1,8 +1,7 @@
-/* EmptyState (docs/ui-design-system.md, "EmptyState").
- * Centred on both axes of the region it describes: it grows to fill a flex column and centres
- * its content there. A 28px thin-stroke icon in tertiary ink, 12px above a 13/600 title in
- * text ink, a 12px secondary line (max 40ch) 4px below, and at most one soft (secondary)
- * Button 16px below. */
+/* EmptyState (docs/ui-design-system.md, "EmptyState"). The look is the kit's
+ * `.mnml-empty-state`: centred, a 28px icon in faint ink, a 13/500 title in secondary ink, an
+ * 11px muted line. This module makes it fill the flex column it describes, keeps the title's
+ * style at any heading level, and spaces the optional action 16px below. */
 .empty {
   display: flex;
   flex: 1 1 auto;
@@ -12,9 +11,7 @@
   align-self: stretch;
   min-width: 0;
   min-height: 16rem; /* 256 */
-  margin: auto;
   padding: var(--space-7) var(--content-inset);
-  text-align: center;
 }
 
 .content {
@@ -26,29 +23,28 @@
 
 .icon {
   display: inline-flex;
-  margin-bottom: var(--space-3);
-  color: var(--color-text-subtle);
+  color: var(--color-text-faint);
 }
 
-/* The thin stroke; beats base.css `svg.lucide`. */
 .empty .icon > svg {
   width: var(--icon-size-empty);
   height: var(--icon-size-empty);
-  stroke-width: var(--icon-stroke-thin);
 }
 
+/* The kit's `h2` rule, for every heading level. */
 .title {
-  font-size: var(--font-size-ui);
-  font-weight: var(--font-weight-semibold);
+  margin: 14px 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-snug);
-  color: var(--color-text);
 }
 
 .description {
   margin: var(--space-1) 0 0;
+  color: var(--color-text-subtle);
   font-size: var(--font-size-secondary);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-muted);
+  line-height: var(--line-height-relaxed);
 }
 
 .action {

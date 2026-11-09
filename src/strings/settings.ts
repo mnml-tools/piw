@@ -59,6 +59,8 @@ export const settingsStrings = {
   appearance: {
     theme: 'Theme',
     themes: { system: 'System', light: 'Light', dark: 'Dark' },
+    accent: 'Accent colour',
+    accents: { pink: 'Pink', blue: 'Blue', orange: 'Orange', green: 'Green', purple: 'Purple' },
     textSize: 'Text size',
     sizes: { small: 'Small', default: 'Default', large: 'Large' },
   },

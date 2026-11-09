@@ -1,3 +1,4 @@
+import { Button as KitButton } from '@mnml-tools/ui';
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from 'react';
 import { Spinner } from '../Spinner/Spinner';
 import { cx } from '../utils';
@@ -8,7 +9,7 @@ export type ButtonSize = 'sm' | 'md';
 
 export interface ButtonProps extends ComponentPropsWithRef<'button'> {
   variant?: ButtonVariant;
-  /** `md` = 28px, 13px label (default: dialogs, forms, empty states); `sm` = 24px, 12px label. */
+  /** `md` = 26px, 12px label (default: dialogs, forms, empty states); `sm` = 22px, 11px label. */
   size?: ButtonSize;
   /**
    * Busy: a spinner takes the place of the leading icon (or leads the label), the label stays,
@@ -22,9 +23,10 @@ export interface ButtonProps extends ComponentPropsWithRef<'button'> {
 }
 
 /**
- * Command button: `primary` is the accent pill (one per surface), `secondary` a soft fill,
- * `ghost` text with a hover fill, `danger` for confirm-delete. Labels start with a verb
- * ("Move to Trash"), never "OK".
+ * Command button on the kit's `Button` (@mnml-tools/ui): square, 1px border. `secondary` is the
+ * kit's default button, `primary` the kit's primary (one per surface: Save, Create), `ghost` a
+ * borderless text button with the hover fill, `danger` a default button that fills red on hover
+ * (confirm-delete only). Labels start with a verb ("Move to Trash"), never "OK".
  */
 export function Button({
   variant = 'secondary',
@@ -47,8 +49,9 @@ export function Button({
     onClick?.(event);
   };
   return (
-    <button
+    <KitButton
       type={type}
+      variant={variant === 'primary' ? 'primary' : 'default'}
       className={cx(styles.button, styles[variant], styles[size], className)}
       disabled={disabled}
       aria-busy={loading || undefined}
@@ -68,6 +71,6 @@ export function Button({
         {children != null && children !== false && <span className={styles.label}>{children}</span>}
         {iconEnd && <span className={styles.icon}>{iconEnd}</span>}
       </span>
-    </button>
+    </KitButton>
   );
 }

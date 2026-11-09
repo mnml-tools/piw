@@ -16,8 +16,9 @@ export interface EmptyStateProps extends Omit<ComponentPropsWithRef<'div'>, 'tit
 }
 
 /**
- * Empty region: a thin 28px icon, a 13/600 title, one 12px helper line and at most one soft
- * action, centred in the region it describes (the caller's flex column gives it the space).
+ * Empty region on the kit's `.mnml-empty-state` (@mnml-tools/ui): a faint 28px icon, a 13/500
+ * secondary title, one 11px muted helper line and at most one action, centred in the region it
+ * describes (the caller's flex column gives it the space).
  */
 export function EmptyState({
   icon,
@@ -30,7 +31,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   const Heading = `h${headingLevel}` as const;
   return (
-    <div className={cx(styles.empty, className)} {...rest}>
+    <div className={cx('mnml-empty-state', styles.empty, className)} {...rest}>
       <div className={styles.content}>
         {icon && <span className={styles.icon}>{icon}</span>}
         <Heading className={styles.title}>{title}</Heading>

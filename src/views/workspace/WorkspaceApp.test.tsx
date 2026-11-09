@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installDomPolyfills, setPlatform } from '@/components/ui/test-utils';
@@ -39,15 +39,33 @@ afterEach(() => {
 });
 
 describe('WorkspaceApp shell', () => {
-  it('is the top bar above one content region, with no sidebar and no status bar', async () => {
+  it('is the title bar and the area tabs, one content region and the status bar, with no sidebar', async () => {
     renderWithProviders(<WorkspaceApp />);
-    const bar = screen.getByRole('banner', { name: 'Piw' });
-    expect(within(bar).getByRole('navigation', { name: 'Areas' })).toBeInTheDocument();
+    // The kit's title bar, then the area tabs under it.
+    const bar = screen.getByRole('banner');
+    expect(within(bar).getByText('piw')).toBeInTheDocument();
+    const areas = screen.getByRole('navigation', { name: 'Areas' });
+    expect(bar.compareDocumentPosition(areas) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     const main = screen.getByRole('main');
     expect(await within(main).findByRole('heading', { name: 'Trash' })).toBeInTheDocument();
-    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    const footer = screen.getByRole('contentinfo');
+    expect(within(footer).getByText('PIW / All spaces')).toBeInTheDocument();
+    expect(await within(footer).findByText(/in inbox/)).toBeInTheDocument();
     expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /sidebar/i })).not.toBeInTheDocument();
+  });
+
+  it('drops a persisted space filter whose space no longer exists', async () => {
+    useWorkspace.setState({ spaceId: 'gone' });
+    renderWithProviders(<WorkspaceApp />);
+    await waitFor(() => expect(useWorkspace.getState().spaceId).toBeNull());
+  });
+
+  it('keeps a persisted space filter whose space exists', async () => {
+    useWorkspace.setState({ spaceId: 'work' });
+    renderWithProviders(<WorkspaceApp />);
+    await screen.findByRole('heading', { name: 'Trash' });
+    expect(useWorkspace.getState().spaceId).toBe('work');
   });
 
   it('keeps the global shortcuts: Mod+K opens search, Mod+N starts a note', async () => {

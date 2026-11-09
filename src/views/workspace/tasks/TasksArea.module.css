@@ -1,8 +1,8 @@
 /*
  * The Tasks area (docs/ui-design-system.md, "View header", "Grid"). The area is its own
  * container: the inspector docks at ≥ 820px of content and overlays the list below (TasksArea
- * picks the mode from the measured width). The list sits in the page column (880px, left on the
- * grid) under the view header, so the header's filters end where the rows do: glyphs on the
+ * picks the mode from the measured width). The list sits in the page column (the full canvas,
+ * as Zap's lists) under the view header, so the header's filters end where the rows do: glyphs on the
  * content inset, text on --text-start.
  */
 .area {
@@ -71,7 +71,7 @@
   font-size: var(--font-size-meta);
 }
 
-/* "Show 3 completed": a quiet ghost text button whose label sits on the text column (its 8px
+/* "Show 3 completed": a quiet ghost text button whose label sits on the text column (its 6px
    padding hangs outside it), 8px under the last group. */
 .completedToggle {
   align-self: flex-start;
@@ -80,7 +80,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Empty states: centred in the canvas (the view's width, 100cqw of .main), not in the 880px
+/* Empty states: centred in the canvas (the view's width, 100cqw of .main), not in the
    list column, and vertically in the remaining height. */
 .empty {
   width: 100cqw;

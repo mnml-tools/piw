@@ -38,7 +38,10 @@ export interface DrawerProps extends Omit<ComponentPropsWithRef<'section'>, 'tit
   returnFocusRef?: RefObject<HTMLElement | null>;
 }
 
-/** Non-modal task-details panel: `role="region"` + heading, Esc closes, focus returns to the row. */
+/**
+ * Non-modal task-details panel: `role="region"` + heading, Esc closes, focus returns to the row.
+ * Its header is the kit's dialog heading (`.mnml-dialog-heading`, @mnml-tools/ui): a soft bar.
+ */
 export function Drawer({
   open,
   onClose,
@@ -108,7 +111,7 @@ export function Drawer({
       }}
       {...rest}
     >
-      <header className={styles.header}>
+      <header className={cx('mnml-dialog-heading', styles.header)}>
         <h2 id={headingId} ref={headingRef} tabIndex={-1} className={styles.title}>
           {title}
         </h2>

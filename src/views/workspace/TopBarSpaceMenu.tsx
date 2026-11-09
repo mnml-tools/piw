@@ -111,7 +111,7 @@ export function TopBarSpaceMenu() {
   return (
     <>
       <DropdownMenu
-        align="end"
+        align="center"
         items={items}
         trigger={
           <button
