@@ -89,6 +89,8 @@ export function noteItem(overrides: Partial<NoteListItem> = {}): NoteListItem {
     tags: [],
     pinned: false,
     taskCount: 0,
+    checklistCount: 0,
+    checklistDone: 0,
     createdAt: ts,
     updatedAt: ts,
     archivedAt: null,

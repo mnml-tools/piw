@@ -8,17 +8,23 @@ import { useWorkspace } from '@/state/workspace';
 import { note, noteItem, spaces } from '@/test/fixtures';
 import { renderWithProviders } from '@/test/render';
 import NotesArea from './NotesArea';
-import { settings } from './test-helpers';
+import { editorText, settings } from './test-helpers';
 
 const items = [
   noteItem({ id: 'n1', displayTitle: 'Ligar ao fornecedor', excerpt: 'Pedir orçamento revisto' }),
-  noteItem({ id: 'n2', displayTitle: 'Comprar café', spaceId: 'personal' }),
+  noteItem({
+    id: 'n2',
+    displayTitle: 'Comprar café',
+    spaceId: 'personal',
+    checklistCount: 5,
+    checklistDone: 1,
+  }),
   noteItem({ id: 'd1', kind: 'document', displayTitle: 'Refactor 2FA', taskCount: 4 }),
 ];
 
 const row = (name: string) => screen.getByRole('button', { name });
 const findRow = (name: string) => screen.findByRole('button', { name });
-const field = () => screen.findByRole<HTMLTextAreaElement>('textbox', { name: 'Note text' });
+const field = () => screen.findByRole('textbox', { name: 'Note text' });
 
 beforeAll(() => {
   installDomPolyfills();
@@ -48,7 +54,7 @@ beforeEach(() => {
 });
 
 describe('NotesArea — list', () => {
-  it('lists notes and documents with title, snippet, date, space and task count', async () => {
+  it('lists notes and documents with title, snippet, date, space and task or checklist count', async () => {
     renderWithProviders(<NotesArea />);
     const list = await screen.findByRole('list', { name: 'Notes' });
     expect(within(list).getAllByRole('listitem')).toHaveLength(3);
@@ -56,7 +62,7 @@ describe('NotesArea — list', () => {
 
     expect(row('Ligar ao fornecedor')).toHaveAccessibleDescription(/Work/);
     expect(screen.getByText('Pedir orçamento revisto')).toBeInTheDocument();
-    expect(row('Comprar café')).toHaveAccessibleDescription(/Personal/);
+    expect(row('Comprar café')).toHaveAccessibleDescription(/Personal.*1 of 5 done/);
     const documentRow = row('Refactor 2FA');
     expect(documentRow).toHaveAccessibleDescription(/Document/);
     expect(documentRow).toHaveAccessibleDescription(/4 tasks/);
@@ -104,7 +110,7 @@ describe('NotesArea — list', () => {
 
     expect(useWorkspace.getState().focus).toEqual({ type: 'note', id: 'n2' });
     const text = await field();
-    expect(text).toHaveValue('Comprar café\nbody');
+    expect(editorText(text)).toBe('Comprar café\nbody');
     expect(text).toHaveFocus();
     expect(screen.queryByRole('list', { name: 'Notes' })).not.toBeInTheDocument();
 
@@ -260,7 +266,7 @@ describe('NotesArea — header', () => {
     await user.keyboard('{ArrowDown}');
     expect(useWorkspace.getState().focus).toEqual({ type: 'note', id: 'n2' });
     const text = await field();
-    expect(text).toHaveValue('Comprar café\nbody');
+    expect(editorText(text)).toBe('Comprar café\nbody');
     expect(row('Comprar café')).toHaveFocus();
     expect(row('Comprar café').closest('[aria-current]')).toHaveAttribute('aria-current', 'true');
     expect(useWorkspace.getState().history).toHaveLength(0);
@@ -305,7 +311,7 @@ describe('NotesArea — header', () => {
     await user.type(text, 'Hello');
     await waitFor(() => expect(useWorkspace.getState().focus).toEqual({ type: 'note', id: 'n7' }));
     expect(await field()).toBe(text);
-    expect(text).toHaveValue('Hello');
+    expect(editorText(text)).toBe('Hello');
     expect(text).toHaveFocus();
     expect(api.createNote).toHaveBeenCalledTimes(1);
   });

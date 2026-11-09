@@ -1,6 +1,7 @@
 /**
  * Test-only helpers for the Notes area. Never import from app code.
  */
+import { EditorView } from '@codemirror/view';
 import { notifyManager } from '@tanstack/react-query';
 import { act } from '@testing-library/react';
 import { vi } from 'vitest';
@@ -54,3 +55,25 @@ export async function settle(ms = 0): Promise<void> {
 
 /** `userEvent.setup` options for fake timers. */
 export const fakeTimerUser = { advanceTimers: (ms: number) => vi.advanceTimersByTime(ms) };
+
+function editorView(field: HTMLElement): EditorView {
+  const view = EditorView.findFromDOM(field);
+  if (!view) throw new Error('Not a note editor');
+  return view;
+}
+
+/** The text of a note editor (MarkdownEditor), given its textbox. */
+export function editorText(field: HTMLElement): string {
+  return editorView(field).state.doc.toString();
+}
+
+/** The main selection of a note editor, as `[from, to]`. */
+export function editorSelection(field: HTMLElement): [number, number] {
+  const { from, to } = editorView(field).state.selection.main;
+  return [from, to];
+}
+
+/** Selects `from…to` in a note editor, as a pointer or Shift+arrows would. */
+export function selectInEditor(field: HTMLElement, from: number, to: number): void {
+  editorView(field).dispatch({ selection: { anchor: from, head: to } });
+}

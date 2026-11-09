@@ -18,6 +18,7 @@ import type { Tab } from '@/lib/ipc/bindings/Tab';
 import type { TabKind } from '@/lib/ipc/bindings/TabKind';
 import type { Task } from '@/lib/ipc/bindings/Task';
 import type { TasksTabSettings } from '@/lib/ipc/bindings/TasksTabSettings';
+import { taskProgress, textLines } from '@/lib/markdown';
 import type { TaskStatus } from '@/lib/ipc/bindings/TaskStatus';
 
 // ---------------------------------------------------------------------------------------------
@@ -198,26 +199,19 @@ function truncate(text: string, max: number): string {
     .trimEnd()}…`;
 }
 
-function lines(body: string): string[] {
-  return body
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-}
-
-/** Explicit title, or the first non-empty line of the body without heading markers. */
+/** Explicit title, or the first text line of the body (without Markdown markers). */
 export function displayTitle(title: string, body: string | null): string {
   const explicit = title.trim();
   if (explicit) return truncate(explicit, TITLE_MAX_CHARS);
-  const first = body === null ? undefined : lines(body)[0];
+  const first = body === null ? undefined : textLines(body)[0];
   if (first === undefined) return '';
-  return truncate(first.replace(/^#+/, '').trimStart(), TITLE_MAX_CHARS);
+  return truncate(first, TITLE_MAX_CHARS);
 }
 
 /** Single-line preview of the body, skipping the line used as the inferred title. */
 export function excerpt(title: string, body: string | null): string {
   if (body === null) return '';
-  const rest = lines(body);
+  const rest = textLines(body);
   if (!title.trim()) rest.shift();
   return truncate(rest.join(' '), EXCERPT_MAX_CHARS);
 }
@@ -381,6 +375,7 @@ export function toNote(store: Store, row: NoteRow): Note {
 
 export function toListItem(store: Store, row: NoteRow): NoteListItem {
   const note = toNote(store, row);
+  const checklist = taskProgress(row.body ?? '');
   return {
     id: note.id,
     spaceId: note.spaceId,
@@ -395,6 +390,8 @@ export function toListItem(store: Store, row: NoteRow): NoteListItem {
     taskCount: store.tasks.filter(
       (task) => task.documentId === row.id && task.deletedAt === null && task.parentTaskId === null,
     ).length,
+    checklistCount: checklist.total,
+    checklistDone: checklist.done,
     createdAt: note.createdAt,
     updatedAt: note.updatedAt,
     archivedAt: note.archivedAt,

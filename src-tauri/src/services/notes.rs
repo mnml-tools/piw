@@ -7,7 +7,9 @@ use ts_rs::TS;
 use super::{resolve_space, split_list};
 use crate::domain::change::{ChangeSet, EntityKind};
 use crate::domain::model::{Note, NoteKind, NoteListItem};
-use crate::domain::text::{NOTE_BODY_MAX_BYTES, display_title, excerpt, require_max_bytes};
+use crate::domain::text::{
+    NOTE_BODY_MAX_BYTES, checklist_progress, display_title, excerpt, require_max_bytes,
+};
 use crate::domain::{new_id, time::now};
 use crate::error::{AppError, AppResult};
 
@@ -49,6 +51,7 @@ pub(crate) fn map_note(row: &Row<'_>) -> rusqlite::Result<Note> {
 
 pub(crate) fn map_list_item(row: &Row<'_>) -> rusqlite::Result<NoteListItem> {
     let note = map_note(row)?;
+    let (checklist_done, checklist_count) = checklist_progress(note.body.as_deref());
     Ok(NoteListItem {
         excerpt: excerpt(&note.title, note.body.as_deref()),
         id: note.id,
@@ -61,6 +64,8 @@ pub(crate) fn map_list_item(row: &Row<'_>) -> rusqlite::Result<NoteListItem> {
         tags: note.tags,
         pinned: note.pinned,
         task_count: row.get(16)?,
+        checklist_count,
+        checklist_done,
         created_at: note.created_at,
         updated_at: note.updated_at,
         archived_at: note.archived_at,

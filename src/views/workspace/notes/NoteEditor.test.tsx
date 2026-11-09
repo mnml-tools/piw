@@ -10,7 +10,15 @@ import { useWorkspace } from '@/state/workspace';
 import { note, spaces } from '@/test/fixtures';
 import { renderWithProviders } from '@/test/render';
 import { NoteEditor, type NoteEditorProps } from './NoteEditor';
-import { fakeTimerUser, settings, settle, useFakeClock } from './test-helpers';
+import {
+  editorSelection,
+  editorText,
+  fakeTimerUser,
+  selectInEditor,
+  settings,
+  settle,
+  useFakeClock,
+} from './test-helpers';
 import { AUTOSAVE_DELAY_MS, RETRY_BASE_MS } from './useNoteSession';
 
 function deferred<T>() {
@@ -29,7 +37,9 @@ function renderEditor(noteId: string | null, props: Partial<NoteEditorProps> = {
   return { ...view, onBack };
 }
 
-const field = () => screen.getByRole<HTMLTextAreaElement>('textbox', { name: 'Note text' });
+const field = () => screen.getByRole('textbox', { name: 'Note text' });
+/** Types where the caret is (the editor opens focused, caret at the end), as the user would. */
+const TYPE_HERE = { skipClick: true };
 
 /** Echoes the saved text back with the next revision, like the database. */
 function savesNextRev() {
@@ -70,10 +80,10 @@ describe('NoteEditor — new notes (no empty records)', () => {
     await settle();
 
     expect(field()).toHaveFocus();
-    await user.type(field(), '  {Enter} ');
+    await user.type(field(), '  {Enter} ', TYPE_HERE);
     expect(create).not.toHaveBeenCalled();
 
-    await user.type(field(), 'Hi');
+    await user.type(field(), 'Hi', TYPE_HERE);
     expect(create).toHaveBeenCalledTimes(1);
     expect(create).toHaveBeenCalledWith({ body: '  \n H', spaceId: 'work' });
 
@@ -83,7 +93,7 @@ describe('NoteEditor — new notes (no empty records)', () => {
     await settle(AUTOSAVE_DELAY_MS);
     expect(update).toHaveBeenCalledWith('n9', 1, { body: '  \n Hi' });
     expect(create).toHaveBeenCalledTimes(1);
-    expect(field()).toHaveValue('  \n Hi');
+    expect(editorText(field())).toBe('  \n Hi');
   });
 
   it('never creates a record for whitespace and discards nothing when left', async () => {
@@ -92,7 +102,7 @@ describe('NoteEditor — new notes (no empty records)', () => {
     const { unmount } = renderEditor(null);
     await settle();
 
-    await user.type(field(), '   {Enter}{Enter}\t');
+    await user.type(field(), '   {Enter}{Enter}\t', TYPE_HERE);
     await settle(AUTOSAVE_DELAY_MS * 2);
     unmount();
     await settle();
@@ -109,7 +119,7 @@ describe('NoteEditor — new notes (no empty records)', () => {
     const user = userEvent.setup(fakeTimerUser);
     renderEditor(null);
     await settle();
-    await user.type(field(), 'x');
+    await user.type(field(), 'x', TYPE_HERE);
     expect(create).toHaveBeenCalledWith({ body: 'x', spaceId: 'personal' });
   });
 });
@@ -121,17 +131,17 @@ describe('NoteEditor — autosave', () => {
     const user = userEvent.setup(fakeTimerUser);
     renderEditor('n1');
     await settle();
-    expect(field()).toHaveValue('Ligar');
+    expect(editorText(field())).toBe('Ligar');
     expect(field()).toHaveFocus();
-    expect(field().selectionStart).toBe(5);
+    expect(editorSelection(field())).toEqual([5, 5]);
 
-    await user.type(field(), ' já');
+    await user.type(field(), ' já', TYPE_HERE);
     await settle(AUTOSAVE_DELAY_MS - 1);
     expect(update).not.toHaveBeenCalled();
     await settle(1);
     expect(update).toHaveBeenLastCalledWith('n1', 1, { body: 'Ligar já' });
 
-    await user.type(field(), '!');
+    await user.type(field(), '!', TYPE_HERE);
     await settle(AUTOSAVE_DELAY_MS);
     expect(update).toHaveBeenLastCalledWith('n1', 2, { body: 'Ligar já!' });
     expect(update).toHaveBeenCalledTimes(2);
@@ -144,7 +154,7 @@ describe('NoteEditor — autosave', () => {
     renderEditor('n1');
     await settle();
 
-    await user.type(field(), 'b');
+    await user.type(field(), 'b', TYPE_HERE);
     await user.keyboard('{Control>}s{/Control}');
     await settle();
     expect(update).toHaveBeenCalledWith('n1', 1, { body: 'ab' });
@@ -160,13 +170,13 @@ describe('NoteEditor — autosave', () => {
     renderEditor('n1');
     await settle();
 
-    await user.type(field(), 'b');
+    await user.type(field(), 'b', TYPE_HERE);
     await settle(AUTOSAVE_DELAY_MS);
     expect(update).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('alert')).toHaveTextContent('Couldn’t save');
     expect(screen.getByText(/Your text is kept/)).toBeInTheDocument();
     expect(field()).not.toHaveAttribute('readonly');
-    expect(field()).toHaveValue('ab');
+    expect(editorText(field())).toBe('ab');
 
     await user.click(screen.getByRole('button', { name: 'Retry' }));
     await settle();
@@ -185,7 +195,7 @@ describe('NoteEditor — autosave', () => {
 
     act(() => client.setQueryData(keys.note('n1'), note({ body: 'From the sticky', rev: 2 })));
     await settle();
-    expect(field()).toHaveValue('From the sticky');
+    expect(editorText(field())).toBe('From the sticky');
     await settle(AUTOSAVE_DELAY_MS * 2);
     expect(update).not.toHaveBeenCalled();
   });
@@ -197,12 +207,12 @@ describe('NoteEditor — autosave', () => {
     renderEditor('n1');
     await settle();
 
-    field().setSelectionRange(0, 5);
+    selectInEditor(field(), 0, 5);
     await user.keyboard('{Control>}b{/Control}');
-    expect(field()).toHaveValue('**hello** world');
-    expect([field().selectionStart, field().selectionEnd]).toEqual([2, 7]);
+    expect(editorText(field())).toBe('**hello** world');
+    expect(editorSelection(field())).toEqual([2, 7]);
     await user.keyboard('{Control>}i{/Control}');
-    expect(field()).toHaveValue('**_hello_** world');
+    expect(editorText(field())).toBe('**_hello_** world');
     await settle(AUTOSAVE_DELAY_MS);
     expect(update).toHaveBeenLastCalledWith('n1', 1, { body: '**_hello_** world' });
   });
@@ -215,7 +225,7 @@ describe('NoteEditor — autosave', () => {
     await settle();
 
     await user.keyboard('{Enter}pão');
-    expect(field()).toHaveValue('- [ ] leite\n- [ ] pão');
+    expect(editorText(field())).toBe('- [ ] leite\n- [ ] pão');
   });
 });
 
@@ -233,7 +243,7 @@ describe('NoteEditor — conflicts', () => {
     const user = userEvent.setup(fakeTimerUser);
     renderEditor('n1');
     await settle();
-    await user.type(field(), ' mine');
+    await user.type(field(), ' mine', TYPE_HERE);
     await settle(AUTOSAVE_DELAY_MS);
     return { update, user };
   }
@@ -251,14 +261,14 @@ describe('NoteEditor — conflicts', () => {
     await settle();
     expect(update).toHaveBeenLastCalledWith('n1', 5, { body: 'Ligar mine' });
     expect(screen.queryByText('This note changed in another window')).not.toBeInTheDocument();
-    expect(field()).toHaveValue('Ligar mine');
+    expect(editorText(field())).toBe('Ligar mine');
   });
 
   it('Reload adopts the other window’s text', async () => {
     const { update, user } = await conflicted();
     await user.click(screen.getByRole('button', { name: 'Reload' }));
     await settle();
-    expect(field()).toHaveValue('Theirs');
+    expect(editorText(field())).toBe('Theirs');
     expect(screen.queryByText('This note changed in another window')).not.toBeInTheDocument();
     await settle(AUTOSAVE_DELAY_MS * 2);
     expect(update).toHaveBeenCalledTimes(1);
@@ -304,7 +314,7 @@ describe('NoteEditor — leaving', () => {
     const user = userEvent.setup(fakeTimerUser);
     const { onBack, unmount } = renderEditor('n1');
     await settle();
-    await user.type(field(), 'd{Escape}');
+    await user.type(field(), 'd{Escape}', TYPE_HERE);
     expect(onBack).toHaveBeenCalledTimes(1);
     unmount();
     await settle();
@@ -325,7 +335,7 @@ describe('NoteEditor — commands', () => {
     renderEditor('n1');
     await settle();
 
-    await user.type(field(), '{Enter}SMS');
+    await user.type(field(), '{Enter}SMS', TYPE_HERE);
     await user.click(screen.getByRole('button', { name: 'More actions' }));
     await user.click(screen.getByRole('menuitem', { name: 'Convert to document' }));
     await settle();

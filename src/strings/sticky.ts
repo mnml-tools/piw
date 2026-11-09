@@ -11,6 +11,7 @@ export const stickyStrings = {
   addSubtask: 'Add subtask',
   addTask: 'Add task',
   noteLabel: 'Note text',
+  progress: (done: number, total: number) => `${done} of ${total} done`,
   saveError: 'Couldn’t save',
   retry: 'Retry',
   changedElsewhere: 'Changed in another window',

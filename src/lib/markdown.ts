@@ -1,8 +1,8 @@
 /**
- * The only editing helpers of the plain-text note editor (docs/ui-design-system.md §10): Mod+B /
- * Mod+I wrap the selection in Markdown markers, Enter continues list lines, Tab / Shift+Tab indent
- * list lines. Pure functions that return a replacement for a range, so the caller can apply it in a
- * way that keeps the native undo history.
+ * The only editing helpers of the note editor (docs/ui-design-system.md §10): Mod+B / Mod+I wrap
+ * the selection in Markdown markers, Enter continues list lines, Tab / Shift+Tab indent list
+ * lines. Pure functions that return a replacement for a range, so the editor applies it as one
+ * undoable change.
  */
 
 /** Replace `value.slice(start, end)` with `text`, then select `selectionStart…selectionEnd`. */
@@ -16,18 +16,31 @@ export interface TextEdit {
 
 const LIST_LINE = /^([ \t]*)([-*]|(\d+)([.)]))[ ](\[[ xX]\][ ])?/;
 const INDENT = '  ';
-const TITLE_MARKERS = /^(?:#{1,6}\s+|[-*+]\s+|\d+[.)]\s+|>\s*|\[[ xX]\]\s+)+/;
+const LINE_MARKERS =
+  /^(?:#{1,6}(?:\s+|$)|>\s*|[-*+](?:\s+|$)|\d{1,9}[.)](?:\s+|$)|\[[ xX]\](?:\s+|$))+/;
+const RULE = /^\s*([-*_])(?:\s*\1){2,}\s*$/;
 const TITLE_MAX = 80;
 
 /**
- * Display title of a quick note: the first non-empty line without leading Markdown markers, cut to
- * 80 characters. Display only — the text is never rewritten (docs/ui-design-system.md §17 rule 4).
- * The database returns the same value as `displayTitle`; this is for text that may not be saved
- * yet.
+ * The text's lines as the note list reads them: trimmed, without leading Markdown markers
+ * (headings, quotes, list bullets and numbers, task boxes), skipping empty lines and rules. The
+ * same rule as the database's titles and excerpts (`domain/text.rs`).
+ */
+export function textLines(text: string): string[] {
+  return text
+    .split('\n')
+    .filter((line) => !RULE.test(line))
+    .map((line) => line.trim().replace(LINE_MARKERS, '').trim())
+    .filter((line) => line !== '');
+}
+
+/**
+ * Display title of a quick note: the first text line (`textLines`), cut to 80 characters.
+ * Display only — the text is never rewritten (docs/ui-design-system.md §17 rule 4). The database
+ * returns the same value as `displayTitle`; this is for text that may not be saved yet.
  */
 export function inferTitle(text: string): string {
-  const line = text.split('\n').find((candidate) => candidate.trim() !== '') ?? '';
-  return line.trim().replace(TITLE_MARKERS, '').trim().slice(0, TITLE_MAX);
+  return (textLines(text)[0] ?? '').slice(0, TITLE_MAX);
 }
 
 function lineStartAt(value: string, index: number): number {
@@ -137,40 +150,41 @@ export function indentList(
   };
 }
 
-/**
- * Applies an edit to a focused textarea. `insertText` keeps the native undo stack (Mod+Z) and
- * fires a normal `input` event; where it is unavailable the range is replaced directly and an
- * `input` event is dispatched so React's `onChange` (and auto-grow) still run.
- */
-export function applyEdit(field: HTMLTextAreaElement, edit: TextEdit): void {
-  field.setSelectionRange(edit.start, edit.end);
-  const hasRange = edit.start !== edit.end;
-  let applied = false;
-  if (typeof document.execCommand === 'function' && (edit.text !== '' || hasRange)) {
-    applied =
-      edit.text === ''
-        ? document.execCommand('delete', false)
-        : document.execCommand('insertText', false, edit.text);
+const TASK_LINE = /^(\s*(?:[-*+]|\d+[.)])\s+)\[([ xX])\](?=\s|$)/;
+const LIST_PREFIX = /^(\s*(?:[-*+]|\d+[.)])\s+)/;
+
+/** Progress of a note's checklist items (the sticky strip; `checklistDone/Count` in lists). */
+export interface TaskProgress {
+  done: number;
+  total: number;
+}
+
+/** The same rule as the database's `checklist_progress` (`domain/text.rs`). */
+export function taskProgress(text: string): TaskProgress {
+  let done = 0;
+  let total = 0;
+  for (const line of text.split('\n')) {
+    const match = TASK_LINE.exec(line);
+    if (!match) continue;
+    total += 1;
+    if (match[2] !== ' ') done += 1;
   }
-  if (!applied && (edit.text !== '' || hasRange)) {
-    field.setRangeText(edit.text, edit.start, edit.end, 'end');
-    field.dispatchEvent(new Event('input', { bubbles: true }));
-  }
-  field.setSelectionRange(edit.selectionStart, edit.selectionEnd);
+  return { done, total };
 }
 
 /**
- * Replaces the whole text without user intent (another window's version), keeping the caret where
- * it was. Uses the tracked `value` setter, so React's `onChange` does not treat it as an edit;
- * the `input` event only lets auto-grow re-measure.
+ * Mod+Enter on one line: ticks or unticks a task item, turns a list item into a task and any
+ * other line into a task item. An empty line is left alone (null).
  */
-export function replaceText(field: HTMLTextAreaElement | null, text: string): void {
-  if (!field || field.value === text) return;
-  const { selectionStart, selectionEnd } = field;
-  field.value = text;
-  field.setSelectionRange(
-    Math.min(selectionStart, text.length),
-    Math.min(selectionEnd, text.length),
-  );
-  field.dispatchEvent(new Event('input', { bubbles: true }));
+export function toggleTaskLine(line: string): string | null {
+  const task = TASK_LINE.exec(line);
+  if (task) {
+    const [, prefix = '', mark] = task;
+    return `${prefix}[${mark === ' ' ? 'x' : ' '}]${line.slice(task[0].length)}`;
+  }
+  if (line.trim() === '') return null;
+  const list = LIST_PREFIX.exec(line);
+  if (list) return `${list[0]}[ ] ${line.slice(list[0].length)}`;
+  const indent = /^\s*/.exec(line)?.[0] ?? '';
+  return `${indent}- [ ] ${line.slice(indent.length)}`;
 }

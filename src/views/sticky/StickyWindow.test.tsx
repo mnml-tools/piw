@@ -8,6 +8,11 @@ import { note, task } from '@/test/fixtures';
 import { renderWithProviders } from '@/test/render';
 import StickyWindow from './StickyWindow';
 
+/** The editor's lines as shown (rendered Markdown, markers hidden while unfocused). */
+function lines(field: HTMLElement): string[] {
+  return [...field.querySelectorAll('.cm-line')].map((line) => line.textContent ?? '');
+}
+
 function record(overrides: Partial<StickyRecord> = {}): StickyRecord {
   return {
     placement: { x: null, y: null, width: 300, height: 260, alwaysOnTop: false },
@@ -37,7 +42,7 @@ describe('StickyWindow', () => {
   it('keeps the drag strip and every control reachable by name', async () => {
     renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
     const field = await screen.findByRole('textbox', { name: 'Note text' });
-    expect(field).toHaveValue('Ligar ao fornecedor\nPedir orçamento revisto.');
+    expect(lines(field)).toEqual(['Ligar ao fornecedor', 'Pedir orçamento revisto.']);
 
     const strip = screen.getByRole('banner');
     expect(strip).toHaveAttribute('data-tauri-drag-region');
@@ -94,6 +99,33 @@ describe('StickyWindow', () => {
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(toggle);
     expect(api.setStickyAlwaysOnTop).toHaveBeenCalledWith({ kind: 'note', id: 'n1' }, false);
+  });
+
+  it('renders the note as Markdown, counts its task items and ticks them', async () => {
+    vi.mocked(api.getNote).mockResolvedValue(
+      note({ body: '## Mykid\n\n- [x] Verify archive bug\n- [ ] Reply to **Rita**' }),
+    );
+    const update = vi
+      .spyOn(api, 'updateNoteText')
+      .mockImplementation(async (_id, rev, patch) =>
+        note({ body: patch.body ?? '', rev: rev + 1 }),
+      );
+    renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
+    const field = await screen.findByRole('textbox', { name: 'Note text' });
+    expect(lines(field)).toEqual(['Mykid', '', 'Verify archive bug', 'Reply to Rita']);
+
+    const strip = screen.getByRole('banner');
+    expect(within(strip).getByLabelText('1 of 2 done')).toHaveTextContent('1/2');
+
+    const reply = within(field).getByRole('checkbox', { name: 'Reply to **Rita**' });
+    expect(reply).not.toBeChecked();
+    await userEvent.pointer({ keys: '[MouseLeft>]', target: reply });
+    expect(within(strip).getByLabelText('2 of 2 done')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith('n1', expect.any(Number), {
+        body: '## Mykid\n\n- [x] Verify archive bug\n- [x] Reply to **Rita**',
+      }),
+    );
   });
 
   it('renders a task with its checkbox, subtasks and the "Task" strip title', async () => {

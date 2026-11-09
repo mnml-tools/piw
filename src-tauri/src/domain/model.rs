@@ -105,6 +105,10 @@ pub struct NoteListItem {
     pub pinned: bool,
     /// Number of tasks linked to a document (0 for quick notes).
     pub task_count: i64,
+    /// Checklist items (`- [ ]`, `- [x]`) in a quick note's text, and how many are ticked.
+    /// Editorial only, never real tasks; 0 for documents.
+    pub checklist_count: i64,
+    pub checklist_done: i64,
     pub created_at: String,
     pub updated_at: String,
     pub archived_at: Option<String>,

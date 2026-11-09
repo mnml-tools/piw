@@ -5,7 +5,6 @@ import { useAutosave } from '@/lib/hooks/useAutosave';
 import { api } from '@/lib/ipc/api';
 import type { Note } from '@/lib/ipc/bindings/Note';
 import { IpcError } from '@/lib/ipc/client';
-import { replaceText } from './markdown';
 
 /** Autosave runs 400 ms after the last keystroke (docs/ui-design-system.md §10). */
 export const AUTOSAVE_DELAY_MS = 400;
@@ -21,7 +20,8 @@ export type FlushResult = 'saved' | 'empty' | 'failed';
 export interface NoteSessionOptions {
   /** The persisted note, or `null` for a new unsaved draft. */
   initial: Note | null;
-  field: RefObject<HTMLTextAreaElement | null>;
+  /** The editor, which adopts another window's text without treating it as an edit. */
+  field: RefObject<{ replaceText: (text: string) => void } | null>;
   /** Space for the record, read when it is created. */
   resolveSpace: () => string | null;
   onCreated?: (note: Note) => void;
@@ -180,7 +180,7 @@ export function useNoteSession({
     const body = note.body ?? '';
     saver.takeTheirs(body, note.rev);
     textRef.current = body;
-    replaceText(field.current, body);
+    field.current?.replaceText(body);
   }, [field, saver]);
 
   const keepMine = useCallback(async () => {
@@ -199,7 +199,7 @@ export function useNoteSession({
     const body = remote.body ?? '';
     saver.takeTheirs(body, remote.rev);
     textRef.current = body;
-    replaceText(field.current, body);
+    field.current?.replaceText(body);
   }, [field, remote, saver]);
 
   const failed = creation === 'failed' || status === 'error';
