@@ -35,7 +35,7 @@ export const STICKY_DEFAULT_HEIGHT = 260;
 
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
-  accent: 'purple',
+  accent: 'blue',
   textSize: 'default',
   closeToTray: true,
   launchAtLogin: false,
