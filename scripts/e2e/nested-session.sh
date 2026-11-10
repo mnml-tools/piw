@@ -7,7 +7,8 @@
 #
 # Usage: scripts/e2e/nested-session.sh <scenario.sh> [output-dir]
 #   The scenario runs with DISPLAY set to the nested XWayland, PIW_BIN pointing at the binary,
-#   OUT pointing at the output directory and PIW_DATA_DIR at a fresh data directory.
+#   OUT pointing at the output directory, PIW_DATA_DIR at a fresh data directory and PIW_VAULT
+#   at a fresh vault.
 #   By default the release binary is used (`pnpm tauri build --no-bundle`): it embeds the
 #   frontend, starts deterministically and exercises the production CSP and capabilities.
 #   Set PIW_BIN=src-tauri/target/debug/piw (with `pnpm dev` running) to test a debug build.
@@ -39,7 +40,8 @@ mkdir -p "$OUT/share"
 export XDG_DATA_HOME="$OUT/share"
 PIW_BIN="${PIW_BIN:-$ROOT/src-tauri/target/release/piw}"
 [ -x "$PIW_BIN" ] || { echo "missing binary: $PIW_BIN (run: pnpm tauri build --no-bundle)" >&2; exit 2; }
-export OUT PIW_BIN PIW_DATA_DIR="$OUT/data" ROOT
+# PIW_VAULT keeps the run away from the vault in your settings or ~/Piw.
+export OUT PIW_BIN PIW_DATA_DIR="$OUT/data" PIW_VAULT="$OUT/vault" ROOT
 
 exec timeout "${E2E_TIMEOUT:-180}" dbus-run-session -- \
   kwin_wayland --virtual --xwayland --no-lockscreen --width "$WIDTH" --height "$HEIGHT" \

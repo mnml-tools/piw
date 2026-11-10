@@ -25,6 +25,15 @@ describe('liveMarkdown', () => {
     expect(view.state.doc.toString()).toBe('# Plan\n- [ ] **Ship** it\n- note\n> quoted `code`');
   });
 
+  it('hides code fences, keeping the language as a label, and halves blank lines', () => {
+    const { view } = mount('Intro\n\n```ts\nconst a = 1;\n```\n\nEnd');
+    expect(shown(view)).toEqual(['Intro', '', 'ts', 'const a = 1;', '', '', 'End']);
+    const lines = [...view.contentDOM.querySelectorAll('.cm-line')];
+    expect(lines.filter((l) => l.className.includes('liveBlank'))).toHaveLength(2);
+    expect(lines[4]?.className).toContain('liveCodeClose');
+    expect(view.state.doc.toString()).toBe('Intro\n\n```ts\nconst a = 1;\n```\n\nEnd');
+  });
+
   it('saves edits but not text adopted from elsewhere', () => {
     const { view, onEdit } = mount('one');
     view.dispatch({ changes: { from: 3, insert: ' two' } });

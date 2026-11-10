@@ -9,11 +9,6 @@ pub fn now() -> String {
     Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true)
 }
 
-/// Today's date in the user's local time zone.
-pub fn local_today() -> NaiveDate {
-    chrono::Local::now().date_naive()
-}
-
 /// Validates a due date (`YYYY-MM-DD`).
 pub fn parse_date(value: &str) -> AppResult<NaiveDate> {
     NaiveDate::parse_from_str(value, "%Y-%m-%d")

@@ -7,7 +7,7 @@
  * - Commands: `mockIPC` routes every `invoke` to `mock-backend.ts`.
  * - Events: Tauri's event plugin (`listen`, `unlisten`, `emit`, `emit_to`) is emulated here, so
  *   the backend's `piw://changed` reaches TanStack Query exactly as in the app.
- * - Windows: `?window=` picks the label (`main`, `capture`, `sticky:<kind>:<id or title>`,
+ * - Windows: `?window=` picks the label (`main`, `capture`, `sticky:<kind>:<id, title or view>`,
  *   `gallery`) through `mockWindows`, and `isTauri` is set so the app takes its Tauri paths.
  * - Stickies: "Pin to desktop" logs the sticky's URL. With `?popups=1` it opens a popup instead
  *   (off by default: embedded browsers such as the Claude browser pane replace the page instead
@@ -79,7 +79,10 @@ export function installMockBackend(): void {
   const mode: MockMode = params.get('mock') === 'empty' ? 'empty' : 'demo';
   const inherited = openerSession(mode);
   const sessionId = inherited?.id ?? newId();
-  const initial = inherited?.store ?? seedStore(mode);
+  const initial = inherited?.store ?? {
+    ...seedStore(mode),
+    importPending: params.get('import') === '1',
+  };
   const label = resolveWindowLabel(params.get('window') ?? 'main', initial);
   const channel =
     typeof BroadcastChannel === 'undefined'
@@ -183,6 +186,8 @@ export function installMockBackend(): void {
         emitTo(target?.label ?? null, String(args['event']), args['payload']);
         return null;
       }
+      case 'plugin:window|is_maximized':
+        return false;
       default:
         return backend.invoke(command, args);
     }
@@ -195,8 +200,8 @@ export function installMockBackend(): void {
     applyWorkspaceParams(params, backend.getStore());
     log(
       `${mode === 'empty' ? 'empty store' : 'demo data'} in memory (dev only, resets on reload). ` +
-        'Try ?window=capture, ?window=sticky:task:totp, ?area=tasks&task=demo, ?doc=refactor, ' +
-        '?theme=dark, ?mock=empty.',
+        'Try ?note=refactor, ?tasks=today, ?open=settings, ?window=capture, ' +
+        '?window=sticky:vault_note:refactor, ?theme=dark, ?mock=empty, ?import=1.',
     );
   }
 }

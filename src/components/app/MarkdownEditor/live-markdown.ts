@@ -3,9 +3,12 @@ import { Language, defineLanguageFacet, syntaxTree } from '@codemirror/language'
 import {
   Annotation,
   EditorSelection,
+  Facet,
   EditorState,
   Transaction,
   type Extension,
+  type Text,
+  type StateEffect,
   type Range,
 } from '@codemirror/state';
 import {
@@ -27,6 +30,7 @@ import {
   toggleWrap,
   type TextEdit,
 } from '@/lib/markdown';
+import { applyTaskChange, taskBox } from '@/lib/vault/tasks';
 import styles from './MarkdownEditor.module.css';
 
 /**
@@ -47,6 +51,21 @@ const gfmMarkdown = new Language(defineLanguageFacet(), parser.configure(GFM), [
 /** Marks a transaction that adopts text from elsewhere: not an edit to save or undo. */
 const external = Annotation.define<boolean>();
 
+/**
+ * Today's date for task completion dates (docs/vault-format.md §3): when an editor provides it,
+ * ticking a task adds `✅ today` and unticking removes it, as every other part of Piw does in a
+ * vault note. Quick notes and stickies leave it out.
+ */
+export const completionDate = Facet.define<() => string, (() => string) | null>({
+  combine: (values) => values[0] ?? null,
+});
+
+function toggleLine(text: string, today: (() => string) | null): string | null {
+  const box = today ? taskBox(text) : null;
+  if (!box || !today) return toggleTaskLine(text);
+  return applyTaskChange(text, box.boxAt, { kind: 'check', checked: !box.checked, today: today() });
+}
+
 /** Applies `toggleTaskLine` to every line the selection touches, as one undoable edit. */
 function toggleTasks(view: EditorView, lines?: number[]): boolean {
   const { state } = view;
@@ -58,9 +77,10 @@ function toggleTasks(view: EditorView, lines?: number[]): boolean {
       for (let n = state.doc.lineAt(range.from).number; n <= last; n += 1) numbers.add(n);
     }
   }
+  const today = state.facet(completionDate);
   const changes = [...numbers].flatMap((n) => {
     const line = state.doc.line(n);
-    const next = toggleTaskLine(line.text);
+    const next = toggleLine(line.text, today);
     return next === null ? [] : [{ from: line.from, to: line.to, insert: next }];
   });
   if (changes.length === 0) return false;
@@ -182,9 +202,31 @@ const headingLines = [
 const itemLine = line(styles.liveItem);
 const quoteLine = line(styles.liveQuote);
 const codeLine = line(styles.liveCodeBlock);
+const codeOpenLine = line(`${styles.liveCodeBlock} ${styles.liveCodeOpen}`);
+const codeCloseLine = line(`${styles.liveCodeBlock} ${styles.liveCodeClose}`);
+const codeBodyLine = line(`${styles.liveCodeBlock} ${styles.liveCodeBody}`);
+const codeInfo = Decoration.mark({ class: styles.liveCodeInfo });
+/** An empty line outside code, not being edited: half height, as a paragraph gap. */
+const blankLine = line(styles.liveBlank);
+
+/**
+ * End of a YAML front matter block at the very top of the text (`---` lines around it,
+ * docs/vault-format.md §2), or 0. The Markdown grammar does not know it, so it is drawn as quiet
+ * metadata and nothing inside it is formatted.
+ */
+export function frontMatterEnd(doc: Text): number {
+  if (doc.lines < 2 || doc.line(1).text !== '---') return 0;
+  for (let n = 2; n <= doc.lines; n += 1) {
+    const text = doc.line(n).text;
+    if (text === '---' || text === '...') return doc.line(n).to;
+  }
+  return 0;
+}
+
+const frontMatterLine = line(styles.liveFrontMatter);
 
 /** Line numbers that show their Markdown: those under the selection, while focused. */
-function revealedLines(view: EditorView): Set<number> {
+export function revealedLines(view: EditorView): Set<number> {
   const lines = new Set<number>();
   if (!view.hasFocus) return lines;
   const { doc, selection } = view.state;
@@ -203,6 +245,13 @@ function decorate(view: EditorView): DecorationSet {
   const found: Range<Decoration>[] = [];
   const add = (decoration: Decoration, from: number, to = from) =>
     found.push(decoration.range(from, to));
+  const metadataEnd = frontMatterEnd(doc);
+  const codeLines = new Set<number>();
+  if (metadataEnd > 0) {
+    for (let n = 1; n <= doc.lineAt(metadataEnd).number; n += 1) {
+      add(frontMatterLine, doc.line(n).from);
+    }
+  }
 
   /** Hides a marker and the spaces after it (`# `, `> `). */
   const hideLeading = (node: SyntaxNode) => {
@@ -224,6 +273,8 @@ function decorate(view: EditorView): DecorationSet {
       to,
       enter: (ref) => {
         const node = ref.node;
+        // Nothing inside front matter is Markdown (its children start there too).
+        if (node.from < metadataEnd && node.name !== 'Document') return;
         const heading = /^ATXHeading(\d)$/.exec(node.name);
         if (heading) {
           add(headingLines[Number(heading[1]) - 1]!, doc.lineAt(node.from).from);
@@ -333,15 +384,42 @@ function decorate(view: EditorView): DecorationSet {
             return;
           case 'FencedCode':
           case 'CodeBlock': {
+            const first = doc.lineAt(node.from).number;
             const last = doc.lineAt(node.to).number;
-            for (let n = doc.lineAt(node.from).number; n <= last; n += 1) {
-              add(codeLine, doc.line(n).from);
+            for (let n = first; n <= last; n += 1) codeLines.add(n);
+            // A fenced block not being edited hides its ``` fences: the opening one keeps only
+            // the language as a quiet label, the closing one shrinks to the block's foot.
+            const fences = node.name === 'FencedCode' ? node.getChildren('CodeMark') : [];
+            let editing = false;
+            for (let n = first; n <= last; n += 1) editing ||= revealed.has(n);
+            const open = fences[0];
+            const close = fences.length > 1 ? fences[fences.length - 1] : undefined;
+            for (let n = first; n <= last; n += 1) {
+              let decoration = codeLine;
+              if (!editing && open) {
+                if (n === first) decoration = codeOpenLine;
+                else if (close !== undefined && n === last) decoration = codeCloseLine;
+                else decoration = codeBodyLine;
+              }
+              add(decoration, doc.line(n).from);
+            }
+            if (!editing && open) {
+              add(hidden, open.from, open.to);
+              const info = node.getChild('CodeInfo');
+              if (info) add(codeInfo, info.from, info.to);
+              if (close) add(hidden, close.from, close.to);
             }
             return;
           }
         }
       },
     });
+    for (let n = doc.lineAt(from).number; n <= doc.lineAt(to).number; n += 1) {
+      const blank = doc.line(n);
+      if (blank.length > 0 && blank.text.trim() !== '') continue;
+      if (codeLines.has(n) || revealed.has(n) || blank.from < metadataEnd) continue;
+      add(blankLine, blank.from);
+    }
   }
   return Decoration.set(found, true);
 }
@@ -422,9 +500,16 @@ export function liveMarkdown({ onEdit, onEscape }: LiveMarkdownOptions): Extensi
  * Adopts text from elsewhere (another window, a reload). Only the differing middle is replaced,
  * so the caret keeps its place; it is not an edit, so it is neither saved nor undoable.
  */
-export function replaceText(view: EditorView, text: string): void {
+export function replaceText(
+  view: EditorView,
+  text: string,
+  effects: readonly StateEffect<unknown>[] = [],
+): void {
   const current = view.state.doc.toString();
-  if (current === text) return;
+  if (current === text) {
+    if (effects.length > 0) view.dispatch({ effects: [...effects] });
+    return;
+  }
   let start = 0;
   const max = Math.min(current.length, text.length);
   while (start < max && current[start] === text[start]) start += 1;
@@ -438,6 +523,7 @@ export function replaceText(view: EditorView, text: string): void {
       to: current.length - end,
       insert: text.slice(start, text.length - end),
     },
+    effects: [...effects],
     annotations: [external.of(true), Transaction.addToHistory.of(false)],
   });
 }

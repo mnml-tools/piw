@@ -1,0 +1,42 @@
+/* Trash rows on the page grid (components/app/Page.module.css): the 14px glyph on
+   --content-inset, the name with where it was below in mono muted ink, then Restore and Delete
+   forever at the right inset. Hairlines between rows, as the kit's lists. */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: calc(var(--control-height-sm) + 2 * var(--space-2));
+  padding: var(--space-1-5) var(--content-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.icon {
+  flex: none;
+  color: var(--color-icon);
+}
+
+.text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--font-size-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.from {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+}

@@ -2,40 +2,23 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '@/lib/ipc/api';
 import { IpcError } from '@/lib/ipc/client';
-import type { Settings } from '@/lib/ipc/bindings/Settings';
-import type { Space } from '@/lib/ipc/bindings/Space';
 import { EMPTY_FORM, initialSpace, switchMode, useCapture } from './useCapture';
 
-const spaces: Space[] = [
-  {
-    id: 'work',
-    name: 'Work',
-    color: 'sky',
-    sortOrder: 0,
-    isDefault: true,
-    createdAt: '',
-    updatedAt: '',
-  },
-  {
-    id: 'home',
-    name: 'Personal',
-    color: null,
-    sortOrder: 1,
-    isDefault: false,
-    createdAt: '',
-    updatedAt: '',
-  },
-];
-const settings = { captureSpace: 'last_used', lastCaptureSpaceId: 'home' } as Settings;
+const spaces = ['Work', 'Personal'];
+const KEY = 'piw.vault.captureSpace';
 
 beforeEach(() => {
   vi.spyOn(api, 'getCaptureDraft').mockResolvedValue(null);
   vi.spyOn(api, 'saveCaptureDraft').mockResolvedValue();
   vi.spyOn(api, 'clearCaptureDraft').mockResolvedValue();
   vi.spyOn(api, 'hideCapture').mockResolvedValue();
-  vi.spyOn(api, 'rememberCaptureSpace').mockResolvedValue();
+  vi.spyOn(api, 'vaultCapture').mockResolvedValue('Personal/Inbox.md');
+  localStorage.setItem(KEY, 'Personal');
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  localStorage.clear();
+});
 
 describe('switchMode', () => {
   it('is lossless in both directions', () => {
@@ -47,55 +30,64 @@ describe('switchMode', () => {
 });
 
 describe('initialSpace', () => {
-  it('prefers the last used space, falling back to the default', () => {
-    expect(initialSpace(spaces, settings)).toBe('home');
-    expect(initialSpace(spaces, { ...settings, lastCaptureSpaceId: 'gone' })).toBe('work');
-    expect(initialSpace(spaces, { ...settings, captureSpace: 'default' })).toBe('work');
+  it('prefers the last used space, falling back to the first', () => {
+    expect(initialSpace(spaces, 'last_used')).toBe('Personal');
+    expect(initialSpace(spaces, 'default')).toBe('Work');
+    localStorage.setItem(KEY, 'Gone');
+    expect(initialSpace(spaces, 'last_used')).toBe('Work');
+    expect(initialSpace([], 'last_used')).toBeNull();
   });
 });
 
 describe('useCapture', () => {
   it('CA-01: saves a note, clears the draft and closes only after persisting', async () => {
     const order: string[] = [];
-    vi.spyOn(api, 'createNote').mockImplementation(async () => {
+    vi.mocked(api.vaultCapture).mockImplementation(async () => {
       order.push('create');
-      return { id: 'n1' } as never;
+      return 'Personal/Inbox.md';
     });
     vi.mocked(api.hideCapture).mockImplementation(async () => {
       order.push('hide');
     });
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     act(() => result.current.update({ text: 'Ligar ao fornecedor' }));
     await act(async () => {
       expect(await result.current.submit()).toBe(true);
     });
-    expect(api.createNote).toHaveBeenCalledWith({ body: 'Ligar ao fornecedor', spaceId: 'home' });
+    expect(api.vaultCapture).toHaveBeenCalledWith({
+      space: 'Personal',
+      mode: 'note',
+      text: 'Ligar ao fornecedor',
+      description: '',
+      due: null,
+    });
     expect(order).toEqual(['create', 'hide']);
     expect(api.clearCaptureDraft).toHaveBeenCalled();
     expect(result.current.form.text).toBe('');
   });
 
   it('saves a task with title and description and pins it when asked', async () => {
-    vi.spyOn(api, 'createTask').mockResolvedValue({ id: 't1' } as never);
-    const sticky = vi.spyOn(api, 'openSticky').mockResolvedValue(1);
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const sticky = vi.spyOn(api, 'vaultPinNote').mockResolvedValue(1);
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('task'));
     act(() =>
       result.current.update({ text: 'Comprar café', description: 'No supermercado', pin: true }),
     );
     await act(() => result.current.submit());
-    expect(api.createTask).toHaveBeenCalledWith({
-      title: 'Comprar café',
+    expect(api.vaultCapture).toHaveBeenCalledWith({
+      space: 'Personal',
+      mode: 'task',
+      text: 'Comprar café',
       description: 'No supermercado',
-      spaceId: 'home',
+      due: null,
     });
-    expect(sticky).toHaveBeenCalledWith({ kind: 'task', id: 't1' });
+    expect(sticky).toHaveBeenCalledWith('Personal/Inbox.md');
   });
 
   it('CA-08: a failed save keeps the text, stays open and keeps the draft', async () => {
-    vi.spyOn(api, 'createNote').mockRejectedValue(new IpcError('storage', 'disk is full'));
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    vi.mocked(api.vaultCapture).mockRejectedValue(new IpcError('storage', 'disk is full'));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     act(() => result.current.update({ text: 'do not lose me' }));
     await act(async () => {
@@ -115,22 +107,22 @@ describe('useCapture', () => {
       mode: 'task',
       text: 'half typed',
       description: '',
-      spaceId: 'work',
+      spaceId: 'Work',
       dueDate: null,
       pin: false,
     });
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     expect(result.current.restored).toBe(true);
     expect(result.current.form).toMatchObject({
       mode: 'task',
       text: 'half typed',
-      spaceId: 'work',
+      spaceId: 'Work',
     });
   });
 
   it('switching mode keeps every character', async () => {
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     act(() => result.current.update({ text: 'Title line\nmore detail' }));
     act(() => result.current.setMode('task'));
@@ -144,7 +136,7 @@ describe('useCapture', () => {
   });
 
   it('discard clears the text and the stored draft', async () => {
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     act(() => result.current.update({ text: 'throw away' }));
     await act(() => result.current.discard());
@@ -153,13 +145,12 @@ describe('useCapture', () => {
   });
 
   it('ignores empty submissions', async () => {
-    const create = vi.spyOn(api, 'createNote');
-    const { result } = renderHook(() => useCapture(spaces, settings));
+    const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
     act(() => result.current.update({ text: '   ' }));
     await act(async () => {
       expect(await result.current.submit()).toBe(false);
     });
-    expect(create).not.toHaveBeenCalled();
+    expect(api.vaultCapture).not.toHaveBeenCalled();
   });
 });

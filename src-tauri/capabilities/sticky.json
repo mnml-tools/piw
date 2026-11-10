@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "sticky",
-  "description": "Sticky windows: show and edit their one item, manage their own window. Nothing else.",
+  "description": "Sticky windows: show and edit their one item, manage their own window. Vault stickies reach only their own note or task view (commands/vault.rs). Nothing else.",
   "windows": ["sticky:*"],
   "permissions": [
     "core:event:allow-listen",
@@ -15,15 +15,12 @@
     "allow-set-sticky-always-on-top",
     "allow-set-sticky-color",
     "allow-open-in-workspace",
-    "allow-get-note",
-    "allow-update-note-text",
-    "allow-get-task",
-    "allow-update-task-text",
-    "allow-set-task-completed",
-    "allow-create-task",
-    "allow-list-document-tasks",
-    "allow-get-tab",
-    "allow-get-document",
+    "allow-vault-read-note",
+    "allow-vault-write-note",
+    "allow-vault-tasks",
+    "allow-vault-edit-task",
+    "allow-vault-sticky-view",
+    "allow-vault-capture",
     "allow-spike-ack"
   ]
 }

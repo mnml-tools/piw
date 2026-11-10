@@ -2,9 +2,13 @@ import { IpcError } from '@/lib/ipc/client';
 
 export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error' | 'conflict';
 
-export interface AutosaverOptions<T> {
+/**
+ * `R` is the revision the store hands back with each save: a number for database rows, the
+ * file hash for vault notes.
+ */
+export interface AutosaverOptions<T, R = number> {
   /** Persists `value` given the last known revision; resolves with the new revision. */
-  save: (value: T, rev: number) => Promise<number>;
+  save: (value: T, rev: R) => Promise<R>;
   onStatus: (status: SaveStatus) => void;
   delay?: number;
   equals?: (a: T, b: T) => boolean;
@@ -18,8 +22,8 @@ export interface AutosaverOptions<T> {
  * - A `conflict` (another window saved first) stops saving until the caller resolves it, so
  *   another window's text is never overwritten silently.
  */
-export class Autosaver<T> {
-  private base: { value: T; rev: number };
+export class Autosaver<T, R = number> {
+  private base: { value: T; rev: R };
   private pending: { value: T } | null = null;
   private inFlight: Promise<void> | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -28,11 +32,11 @@ export class Autosaver<T> {
   private readonly delay: number;
   private readonly equals: (a: T, b: T) => boolean;
 
-  private save: AutosaverOptions<T>['save'];
+  private save: AutosaverOptions<T, R>['save'];
 
   constructor(
-    initial: { value: T; rev: number },
-    private readonly options: AutosaverOptions<T>,
+    initial: { value: T; rev: R },
+    private readonly options: AutosaverOptions<T, R>,
   ) {
     this.save = options.save;
     this.base = initial;
@@ -41,7 +45,7 @@ export class Autosaver<T> {
   }
 
   /** Replaces the save function (e.g. a React callback that changed between renders). */
-  setSave(save: AutosaverOptions<T>['save']): void {
+  setSave(save: AutosaverOptions<T, R>['save']): void {
     this.save = save;
   }
 
@@ -50,7 +54,7 @@ export class Autosaver<T> {
   }
 
   /** The last value known to be persisted, and its revision. */
-  get persisted(): { value: T; rev: number } {
+  get persisted(): { value: T; rev: R } {
     return this.base;
   }
 
@@ -60,7 +64,7 @@ export class Autosaver<T> {
   }
 
   /** Replaces the persisted baseline (e.g. after loading or reloading from the database). */
-  reset(value: T, rev: number): void {
+  reset(value: T, rev: R): void {
     this.clearTimer();
     this.base = { value, rev };
     this.pending = null;
@@ -104,14 +108,14 @@ export class Autosaver<T> {
   }
 
   /** After a conflict: keep the local text and save it over the newer revision. */
-  keepMine(latestRev: number): Promise<void> {
+  keepMine(latestRev: R): Promise<void> {
     this.base = { ...this.base, rev: latestRev };
     this.setStatus('pending');
     return this.flush();
   }
 
   /** After a conflict: drop local edits and adopt the database version. */
-  takeTheirs(value: T, rev: number): void {
+  takeTheirs(value: T, rev: R): void {
     this.reset(value, rev);
   }
 

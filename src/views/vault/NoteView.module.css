@@ -1,0 +1,56 @@
+/* A vault note (docs/redesign.md, "Layout"): the quiet toolbar line (the folders, the save
+   state), then the title (the file name) as the page's heading on the reading column, then the
+   text. The column, banners and editor typography are the note editor's
+   (notes/NoteEditor.module.css). */
+.state {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: var(--space-6);
+}
+
+.breadcrumb {
+  overflow: hidden;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  display: block;
+  width: 100%;
+  max-width: var(--editor-max-width);
+  margin: 0 auto var(--space-3);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-title);
+  line-height: var(--line-height-heading);
+  outline: none;
+}
+
+.title:focus-visible {
+  box-shadow: 0 var(--border-width) 0 var(--color-focus-ring);
+}
+
+.title[readonly] {
+  color: var(--color-text-muted);
+}
+
+/* The text and the note panel side by side; the text keeps the reading column. */
+.split {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: inline-size;
+}
+
+.split > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}

@@ -89,11 +89,11 @@
 }
 
 .liveH2 {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-heading);
 }
 
 .liveH3 {
-  font-size: var(--font-size-heading);
+  font-size: var(--font-size-lg);
 }
 
 .root :global(.cm-editor) .liveItem {
@@ -146,8 +146,178 @@
   font-size: var(--font-size-code);
 }
 
+/* A fenced block not being edited (live-markdown.ts): its ``` fences hidden, the block on the
+   soft fill, the language as a quiet label on the first line, the last line a thin foot. */
+.root :global(.cm-editor) .liveCodeOpen,
+.root :global(.cm-editor) .liveCodeClose,
+.root :global(.cm-editor) .liveCodeBody {
+  background: var(--color-bg-soft);
+}
+
+.root :global(.cm-editor) .liveCodeOpen {
+  padding-top: var(--space-1);
+}
+
+.root :global(.cm-editor) .liveCodeClose {
+  height: var(--space-1-5);
+  overflow: hidden;
+}
+
+.liveCodeInfo {
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+}
+
+/* An empty line outside code that is not being edited: half a line, as a paragraph gap. */
+.root :global(.cm-editor) .liveBlank {
+  font-size: 0.5em;
+}
+
 @media (forced-colors: active) {
   .root :global(.cm-editor.cm-focused) {
     outline: var(--border-width) solid Highlight;
   }
+}
+
+/* YAML front matter at the top of a note: quiet metadata in mono, never formatted. */
+.root :global(.cm-editor) .liveFrontMatter {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+}
+
+/* A folded front matter (front-matter.ts): one quiet line of its properties, tags as #tags;
+   a click opens the YAML for editing. */
+.frontMatterSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  padding-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-secondary);
+  cursor: text;
+}
+
+.frontMatterProperty {
+  display: inline-flex;
+  gap: var(--space-1-5);
+}
+
+.frontMatterKey {
+  color: var(--color-text-subtle);
+}
+
+/* Vault links and tags (wiki-links.ts): accent text, so they read as things that lead somewhere.
+   Mod+click follows a link, as with every link in Piw. */
+.liveWikiLink {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: var(--color-link-underline);
+  text-underline-offset: 2px;
+}
+
+.liveTag {
+  color: var(--color-accent);
+}
+
+/* Task dates (task-dates.ts): a recognised date as the kit's small badge, mono 10px in muted ink
+   with a 1px edge; an overdue one in the danger ink; a completion date fainter. The date menu
+   under the caret is the kit's menu surface. */
+.dateChip {
+  display: inline-flex;
+  align-items: center;
+  height: 1.4em;
+  padding: 0 var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  line-height: 1;
+  vertical-align: 0.1em;
+  /* Rendered list lines hang with a negative indent, which inline boxes inherit. */
+  text-indent: 0;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dateChip[data-tone='overdue'] {
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+/* CodeMirror makes the menu's own element the tooltip; these beat its base tooltip theme. */
+.root :global(.cm-tooltip).dateMenu {
+  min-width: 12rem;
+  padding: 3px;
+  border: var(--border-width) solid var(--color-border-floating);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-secondary);
+}
+
+.dateOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 28px;
+  padding: 4px 7px;
+  cursor: pointer;
+}
+
+.dateOption[aria-selected='true'] {
+  background: var(--color-bg-hover);
+}
+
+.dateHint {
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+}
+
+/* The selection's action (selection-action.ts): one quiet button on the kit's menu surface,
+   just above the selection. */
+.root :global(.cm-tooltip).selectionMenu {
+  padding: 2px;
+  border: var(--border-width) solid var(--color-border-floating);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-elevated);
+  box-shadow: var(--shadow-md);
+}
+
+.root :global(.cm-tooltip).selectionMenu {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.selectionDivider {
+  align-self: stretch;
+  width: var(--border-width);
+  margin: 3px 2px;
+  background: var(--color-border);
+}
+
+.selectionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  justify-content: center;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-secondary);
+  cursor: pointer;
+}
+
+.selectionButton:hover {
+  background: var(--color-bg-hover);
 }

@@ -69,6 +69,10 @@ pub struct Settings {
     /// Reopen pinned stickies when Piw starts (off by default for privacy).
     pub restore_stickies_on_launch: bool,
     pub tray_notice_shown: bool,
+    /// The vault folder (docs/redesign.md); `null` means `~/Piw`. `PIW_VAULT` overrides it.
+    pub vault_path: Option<String>,
+    /// When the notes and tasks of Piw 0.1 were imported into the vault (`vault/import`).
+    pub vault_imported_at: Option<String>,
 }
 
 impl Default for Settings {
@@ -84,6 +88,8 @@ impl Default for Settings {
             last_capture_space_id: None,
             restore_stickies_on_launch: false,
             tray_notice_shown: false,
+            vault_path: None,
+            vault_imported_at: None,
         }
     }
 }

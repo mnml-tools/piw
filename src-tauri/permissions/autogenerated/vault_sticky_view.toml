@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-vault-sticky-view"
+description = "Enables the vault_sticky_view command without any pre-configured scope."
+commands.allow = ["vault_sticky_view"]
+
+[[permission]]
+identifier = "deny-vault-sticky-view"
+description = "Denies the vault_sticky_view command without any pre-configured scope."
+commands.deny = ["vault_sticky_view"]

@@ -2,23 +2,24 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { clearMocks, mockIPC } from '@tauri-apps/api/mocks';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { addDays, todayString } from '@/lib/dates';
 import { api } from '@/lib/ipc/api';
 import type { ChangeSet } from '@/lib/ipc/bindings/ChangeSet';
 import { IpcError } from '@/lib/ipc/client';
 import { COMMANDS, createMockBackend, type MockBackend } from './mock-backend';
-import { DEMO_IDS, type MockMode, seedStore } from './mock-data';
+import { type MockMode, seedStore } from './mock-data';
 import { resolveWindowLabel } from './url-state';
 
 let commits: ChangeSet[];
+let opened: string[];
 let backend: MockBackend;
 
 function install(mode: MockMode = 'demo') {
   commits = [];
+  opened = [];
   backend = createMockBackend(seedStore(mode), {
     label: 'main',
     host: {
-      openSticky: () => undefined,
+      openSticky: (target) => opened.push(`${target.kind}:${target.id}`),
       closeSticky: () => undefined,
       emit: () => undefined,
       commit: (changes) => commits.push(changes),
@@ -35,104 +36,76 @@ describe('mock backend', () => {
   it('implements exactly the commands called by api.ts', () => {
     const source = readFileSync(join(__dirname, '../lib/ipc/api.ts'), 'utf8');
     const called = new Set(Array.from(source.matchAll(/call<[^(]*>\('([a-z_]+)'/g), (m) => m[1]));
-    expect(called.size).toBeGreaterThan(80);
+    expect(called.size).toBeGreaterThan(40);
     expect([...COMMANDS].sort()).toEqual([...called].sort());
   });
 
-  it('puts demo tasks in the right sections relative to today', async () => {
-    const today = todayString();
-    const due = await api.listTasks({ view: 'today' });
-    expect(due.map((t) => t.dueDate)).toEqual(
-      [...due.map((t) => t.dueDate)].sort((a, b) => (a ?? '').localeCompare(b ?? '')),
-    );
-    expect(due.every((t) => t.dueDate !== null && t.dueDate <= today)).toBe(true);
-    expect(due.some((t) => t.dueDate === addDays(today, -1))).toBe(true);
-    const upcoming = await api.listTasks({ view: 'upcoming' });
-    expect(upcoming.every((t) => t.dueDate !== null && t.dueDate > today)).toBe(true);
-    const all = await api.listTasks();
-    expect(all.at(-1)?.dueDate).toBeNull();
-    expect(all.every((t) => t.status === 'open' && t.parentTaskId === null)).toBe(true);
-    const totp = all.find((t) => t.id === DEMO_IDS.totpTask);
-    expect(totp).toMatchObject({ subtaskCount: 2, subtaskDone: 1, documentTitle: 'Refactor 2FA' });
-  });
-
-  it('completes a task and reports the change like Rust', async () => {
-    const task = await api.setTaskCompleted(DEMO_IDS.totpTask, true);
-    expect(task).toMatchObject({ status: 'completed', completedAt: expect.any(String) });
+  it('guards note writes with the hash and rolls back failed writes', async () => {
+    const note = await api.vaultReadNote('Work/Weekly sync.md');
+    const saved = await api.vaultWriteNote(note.path, 'New text\n', note.hash);
+    expect(saved.hash).not.toBe(note.hash);
     expect(commits.at(-1)).toEqual({
       origin: 'main',
-      changes: [
-        { kind: 'task', id: DEMO_IDS.totpTask },
-        { kind: 'note', id: DEMO_IDS.refactorDoc },
-      ],
+      changes: [{ kind: 'file', id: 'Work/Weekly sync.md' }],
     });
-    const open = await api.listTasks();
-    expect(open.some((t) => t.id === DEMO_IDS.totpTask)).toBe(false);
-    const completed = await api.listTasks({ view: 'completed' });
-    expect(completed[0]?.id).toBe(DEMO_IDS.totpTask);
-  });
-
-  it('guards text edits with rev and rolls back failed writes', async () => {
-    const note = await api.getNote(DEMO_IDS.supplierNote);
-    const saved = await api.updateNoteText(note.id, note.rev, { body: 'Call them\nNow.' });
-    expect(saved).toMatchObject({ rev: note.rev + 1, displayTitle: 'Call them' });
-    const error = await api.updateNoteText(note.id, note.rev, { body: 'stale' }).catch((e) => e);
+    const error = await api.vaultWriteNote(note.path, 'stale', note.hash).catch((e) => e);
     expect(error).toBeInstanceOf(IpcError);
     expect(error).toMatchObject({ code: 'conflict' });
-    const commitsBefore = commits.length;
-    await expect(api.createTask({ title: '   ' })).rejects.toMatchObject({ code: 'validation' });
-    expect(commits).toHaveLength(commitsBefore);
+    expect((await api.vaultReadNote(note.path)).text).toBe('New text\n');
   });
 
-  it('returns documents with ProseMirror tabs and searchable content', async () => {
-    const doc = await api.getDocument(DEMO_IDS.refactorDoc);
-    expect(doc.tabs.map((t) => [t.title, t.kind])).toEqual([
-      ['Overview', 'content'],
-      ['Implementation', 'content'],
-      ['To-dos', 'tasks'],
-    ]);
-    expect(JSON.parse(doc.tabs[0]?.contentJson ?? '{}')).toMatchObject({ type: 'doc' });
-    const results = await api.search('rollout');
-    expect(results.documents[0]).toMatchObject({
-      id: DEMO_IDS.refactorDoc,
-      tabTitle: 'Implementation',
+  it('reads without committing', async () => {
+    await api.vaultTree();
+    await api.getSettings();
+    expect(commits).toEqual([]);
+  });
+
+  it('pins a note to the desktop and colours its sticky', async () => {
+    expect(await api.vaultPinNote('Work/Weekly sync.md')).toBe(1);
+    const [pinned] = await api.vaultPinned();
+    expect(pinned?.shows).toEqual({
+      kind: 'note',
+      path: 'Work/Weekly sync.md',
+      title: 'Weekly sync',
     });
-    expect(results.documents[0]?.snippet).toContain('\u0002rollout\u0003');
-    const tasks = await api.search('recov');
-    expect(tasks.tasks[0]).toMatchObject({ id: DEMO_IDS.recoveryTask, completed: false });
+    expect(opened).toHaveLength(1);
+    const target = pinned!.target;
+    await api.setStickyColor(target, 'mint');
+    expect(await api.getSticky(target)).toMatchObject({ color: 'mint', isOpen: true });
+    await api.unpinSticky(target);
+    expect(await api.vaultPinned()).toEqual([]);
   });
 
-  it('builds the inbox, trash and pinned views', async () => {
-    const inbox = await api.listInbox();
-    expect(inbox.length).toBe(await api.inboxCount());
-    expect(
-      inbox.every(
-        (item) => (item.type === 'note' ? item.note.documentId : item.task.documentId) === null,
-      ),
-    ).toBe(true);
-    const trash = await api.listTrash();
-    expect(trash.map((item) => item.type)).toEqual(['note', 'task']);
-    const pinned = await api.listPinned();
-    expect(pinned.map((item) => item.target.kind).sort()).toEqual(['note', 'task', 'tasks_tab']);
+  it('captures into the space Inbox', async () => {
+    const path = await api.vaultCapture({
+      space: 'Personal',
+      mode: 'task',
+      text: 'Buy coffee',
+      description: '',
+      due: null,
+    });
+    expect(path).toBe('Personal/Inbox.md');
+    expect((await api.vaultReadNote(path)).text).toContain('- [ ] Buy coffee');
   });
 
-  it('starts empty with ?mock=empty', async () => {
+  it('reports and runs the Piw 0.1 import', async () => {
+    expect(await api.vaultImportStatus()).toEqual({ pending: false, importedAt: null });
+    await api.vaultImport();
+    expect((await api.vaultImportStatus()).importedAt).not.toBeNull();
+    expect((await api.getSettings()).vaultImportedAt).not.toBeNull();
+  });
+
+  it('starts with an empty vault with ?mock=empty', async () => {
     install('empty');
-    expect(await api.listSpaces()).toHaveLength(2);
-    expect(await api.listNotes()).toEqual([]);
-    expect(await api.listTasks()).toEqual([]);
-    const note = await api.createNote({ body: 'First note' });
-    expect(await api.listInbox()).toEqual([
-      { type: 'note', note: expect.objectContaining({ id: note.id }) },
-    ]);
+    expect(await api.vaultTree()).toEqual([]);
   });
 
   it('resolves friendly sticky labels', () => {
     const store = seedStore('demo');
-    expect(resolveWindowLabel('sticky:task:totp', store)).toBe(`sticky:task:${DEMO_IDS.totpTask}`);
-    expect(resolveWindowLabel('sticky:tasks_tab:refactor', store)).toBe(
-      `sticky:tasks_tab:${DEMO_IDS.todosTab}`,
-    );
+    const note = resolveWindowLabel('sticky:vault_note:refactor', store);
+    expect(note).toMatch(/^sticky:vault_note:[0-9a-f-]{36}$/);
+    expect(store.vault.stickies[0]?.path).toBe('Work/Projects/Refactor 2FA.md');
+    expect(resolveWindowLabel('sticky:vault_tasks:today', store)).toMatch(/^sticky:vault_tasks:/);
     expect(resolveWindowLabel('capture', store)).toBe('capture');
   });
 });

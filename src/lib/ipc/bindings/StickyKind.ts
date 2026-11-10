@@ -3,4 +3,4 @@
 /**
  * The kind of item a sticky window displays.
  */
-export type StickyKind = "note" | "task" | "tasks_tab";
+export type StickyKind = "vault_note" | "vault_tasks";

@@ -13,26 +13,24 @@ const STICKY_PREFIX: &str = "sticky";
 #[serde(rename_all = "snake_case")]
 #[ts(export, export_to = "bindings/")]
 pub enum StickyKind {
-    Note,
-    Task,
-    /// A "Tasks" tab of a document.
-    TasksTab,
+    /// A note of the vault; the id maps to its path in `vault_stickies`.
+    VaultNote,
+    /// A task view of the vault (Today, Upcoming, All).
+    VaultTasks,
 }
 
 impl StickyKind {
     fn as_str(self) -> &'static str {
         match self {
-            Self::Note => "note",
-            Self::Task => "task",
-            Self::TasksTab => "tasks_tab",
+            Self::VaultNote => "vault_note",
+            Self::VaultTasks => "vault_tasks",
         }
     }
 
     fn parse(value: &str) -> Option<Self> {
         match value {
-            "note" => Some(Self::Note),
-            "task" => Some(Self::Task),
-            "tasks_tab" => Some(Self::TasksTab),
+            "vault_note" => Some(Self::VaultNote),
+            "vault_tasks" => Some(Self::VaultTasks),
             _ => None,
         }
     }
@@ -87,13 +85,13 @@ mod tests {
     #[test]
     fn label_round_trips() {
         let target = StickyTarget {
-            kind: StickyKind::TasksTab,
+            kind: StickyKind::VaultTasks,
             id: "0190f1b2-7c3d-7a00-8000-000000000001".into(),
         };
         let label = target.label();
         assert_eq!(
             label,
-            "sticky:tasks_tab:0190f1b2-7c3d-7a00-8000-000000000001"
+            "sticky:vault_tasks:0190f1b2-7c3d-7a00-8000-000000000001"
         );
         assert_eq!(StickyTarget::from_label(&label), Some(target));
         assert!(is_sticky(&label));
@@ -103,8 +101,13 @@ mod tests {
     fn rejects_foreign_or_malformed_labels() {
         assert_eq!(StickyTarget::from_label(MAIN), None);
         assert_eq!(StickyTarget::from_label("sticky:poem:abc"), None);
-        assert_eq!(StickyTarget::from_label("sticky:note:"), None);
-        assert_eq!(StickyTarget::from_label("sticky:note:a b"), None);
+        assert_eq!(
+            StickyTarget::from_label("sticky:note:abc"),
+            None,
+            "0.1 kinds are gone"
+        );
+        assert_eq!(StickyTarget::from_label("sticky:vault_note:"), None);
+        assert_eq!(StickyTarget::from_label("sticky:vault_note:a b"), None);
         assert!(!is_sticky("stickyish"));
     }
 }

@@ -26,7 +26,7 @@ interface ViewToolbarProps {
   /** Actions on the right: IconButtons (or one soft Button), 4px apart. */
   actions?: ReactNode;
   /**
-   * True once the view's scroll container has scrolled (`useScrolled`). Set as `data-scrolled`;
+   * True once the view's scroll container has scrolled. Set as `data-scrolled`;
    * the header's hairline is always drawn now (the kit's bar), so it is only a styling hook.
    */
   scrolled?: boolean;

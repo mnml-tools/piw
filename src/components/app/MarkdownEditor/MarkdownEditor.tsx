@@ -1,8 +1,9 @@
-import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
+import { Compartment, EditorSelection, EditorState, type Extension } from '@codemirror/state';
 import { EditorView, placeholder as placeholderText } from '@codemirror/view';
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 import { cx } from '@/components/ui/utils';
 import { liveMarkdown, replaceText } from './live-markdown';
+import { frontMatterFold } from './front-matter';
 import styles from './MarkdownEditor.module.css';
 
 export interface MarkdownEditorHandle {
@@ -12,6 +13,8 @@ export interface MarkdownEditorHandle {
   text: () => string;
   /** Adopts text from elsewhere, keeping the caret: not an edit (no `onChange`, no undo). */
   replaceText: (text: string) => void;
+  /** The CodeMirror view, for hosts that add their own extensions (`null` before mount). */
+  view: () => EditorView | null;
 }
 
 export interface MarkdownEditorProps {
@@ -27,12 +30,15 @@ export interface MarkdownEditorProps {
   onEscape?: () => void;
   /** Sets the typography and `--md-inset` (see MarkdownEditor.module.css). */
   className?: string;
+  /** More CodeMirror extensions (read once, at mount), e.g. a section sticky's task sync. */
+  extensions?: Extension;
   ref?: Ref<MarkdownEditorHandle>;
 }
 
 /**
  * A quick note's text as live Markdown (live-markdown.ts): uncontrolled, so typing never
- * re-renders the host. Shared by the workspace note editor and the note sticky.
+ * re-renders the host. Shared by the workspace note editor, the note sticky and the section
+ * sticky.
  */
 export function MarkdownEditor({
   defaultValue,
@@ -42,6 +48,7 @@ export function MarkdownEditor({
   onChange,
   onEscape,
   className,
+  extensions,
   ref,
 }: MarkdownEditorProps) {
   const host = useRef<HTMLDivElement>(null);
@@ -50,7 +57,7 @@ export function MarkdownEditor({
   const [access] = useState(() => new Compartment());
   const [hint] = useState(() => new Compartment());
   // Read once: the editor is created per mount, as the textarea's `defaultValue`.
-  const initial = useRef({ defaultValue, label, placeholder, readOnly });
+  const initial = useRef({ defaultValue, label, placeholder, readOnly, extensions });
 
   useEffect(() => {
     callbacks.current = { onChange, onEscape };
@@ -69,9 +76,11 @@ export function MarkdownEditor({
             onEdit: (text) => callbacks.current.onChange(text),
             onEscape: () => callbacks.current.onEscape?.(),
           }),
+          frontMatterFold(),
           EditorView.contentAttributes.of({ 'aria-label': start.label }),
           access.of(readOnlyExtension(start.readOnly)),
           hint.of(start.placeholder ? placeholderText(start.placeholder) : []),
+          start.extensions ?? [],
         ],
       }),
     });
@@ -110,6 +119,7 @@ export function MarkdownEditor({
       replaceText: (text) => {
         if (view.current) replaceText(view.current, text);
       },
+      view: () => view.current,
     }),
     [],
   );

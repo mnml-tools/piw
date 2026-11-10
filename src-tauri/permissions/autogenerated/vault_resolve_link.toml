@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-vault-resolve-link"
+description = "Enables the vault_resolve_link command without any pre-configured scope."
+commands.allow = ["vault_resolve_link"]
+
+[[permission]]
+identifier = "deny-vault-resolve-link"
+description = "Denies the vault_resolve_link command without any pre-configured scope."
+commands.deny = ["vault_resolve_link"]

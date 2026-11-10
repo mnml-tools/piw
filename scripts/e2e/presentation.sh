@@ -1,100 +1,96 @@
-# Presentation screenshots: the rich demo workspace, every view, at 2x (crisp on slides).
-# THEME=light|dark. Run with a large virtual output, e.g.:
-#   E2E_WIDTH=3000 E2E_HEIGHT=1900 THEME=light scripts/e2e/nested-session.sh \
-#     scripts/e2e/presentation.sh target-e2e/presentation-light
+# README screenshots from the real build: the demo vault (PIW_DEMO=1, src-tauri/src/vault/demo.rs)
+# with a few notes open in tabs, the note panel and two stickies on top, as a 1440 x 900 window.
+# It renders at 2x (Xft.dpi 192) and scales the picture down, as text on a HiDPI screen looks;
+# at 1x the nested session draws the system font heavier than a desktop does. THEME=light|dark.
+#   E2E_WIDTH=3200 E2E_HEIGHT=2000 THEME=light SHOT_VAULT=~/Piw-demo \
+#     scripts/e2e/nested-session.sh scripts/e2e/presentation.sh target-e2e/presentation-light
+# then copy $OUT/piw-screenshot-$THEME.png to docs/. SHOT_VAULT puts the vault where the status
+# bar shows a short path; it must not exist yet, and is yours to delete afterwards.
 . "$ROOT/scripts/e2e/lib.sh"
 THEME="${THEME:-light}"
-DPI=192 # 2x: WebKitGTK renders CSS px at 2 device px
-W=2880  # 1440 x 900 CSS px
-H=1800
+S=2    # device pixels per CSS px
+W=1440 # the window, in CSS px
+H=900
+MX=40 # where it sits, in device px
+MY=40
+CORNER="3199 1999" # a point no window covers (the output is E2E_WIDTH x E2E_HEIGHT)
+export PIW_DEMO=1
+if [ -n "${SHOT_VAULT:-}" ]; then
+  [ -e "$SHOT_VAULT" ] && { echo "SHOT_VAULT $SHOT_VAULT exists: pick a new folder" >&2; exit 2; }
+  export PIW_VAULT="$SHOT_VAULT"
+fi
+px() { echo $(($1 * S)); }
+set_dpi() { printf 'Xft.dpi: %s\n' $((96 * S)) | env -u WAYLAND_DISPLAY xrdb -merge; }
 
-set_dpi() { printf 'Xft.dpi: %s\n' "$DPI" | env -u WAYLAND_DISPLAY xrdb -merge; }
-
-crop_window() {
-  id="$(xdo search --onlyvisible --name "$1" | head -1)"
-  eval "$(xdo getwindowgeometry --shell "$id")"
-  shot "_full"
-  magick "$OUT/_full.png" -crop "${WIDTH}x${HEIGHT}+${X}+${Y}" +repage "$OUT/$2.png"
-  rm -f "$OUT/_full.png"
-}
-
-place_main() {
-  id="$(xdo search --onlyvisible --name "^Piw$" | head -1)"
-  xdo windowsize --sync "$id" "$W" "$H" 2>/dev/null || xdo windowsize "$id" "$W" "$H"
-  xdo windowmove --sync "$id" 40 40 2>/dev/null || xdo windowmove "$id" 40 40
-  sleep 1.5
-}
-
-search_open() { # search_open <query>: opens the first result
-  key ctrl+k
-  sleep 0.7
-  type_text "$1"
-  sleep 1.2
-  key Return
-  sleep 2
-}
-
+# First start: writes the demo vault and pins its two stickies. Then the theme and the blue
+# accent, in Piw's data.
 set_dpi
 start_piw --hidden
+wait_for_window "Piw sticky" 20 || true
+sleep 2
 stop_piw
 sleep 2
-python3 "$ROOT/scripts/seed-rich.py" "$PIW_DATA_DIR/piw.sqlite3" "$THEME" >/dev/null
+python3 - "$PIW_DATA_DIR/piw.sqlite3" "$THEME" <<'PY'
+import json, sqlite3, sys
+db = sqlite3.connect(sys.argv[1])
+for key, value in (("theme", sys.argv[2]), ("accent", "blue")):
+    db.execute(
+        "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES (?, ?, '2026-11-10T00:00:00.000Z')",
+        (key, json.dumps(value)),
+    )
+db.commit()
+PY
 
+# Second start: the workspace, with the stickies restored at launch.
+# shellcheck disable=SC2086
+xdo mousemove $CORNER
 set_dpi
 start_piw
 wait_for_window "^Piw$" 20
-place_main
+main="$(xdo search --onlyvisible --name "^Piw$" | head -1)"
+xdo windowsize --sync "$main" "$(px $W)" "$(px $H)" 2>/dev/null || xdo windowsize "$main" "$(px $W)" "$(px $H)"
+xdo windowmove --sync "$main" "$MX" "$MY" 2>/dev/null || xdo windowmove "$main" "$MX" "$MY"
+sleep 1.5
 focus_window "^Piw$"
 
-key ctrl+1; sleep 1.5; crop_window "^Piw$" "01-inbox"
-key ctrl+2; sleep 1.5; crop_window "^Piw$" "02-notes"
-search_open "Design principles"; crop_window "^Piw$" "03-note-open"
-key ctrl+3; sleep 1.5; crop_window "^Piw$" "04-tasks"
-search_open "Migrate the remaining"; crop_window "^Piw$" "05-task-details"
-key Escape; sleep 0.6
-search_open "Refactor 2FA"; crop_window "^Piw$" "06-document"
-search_open "Roadmap"; crop_window "^Piw$" "07-document-roadmap"
-key ctrl+k; sleep 0.7; type_text "re"; sleep 1.5; crop_window "^Piw$" "08-search"
-key Escape; sleep 0.6
-key ctrl+4; sleep 1.5; crop_window "^Piw$" "09-pinned"
-key ctrl+comma; sleep 1.5; crop_window "^Piw$" "10-settings"
+# A few notes in tabs (each opens after the active one, and its folder opens in the tree); the
+# last one stays in front.
+for note in "Refactor 2FA" "Weekly sync" "Design principles" "Trip to Lisbon" "Website launch"; do
+  key ctrl+k
+  sleep 0.8
+  type_text "$note"
+  sleep 1.2
+  key Return
+  sleep 1.5
+done
+sleep 1
 
-# Quick Capture over the workspace (the backdrop is the Tasks view).
-key ctrl+3; sleep 1.5
-crop_window "^Piw$" "_backdrop"
-piw_cli --quick-task
-wait_for_window "Quick Capture" 10
-focus_window "Quick Capture"
-type_text "Order a new keyboard"
-key Tab
-type_text "Low-profile, quiet switches. Check the return policy first."
-sleep 0.8
-crop_window "Quick Capture" "_capture"
-key Escape
-sleep 0.8
-stop_piw
-sleep 2
-
-# Stickies on the desktop, restored at launch next to each other.
-python3 - "$PIW_DATA_DIR/piw.sqlite3" <<'PY'
-import sqlite3, sys
-db = sqlite3.connect(sys.argv[1])
-rows = db.execute("SELECT target_kind, target_id FROM sticky_windows ORDER BY target_kind").fetchall()
-for i, (kind, target) in enumerate(rows):
-    db.execute("UPDATE sticky_windows SET is_open = 1, always_on_top = 1, x = ?, y = ?, width = 300,"
-               " height = 280 WHERE target_kind = ? AND target_id = ?", (120 + i * 700, 200, kind, target))
-db.execute("INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('restoreStickiesOnLaunch', 'true', '2026-11-07T00:00:00.000Z')")
-db.commit()
-PY
-set_dpi
-start_piw --hidden
-wait_for_window "Piw sticky" 15
-sleep 2.5
-shot "_stickies-full"
+# The stickies at the right of the note, one right under the other, above the code block. The
+# demo note's long lines break before them (fixtures/demo).
+SX=$((MX + $(px $((W - 260 - 360)))))
 i=0
 for sid in $(xdo search --onlyvisible --name "Piw sticky"); do
+  xdo windowsize "$sid" "$(px 340)" "$(px $((230 - i * 50)))" 2>/dev/null || true
+  xdo windowmove "$sid" "$SX" $((MY + $(px $((150 + i * 240)))))
+  xdo windowraise "$sid"
   i=$((i + 1))
-  eval "$(xdo getwindowgeometry --shell "$sid")"
-  magick "$OUT/_stickies-full.png" -crop "${WIDTH}x${HEIGHT}+${X}+${Y}" +repage "$OUT/_sticky-$i.png"
 done
+sleep 1.5
+
+# WebKitGTK can keep a row hovered after the windows move: sweep the pointer down the stickies
+# in small steps and out to the corner, so every row gets its leave event.
+for y in $(seq $((MY + $(px 160))) 24 $((MY + $(px 860)))); do
+  xdo mousemove $((SX + $(px 40))) "$y"
+done
+for x in $(seq $((SX + $(px 40))) 24 $((MX + $(px $W) + 100))); do
+  xdo mousemove "$x" $((MY + $(px 860)))
+done
+# shellcheck disable=SC2086
+xdo mousemove $CORNER
+sleep 1.5
+
+shot "_full"
+magick "$OUT/_full.png" -crop "$(px $W)x$(px $H)+${MX}+${MY}" +repage \
+  -filter Lanczos -resize "${W}x${H}" "$OUT/piw-screenshot-$THEME.png"
+echo "screenshot: $OUT/piw-screenshot-$THEME.png"
 stop_piw

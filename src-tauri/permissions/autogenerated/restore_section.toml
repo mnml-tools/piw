@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-restore-section"
+description = "Enables the restore_section command without any pre-configured scope."
+commands.allow = ["restore_section"]
+
+[[permission]]
+identifier = "deny-restore-section"
+description = "Denies the restore_section command without any pre-configured scope."
+commands.deny = ["restore_section"]

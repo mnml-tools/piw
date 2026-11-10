@@ -108,11 +108,11 @@ fn probe<R: Runtime>(app: &AppHandle<R>) -> Value {
 
     // Two stickies at requested positions: one on each monitor when available.
     let a = StickyTarget {
-        kind: StickyKind::Note,
+        kind: StickyKind::VaultNote,
         id: "probe-a".into(),
     };
     let b = StickyTarget {
-        kind: StickyKind::Task,
+        kind: StickyKind::VaultTasks,
         id: "probe-b".into(),
     };
     let second = app
@@ -232,7 +232,7 @@ fn probe<R: Runtime>(app: &AppHandle<R>) -> Value {
     steps.insert("40_memory_2_stickies".into(), memory());
     let extra: Vec<StickyTarget> = (0..3)
         .map(|i| StickyTarget {
-            kind: StickyKind::Note,
+            kind: StickyKind::VaultNote,
             id: format!("probe-extra-{i}"),
         })
         .collect();

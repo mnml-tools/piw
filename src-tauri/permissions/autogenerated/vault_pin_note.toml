@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-vault-pin-note"
+description = "Enables the vault_pin_note command without any pre-configured scope."
+commands.allow = ["vault_pin_note"]
+
+[[permission]]
+identifier = "deny-vault-pin-note"
+description = "Denies the vault_pin_note command without any pre-configured scope."
+commands.deny = ["vault_pin_note"]

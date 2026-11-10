@@ -3,10 +3,10 @@ import {
   continueList,
   indentList,
   inferTitle,
-  taskProgress,
   textLines,
   toggleTaskLine,
   toggleWrap,
+  inlineText,
 } from './markdown';
 
 describe('toggleWrap', () => {
@@ -91,15 +91,6 @@ describe('textLines', () => {
   });
 });
 
-describe('taskProgress', () => {
-  it('counts ticked and open task items, at any depth and with any marker', () => {
-    expect(
-      taskProgress('## Title\n- [ ] a\n  * [x] b\n1. [X] c\n- plain\n[ ] not an item'),
-    ).toEqual({ done: 2, total: 3 });
-    expect(taskProgress('No tasks')).toEqual({ done: 0, total: 0 });
-  });
-});
-
 describe('toggleTaskLine', () => {
   it('ticks and unticks a task item', () => {
     expect(toggleTaskLine('- [ ] Call Rita')).toBe('- [x] Call Rita');
@@ -111,5 +102,17 @@ describe('toggleTaskLine', () => {
     expect(toggleTaskLine('2. Call Rita')).toBe('2. [ ] Call Rita');
     expect(toggleTaskLine('  Call Rita')).toBe('  - [ ] Call Rita');
     expect(toggleTaskLine('   ')).toBeNull();
+  });
+});
+
+describe('inlineText', () => {
+  it('drops inline markers and keeps the words', () => {
+    expect(inlineText('Reply to **Rita** about `verify()` and ~~old~~ _new_')).toBe(
+      'Reply to Rita about verify() and old new',
+    );
+    expect(
+      inlineText('See [[Onboarding#Week 1|the plan]], [[Atlas]] and [docs](https://x.y)'),
+    ).toBe('See the plan, Atlas and docs');
+    expect(inlineText('2 * 3 and snake_case_name')).toBe('2 * 3 and snake_case_name');
   });
 });

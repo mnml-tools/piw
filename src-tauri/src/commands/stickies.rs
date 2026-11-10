@@ -7,9 +7,8 @@ use super::support::{database, read, write};
 use crate::domain::model::ColorName;
 use crate::error::{AppError, AppResult};
 use crate::platform::labels::{StickyTarget, is_valid_id};
-use crate::platform::stickies::StickyRegistry;
 use crate::platform::window;
-use crate::services::stickies::{self, PinnedItem, StickyRecord};
+use crate::services::stickies::{self, StickyRecord};
 
 fn validate(target: &StickyTarget) -> AppResult<()> {
     if is_valid_id(&target.id) {
@@ -37,10 +36,19 @@ pub async fn open_sticky<R: Runtime>(
     target: StickyTarget,
 ) -> AppResult<usize> {
     validate(&target)?;
+    pin_and_show(&app, &window, target).await
+}
+
+/// Pins `target` (it must exist) and shows its window; resolves to how many stickies are open.
+pub async fn pin_and_show<R: Runtime>(
+    app: &AppHandle<R>,
+    window: &WebviewWindow<R>,
+    target: StickyTarget,
+) -> AppResult<usize> {
     let target_for_db = target.clone();
-    let record = write(&app, &window, move |tx| stickies::pin(tx, &target_for_db)).await?;
-    open_window(&app, &target, &record)?;
-    let count = open_count(&app);
+    let record = write(app, window, move |tx| stickies::pin(tx, &target_for_db)).await?;
+    open_window(app, &target, &record)?;
+    let count = open_count(app);
     if count > SOFT_LIMIT {
         let _ = app.emit_to(crate::platform::labels::MAIN, EVENT_MANY_STICKIES, count);
     }
@@ -133,14 +141,6 @@ pub async fn get_sticky<R: Runtime>(
     read(&app, move |c| stickies::get(c, &target)).await
 }
 
-#[tauri::command]
-pub async fn list_pinned<R: Runtime>(
-    app: AppHandle<R>,
-    space_id: Option<String>,
-) -> AppResult<Vec<PinnedItem>> {
-    read(&app, move |c| stickies::list(c, space_id.as_deref())).await
-}
-
 /// Forgets saved positions and lets the window manager place open stickies again.
 #[tauri::command]
 pub async fn reset_sticky_positions<R: Runtime>(
@@ -172,30 +172,6 @@ pub async fn reset_sticky_positions<R: Runtime>(
     Ok(())
 }
 
-/// Closes windows whose item went to Trash (the pin is kept so Undo can bring them back) and
-/// reopens a restored item's sticky if it was open before.
-pub fn reconcile<R: Runtime>(app: &AppHandle<R>, restored: Option<&StickyTarget>) {
-    let Ok(db) = database(app) else { return };
-    let pinned: Vec<PinnedItem> = db.read(|c| stickies::list(c, None)).unwrap_or_default();
-    for label in app.webview_windows().into_keys() {
-        let Some(target) = StickyTarget::from_label(&label) else {
-            continue;
-        };
-        if !pinned.iter().any(|item| item.target == target) {
-            let _ = window::close_sticky(app, &target);
-            app.state::<StickyRegistry>().forget(&label);
-        }
-    }
-    if let Some(target) = restored
-        && let Some(item) = pinned
-            .iter()
-            .find(|item| &item.target == target && item.is_open)
-        && let Ok(Some(record)) = db.read(|c| stickies::get(c, &item.target))
-    {
-        let _ = open_window(app, target, &record);
-    }
-}
-
 /// Reopens stickies that were open when Piw last quit — only if the user enabled it.
 pub fn restore_on_launch<R: Runtime>(app: &AppHandle<R>) {
     let Ok(db) = database(app) else { return };
@@ -206,7 +182,11 @@ pub fn restore_on_launch<R: Runtime>(app: &AppHandle<R>) {
     if !enabled {
         return;
     }
-    match db.read(stickies::open_on_launch) {
+    // The vault opens in the background; its stickies load once it is ready.
+    let vault_root = std::env::var_os("PIW_VAULT")
+        .and_then(|root| std::fs::canonicalize(root).ok())
+        .map(|root| root.to_string_lossy().into_owned());
+    match db.read(|c| stickies::open_on_launch(c, vault_root.as_deref())) {
         Ok(items) => {
             for (target, record) in items {
                 if let Err(error) = open_window(app, &target, &record) {

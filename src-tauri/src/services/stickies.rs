@@ -1,6 +1,7 @@
-//! Pinned items and their sticky windows (plan §3.7). A row in `sticky_windows` means the item is
-//! pinned (listed in Pinned); `is_open` says whether its window is on the desktop. "Pin", "Keep on
-//! top", "Hide" and "Remove" are four distinct operations (docs/ui-design-system.md §17 rule 9).
+//! Sticky windows (docs/ui-design-system.md §12): a row in `sticky_windows` means the item is
+//! pinned; `is_open` says whether its window is on the desktop. "Pin", "Keep on top", "Hide" and
+//! "Remove" are four distinct operations (docs/ui-design-system.md §17 rule 9). What a vault
+//! sticky shows is in `vault_stickies` (`services/vault_stickies.rs`).
 
 use rusqlite::{Connection, OptionalExtension, Row, Transaction, params};
 use serde::Serialize;
@@ -13,23 +14,6 @@ use crate::error::{AppError, AppResult};
 use crate::platform::labels::{StickyKind, StickyTarget};
 use crate::platform::window::{STICKY_DEFAULT_HEIGHT, STICKY_DEFAULT_WIDTH, StickyPlacement};
 
-/// A pinned item with what the Pinned view and sticky windows need to show it.
-#[derive(Debug, Clone, PartialEq, Serialize, TS)]
-#[serde(rename_all = "camelCase")]
-#[ts(export, export_to = "bindings/")]
-pub struct PinnedItem {
-    pub target: StickyTarget,
-    pub title: String,
-    /// Document a task or tasks tab belongs to.
-    pub document_title: Option<String>,
-    pub space_id: String,
-    pub is_open: bool,
-    pub always_on_top: bool,
-    pub color: Option<ColorName>,
-    pub completed: bool,
-    pub updated_at: String,
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, TS)]
 #[serde(rename_all = "camelCase")]
 #[ts(export, export_to = "bindings/")]
@@ -41,47 +25,24 @@ pub struct StickyRecord {
 
 fn kind_str(kind: StickyKind) -> &'static str {
     match kind {
-        StickyKind::Note => "note",
-        StickyKind::Task => "task",
-        StickyKind::TasksTab => "tasks_tab",
+        StickyKind::VaultNote => "vault_note",
+        StickyKind::VaultTasks => "vault_tasks",
     }
 }
 
-fn parse_kind(value: &str) -> Option<StickyKind> {
-    match value {
-        "note" => Some(StickyKind::Note),
-        "task" => Some(StickyKind::Task),
-        "tasks_tab" => Some(StickyKind::TasksTab),
-        _ => None,
-    }
-}
-
-/// Checks that the target exists and is not in Trash; returns the entity kind to notify.
+/// Checks that the sticky knows what it shows.
 fn live_target(conn: &Connection, target: &StickyTarget) -> AppResult<()> {
-    let sql = match target.kind {
-        StickyKind::Note => {
-            "SELECT 1 FROM notes WHERE id = ?1 AND deleted_at IS NULL AND kind = 'quick_note'"
-        }
-        StickyKind::Task => "SELECT 1 FROM tasks WHERE id = ?1 AND deleted_at IS NULL",
-        StickyKind::TasksTab => {
-            "SELECT 1 FROM document_tabs t JOIN notes d ON d.id = t.document_id
-             WHERE t.id = ?1 AND t.kind = 'tasks' AND t.deleted_at IS NULL AND d.deleted_at IS NULL"
-        }
-    };
-    conn.query_row(sql, [&target.id], |_| Ok(()))
-        .optional()?
-        .ok_or(AppError::NotFound { entity: "item" })
+    conn.query_row(
+        "SELECT 1 FROM vault_stickies WHERE target_kind = ?1 AND target_id = ?2",
+        params![kind_str(target.kind), target.id],
+        |_| Ok(()),
+    )
+    .optional()?
+    .ok_or(AppError::NotFound { entity: "item" })
 }
 
 fn changes(target: &StickyTarget) -> ChangeSet {
-    let kind = match target.kind {
-        StickyKind::Note => EntityKind::Note,
-        StickyKind::Task => EntityKind::Task,
-        StickyKind::TasksTab => EntityKind::Tab,
-    };
-    ChangeSet::new()
-        .with(kind, target.id.clone())
-        .with(EntityKind::Sticky, target.label())
+    ChangeSet::new().with(EntityKind::Sticky, target.label())
 }
 
 fn map_record(row: &Row<'_>) -> rusqlite::Result<StickyRecord> {
@@ -196,69 +157,21 @@ pub fn reset_positions(tx: &Transaction<'_>) -> AppResult<ChangeSet> {
     Ok(ChangeSet::new().with(EntityKind::Sticky, "*"))
 }
 
-/// Pinned items whose target still exists outside Trash, most recently touched first.
-pub fn list(conn: &Connection, space_id: Option<&str>) -> AppResult<Vec<PinnedItem>> {
-    let mut stmt = conn.prepare_cached(
-        "SELECT s.target_kind, s.target_id, s.is_open, s.always_on_top, s.color, s.updated_at,
-                CASE s.target_kind
-                  WHEN 'note' THEN n.title WHEN 'task' THEN k.title ELSE tab.title END,
-                n.body,
-                CASE s.target_kind WHEN 'task' THEN kd.title WHEN 'tasks_tab' THEN td.title END,
-                coalesce(n.space_id, k.space_id, td.space_id),
-                coalesce(k.status = 'completed', 0)
-           FROM sticky_windows s
-           LEFT JOIN notes n ON s.target_kind = 'note' AND n.id = s.target_id AND n.deleted_at IS NULL
-           LEFT JOIN tasks k ON s.target_kind = 'task' AND k.id = s.target_id AND k.deleted_at IS NULL
-           LEFT JOIN notes kd ON kd.id = k.document_id
-           LEFT JOIN document_tabs tab ON s.target_kind = 'tasks_tab' AND tab.id = s.target_id
-                                     AND tab.deleted_at IS NULL
-           LEFT JOIN notes td ON td.id = tab.document_id AND td.deleted_at IS NULL
-          WHERE coalesce(n.id, k.id, td.id) IS NOT NULL
-            AND (?1 IS NULL OR coalesce(n.space_id, k.space_id, td.space_id) = ?1)
-          ORDER BY s.updated_at DESC",
-    )?;
-    let rows = stmt.query_map([space_id], |row| {
-        let kind: String = row.get(0)?;
-        let title: String = row.get::<_, Option<String>>(6)?.unwrap_or_default();
-        let body: Option<String> = row.get(7)?;
-        let Some(kind) = parse_kind(&kind) else {
-            return Ok(None);
-        };
-        Ok(Some(PinnedItem {
-            title: match kind {
-                StickyKind::Note => crate::domain::text::display_title(&title, body.as_deref()),
-                _ => title,
-            },
-            target: StickyTarget {
-                kind,
-                id: row.get(1)?,
-            },
-            is_open: row.get(2)?,
-            always_on_top: row.get(3)?,
-            color: row.get(4)?,
-            updated_at: row.get(5)?,
-            document_title: row.get(8)?,
-            space_id: row.get(9)?,
-            completed: row.get(10)?,
-        }))
-    })?;
-    let mut items = Vec::new();
-    for row in rows {
-        if let Some(item) = row? {
-            items.push(item);
-        }
-    }
-    Ok(items)
-}
-
-/// Windows to reopen at startup (only used when the user enabled it).
-pub fn open_on_launch(conn: &Connection) -> AppResult<Vec<(StickyTarget, StickyRecord)>> {
-    Ok(list(conn, None)?
+/// Windows to reopen at startup (only used when the user enabled it): the open stickies of the
+/// vault at `vault_root`.
+pub fn open_on_launch(
+    conn: &Connection,
+    vault_root: Option<&str>,
+) -> AppResult<Vec<(StickyTarget, StickyRecord)>> {
+    let Some(root) = vault_root else {
+        return Ok(Vec::new());
+    };
+    Ok(super::vault_stickies::pinned(conn, root)?
         .into_iter()
-        .filter(|item| item.is_open)
-        .filter_map(|item| {
-            let record = get(conn, &item.target).ok().flatten()?;
-            Some((item.target, record))
+        .filter(|pinned| pinned.is_open)
+        .filter_map(|pinned| {
+            let record = get(conn, &pinned.target).ok().flatten()?;
+            Some((pinned.target, record))
         })
         .collect())
 }
@@ -266,64 +179,50 @@ pub fn open_on_launch(conn: &Connection) -> AppResult<Vec<(StickyTarget, StickyR
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::services::tasks::{self, CreateTask};
     use crate::services::test_support::db;
+    use crate::services::vault_stickies::{VaultStickyItem, target_for};
 
-    fn task_target(db: &crate::storage::Database) -> StickyTarget {
-        let task = db
-            .write(|tx| {
-                tasks::create(
-                    tx,
-                    CreateTask {
-                        title: "Pinned task".into(),
-                        ..Default::default()
-                    },
-                )
-            })
-            .unwrap()
-            .0;
-        StickyTarget {
-            kind: StickyKind::Task,
-            id: task.id,
-        }
+    fn note_target(db: &crate::storage::Database) -> StickyTarget {
+        let item = VaultStickyItem::Note {
+            path: "Work/Plan.md".into(),
+        };
+        db.write(|tx| target_for(tx, "/vault", &item)).unwrap()
     }
 
     #[test]
     fn pin_hide_and_remove_are_distinct() {
         let db = db();
-        let target = task_target(&db);
+        let target = note_target(&db);
         let (record, _) = db.write(|tx| pin(tx, &target)).unwrap();
         assert!(record.is_open);
         assert_eq!(
             (record.placement.width, record.placement.height),
             (STICKY_DEFAULT_WIDTH, STICKY_DEFAULT_HEIGHT)
         );
-
         db.write(|tx| set_open(tx, &target, false)).unwrap();
-        let pinned = db.read(|c| list(c, None)).unwrap();
-        assert_eq!(pinned.len(), 1, "hidden stickies stay pinned");
-        assert!(!pinned[0].is_open);
-
-        db.write(|tx| unpin(tx, &target)).unwrap();
-        assert!(db.read(|c| list(c, None)).unwrap().is_empty());
         assert!(
-            db.read(|c| tasks::get(c, &target.id)).is_ok(),
-            "the task itself is untouched"
+            !db.read(|c| get(c, &target)).unwrap().unwrap().is_open,
+            "hidden stays pinned"
+        );
+        db.write(|tx| unpin(tx, &target)).unwrap();
+        assert!(db.read(|c| get(c, &target)).unwrap().is_none());
+        assert!(
+            db.write(|tx| pin(tx, &target)).is_err(),
+            "unpinning forgets what it showed"
         );
     }
 
     #[test]
-    fn geometry_and_on_top_survive_a_restart() {
+    fn geometry_colour_and_on_top_survive_a_restart() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("piw.sqlite3");
         let target = {
             let db = crate::storage::Database::open(&path).unwrap();
-            db.write(crate::services::spaces::ensure_seeded).unwrap();
-            let target = task_target(&db);
+            let target = note_target(&db);
             db.write(|tx| pin(tx, &target)).unwrap();
             let placement = StickyPlacement {
-                x: Some(1200),
-                y: Some(2300),
+                x: Some(40),
+                y: Some(80),
                 width: 320.0,
                 height: 240.0,
                 always_on_top: false,
@@ -331,71 +230,25 @@ mod tests {
             db.write(|tx| save_geometry(tx, &target, &placement))
                 .unwrap();
             db.write(|tx| set_always_on_top(tx, &target, true)).unwrap();
+            db.write(|tx| set_color(tx, &target, Some(ColorName::Mint)))
+                .unwrap();
             target
         };
         let db = crate::storage::Database::open(&path).unwrap();
-        let restored = db.read(open_on_launch).unwrap();
+        let restored = db.read(|c| open_on_launch(c, Some("/vault"))).unwrap();
         assert_eq!(restored.len(), 1);
         let (restored_target, record) = &restored[0];
         assert_eq!(restored_target, &target);
         assert_eq!(
-            record.placement,
-            StickyPlacement {
-                x: Some(1200),
-                y: Some(2300),
-                width: 320.0,
-                height: 240.0,
-                always_on_top: true
-            }
+            (record.placement.x, record.placement.y),
+            (Some(40), Some(80))
         );
-    }
-
-    #[test]
-    fn trashed_or_missing_targets_cannot_be_pinned_and_disappear_from_pinned() {
-        let db = db();
-        let target = task_target(&db);
-        db.write(|tx| pin(tx, &target)).unwrap();
-        db.write(|tx| tasks::trash(tx, &target.id)).unwrap();
-        assert!(db.read(|c| list(c, None)).unwrap().is_empty());
-        assert!(db.write(|tx| pin(tx, &target)).is_err());
-        // Restoring brings it back to Pinned, still marked open.
-        db.write(|tx| tasks::restore(tx, &target.id)).unwrap();
-        assert!(db.read(|c| list(c, None)).unwrap()[0].is_open);
-        // Purging removes the sticky row too (trigger).
-        db.write(|tx| tasks::trash(tx, &target.id)).unwrap();
-        db.write(|tx| tasks::purge(tx, &target.id)).unwrap();
-        assert!(db.read(|c| get(c, &target)).unwrap().is_none());
-        let missing = StickyTarget {
-            kind: StickyKind::Note,
-            id: "nope".into(),
-        };
-        assert!(db.write(|tx| pin(tx, &missing)).is_err());
-    }
-
-    #[test]
-    fn task_flags_reflect_pinning() {
-        let db = db();
-        let target = task_target(&db);
-        db.write(|tx| pin(tx, &target)).unwrap();
-        assert!(db.read(|c| tasks::get(c, &target.id)).unwrap().pinned);
-    }
-
-    #[test]
-    fn reset_positions_forgets_coordinates_only() {
-        let db = db();
-        let target = task_target(&db);
-        db.write(|tx| pin(tx, &target)).unwrap();
-        let placement = StickyPlacement {
-            x: Some(10),
-            y: Some(10),
-            width: 300.0,
-            height: 200.0,
-            always_on_top: false,
-        };
-        db.write(|tx| save_geometry(tx, &target, &placement))
-            .unwrap();
+        assert!(record.placement.always_on_top);
+        assert_eq!(record.color, Some(ColorName::Mint));
         db.write(reset_positions).unwrap();
-        let record = db.read(|c| get(c, &target)).unwrap().unwrap();
-        assert_eq!((record.placement.x, record.placement.width), (None, 300.0));
+        assert_eq!(
+            db.read(|c| get(c, &target)).unwrap().unwrap().placement.x,
+            None
+        );
     }
 }

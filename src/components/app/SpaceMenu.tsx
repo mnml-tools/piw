@@ -1,20 +1,19 @@
 import { ChevronDown } from 'lucide-react';
 import { Button, DropdownMenu, SpaceDot } from '@/components/ui';
-import type { Space } from '@/lib/ipc/bindings/Space';
-import { spaceColor } from './space-color';
 
 interface SpaceMenuProps {
-  spaces: readonly Space[];
+  /** The vault's spaces (top-level folders), by name. */
+  spaces: readonly string[];
   value: string | null;
-  onChange: (spaceId: string) => void;
+  onChange: (space: string) => void;
   /** Accessible name of the trigger, e.g. "Space". */
   label: string;
   disabled?: boolean;
 }
 
-/** Space picker: a soft (secondary) Button with the space's round dot, its name and a chevron. */
+/** Space picker: a soft (secondary) Button with a round dot, the space's name and a chevron. */
 export function SpaceMenu({ spaces, value, onChange, label, disabled }: SpaceMenuProps) {
-  const current = spaces.find((space) => space.id === value);
+  const current = value !== null && spaces.includes(value) ? value : null;
   return (
     <DropdownMenu
       align="end"
@@ -23,10 +22,10 @@ export function SpaceMenu({ spaces, value, onChange, label, disabled }: SpaceMen
           variant="secondary"
           size="sm"
           disabled={disabled}
-          aria-label={`${label}: ${current?.name ?? '—'}`}
+          aria-label={`${label}: ${current ?? '—'}`}
           iconEnd={<ChevronDown aria-hidden />}
         >
-          <SpaceDot color={spaceColor(current)} label={current?.name ?? '—'} />
+          <SpaceDot color="plain" label={current ?? '—'} />
         </Button>
       }
       items={[
@@ -36,7 +35,7 @@ export function SpaceMenu({ spaces, value, onChange, label, disabled }: SpaceMen
           label,
           value: value ?? '',
           onValueChange: onChange,
-          options: spaces.map((space) => ({ value: space.id, label: space.name })),
+          options: spaces.map((space) => ({ value: space, label: space })),
         },
       ]}
     />

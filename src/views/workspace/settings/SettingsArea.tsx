@@ -4,6 +4,7 @@ import { PageColumn, PageScroll, PageView, ViewToolbar } from '@/components/app/
 import {
   AccentPicker,
   Button,
+  ConfirmDialog,
   Kbd,
   Segmented,
   TabPanel,
@@ -11,12 +12,12 @@ import {
   detectPlatform,
   useToast,
 } from '@/components/ui';
-import { useAppStatus, useSettings } from '@/lib/hooks/data';
+import { useAppStatus, useSettings, useVaultImportStatus } from '@/lib/hooks/data';
+import { useVaultStatus } from '@/lib/hooks/vault';
 import { api } from '@/lib/ipc/api';
 import type { Settings } from '@/lib/ipc/bindings/Settings';
 import type { ShortcutStatus } from '@/lib/ipc/bindings/ShortcutStatus';
 import { IpcError } from '@/lib/ipc/client';
-import { buildExport, exportFolderName } from '@/lib/export/build';
 import { recordAccelerator } from '@/lib/shortcuts/accelerator';
 import { common } from '@/strings/common';
 import { settingsStrings as t } from '@/strings/settings';
@@ -144,23 +145,24 @@ function StatusLine({ status }: { status: ShortcutStatus | null }) {
   );
 }
 
-function DataActions() {
+/** The vault folder, and the import of Piw 0.1's notes and tasks (docs/redesign.md, phase 5). */
+function VaultData() {
   const { toast } = useToast();
-  const [busy, setBusy] = useState<'export' | 'backup' | null>(null);
+  const vault = useVaultStatus().data;
+  const imports = useVaultImportStatus().data;
+  const [busy, setBusy] = useState<'folder' | 'import' | null>(null);
+  const [confirmAgain, setConfirmAgain] = useState(false);
   const report = (error: unknown) =>
     toast({
       tone: 'error',
       message: error instanceof IpcError ? error.message : common.toasts.genericError,
     });
 
-  const runExport = async () => {
-    setBusy('export');
+  const changeFolder = async () => {
+    setBusy('folder');
     try {
-      const folder = await api.chooseExportFolder();
-      if (!folder) return;
-      const files = buildExport(await api.exportData());
-      const written = await api.writeExport(exportFolderName(), files);
-      toast({ message: t.data.exported(written), duration: 12_000 });
+      const folder = await api.chooseVaultFolder();
+      if (folder) toast({ message: t.data.folderChanged(folder) });
     } catch (error) {
       report(error);
     } finally {
@@ -168,11 +170,11 @@ function DataActions() {
     }
   };
 
-  const runBackup = async () => {
-    setBusy('backup');
+  const runImport = async () => {
+    setBusy('import');
     try {
-      const path = await api.backupDatabase();
-      if (path) toast({ message: t.data.backedUp(path), duration: 12_000 });
+      const done = await api.vaultImport();
+      toast({ message: t.data.imported(done.notes + done.documents + done.sections, done.tasks) });
     } catch (error) {
       report(error);
     } finally {
@@ -181,28 +183,52 @@ function DataActions() {
   };
 
   return (
-    <Group label={t.data.exportGroup} footnote={t.data.restoreHow}>
-      <Row label={t.data.export} description={t.data.exportBody}>
-        <Button
-          size="sm"
-          variant="secondary"
-          loading={busy === 'export'}
-          onClick={() => void runExport()}
+    <>
+      <Group label={t.data.vault} footnote={t.data.vaultHint}>
+        <Row
+          label={t.data.vaultFolder}
+          description={<code className={styles.path}>{vault?.root ?? t.data.unknown}</code>}
         >
-          {t.data.exportButton}
-        </Button>
-      </Row>
-      <Row label={t.data.backup} description={t.data.backupBody}>
-        <Button
-          size="sm"
-          variant="secondary"
-          loading={busy === 'backup'}
-          onClick={() => void runBackup()}
-        >
-          {t.data.backupButton}
-        </Button>
-      </Row>
-    </Group>
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={busy === 'folder'}
+            onClick={() => void changeFolder()}
+          >
+            {t.data.changeFolder}
+          </Button>
+        </Row>
+      </Group>
+      {imports && (imports.pending || imports.importedAt) && (
+        <Group label={t.data.importGroup} footnote={t.data.importHint}>
+          <Row
+            label={t.data.import}
+            description={
+              imports.importedAt ? t.data.importedAt(imports.importedAt) : t.data.importBody
+            }
+          >
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={busy === 'import'}
+              disabled={vault?.phase !== 'ready'}
+              onClick={() => (imports.importedAt ? setConfirmAgain(true) : void runImport())}
+            >
+              {imports.importedAt ? t.data.importAgain : t.data.importButton}
+            </Button>
+          </Row>
+        </Group>
+      )}
+      <ConfirmDialog
+        open={confirmAgain}
+        onOpenChange={setConfirmAgain}
+        title={t.data.importAgainTitle}
+        description={t.data.importAgainBody}
+        confirmLabel={t.data.importAgain}
+        cancelLabel={common.actions.cancel}
+        onConfirm={runImport}
+      />
+    </>
   );
 }
 
@@ -420,6 +446,7 @@ export default function SettingsArea() {
 
             {tab === 'data' && (
               <>
+                <VaultData />
                 <Group label={t.data.storage}>
                   <Row
                     label={t.data.location}
@@ -428,7 +455,6 @@ export default function SettingsArea() {
                     }
                   />
                 </Group>
-                <DataActions />
               </>
             )}
 

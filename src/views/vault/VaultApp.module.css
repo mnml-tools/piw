@@ -1,0 +1,75 @@
+/* The vault shell (docs/redesign.md, "Layout"), as Zap's AppShell: the title bar, then the
+   sidebar and the main column side by side (the tab strip over the open tab), then the status
+   bar. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.body {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.main {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.panel {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: inline-size;
+  container-name: content;
+}
+
+.notice {
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  height: 100%;
+  padding: var(--space-6);
+}
+
+.detail {
+  display: block;
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+/* The status bar's save state: quiet when saved, the danger ink when a save failed or the file
+   changed on disk. */
+.saveState[data-state='error'],
+.saveState[data-state='conflict'] {
+  color: var(--color-danger);
+}
+
+/* `+` after the open tabs: a square, borderless button the strip's height, as a closed tab. */
+.newTab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  border: 0;
+  background: none;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+}
+
+.newTab:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}

@@ -10,29 +10,34 @@ import {
   type MenuEntry,
   type StickyColor,
 } from '@/components/ui';
-import { useNote, useTask } from '@/lib/hooks/data';
+import { useVaultStickyView } from '@/lib/hooks/vault';
 import { useHotkeys } from '@/lib/hooks/useHotkeys';
 import { api } from '@/lib/ipc/api';
 import type { ColorName } from '@/lib/ipc/bindings/ColorName';
-import type { Note } from '@/lib/ipc/bindings/Note';
 import type { StickyTarget } from '@/lib/ipc/bindings/StickyTarget';
 import { keys } from '@/lib/query/keys';
 import { stickyStrings as t } from '@/strings/sticky';
 import type { TaskProgress } from '@/lib/markdown';
-import { TaskSticky } from './TaskSticky';
-import { TasksTabSticky } from './TasksTabSticky';
 import styles from './StickyWindow.module.css';
 
 const ICON = { ...iconProps, size: 14 } as const;
 
 // The note editor (CodeMirror) loads only in note stickies.
-const NoteSticky = lazy(() => import('./NoteSticky').then((m) => ({ default: m.NoteSticky })));
+const VaultNoteSticky = lazy(() =>
+  import('./VaultNoteSticky').then((m) => ({ default: m.VaultNoteSticky })),
+);
+const VaultTasksSticky = lazy(() =>
+  import('./VaultTasksSticky').then((m) => ({ default: m.VaultTasksSticky })),
+);
 
 function labelOf(target: StickyTarget): string {
   return `sticky:${target.kind}:${target.id}`;
 }
 
-/** A sticky window for one note, task or document Tasks tab (docs/ui-design-system.md §12). */
+/**
+ * A sticky window for one vault note or task view (docs/ui-design-system.md §12, docs/redesign.md
+ * phase 4).
+ */
 export default function StickyWindow({ target }: { target: StickyTarget }) {
   const record = useQuery({
     queryKey: keys.sticky(labelOf(target)),
@@ -144,54 +149,39 @@ export default function StickyWindow({ target }: { target: StickyTarget }) {
         </header>
       </ContextMenu>
       <div className={styles.body}>
-        {target.kind === 'note' && (
+        {target.kind === 'vault_note' && (
           <Suspense fallback={null}>
-            <NoteSticky id={target.id} onProgress={onProgress} />
+            <VaultNoteSticky target={target} onProgress={onProgress} />
           </Suspense>
         )}
-        {target.kind === 'task' && <TaskSticky id={target.id} />}
-        {target.kind === 'tasks_tab' && <TasksTabSticky tabId={target.id} />}
+        {target.kind === 'vault_tasks' && (
+          <Suspense fallback={null}>
+            <VaultTasksSticky target={target} />
+          </Suspense>
+        )}
       </div>
     </div>
   );
 }
 
-/**
- * Whether the strip title would only repeat the first line of the note's text. A quick note's
- * display title is inferred from that line, so the strip stays empty unless it has its own title.
- */
-function repeatsBody(note: Note): boolean {
-  const title = note.title.trim();
-  if (!title) return true;
-  const firstLine = (note.body ?? '').split('\n').find((line) => line.trim()) ?? '';
-  return firstLine.includes(title);
+const VIEW_TITLES = { today: 'Today', upcoming: 'Upcoming', all: 'All tasks' } as const;
+
+/** A vault sticky's title: its note's title, or its view and space ("Today · Work"). */
+function VaultStickyTitle({ target }: { target: StickyTarget }) {
+  const shows = useVaultStickyView(target).data;
+  const title =
+    shows?.kind === 'note'
+      ? shows.title
+      : shows
+        ? [VIEW_TITLES[shows.view], shows.space].filter(Boolean).join(' · ')
+        : '';
+  return (
+    <span className={styles.title} data-tauri-drag-region title={title}>
+      {title}
+    </span>
+  );
 }
 
 function StickyTitle({ target }: { target: StickyTarget }) {
-  const note = useNote(target.kind === 'note' ? target.id : null);
-  const task = useTask(target.kind === 'task' ? target.id : null);
-  const tab = useQuery({
-    queryKey: ['document', 'tab', target.id],
-    queryFn: async () => {
-      const tab = await api.getTab(target.id);
-      const document = await api.getDocument(tab.documentId);
-      return `${document.note.title} · ${tab.title}`;
-    },
-    enabled: target.kind === 'tasks_tab',
-  });
-  const title =
-    target.kind === 'note'
-      ? note.data && !repeatsBody(note.data)
-        ? note.data.displayTitle
-        : undefined
-      : target.kind === 'task'
-        ? task.data?.task.status === 'completed'
-          ? t.completed
-          : t.task
-        : tab.data;
-  return (
-    <span className={styles.title} data-tauri-drag-region title={title}>
-      {title ?? ''}
-    </span>
-  );
+  return <VaultStickyTitle target={target} />;
 }

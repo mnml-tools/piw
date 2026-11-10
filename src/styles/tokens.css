@@ -40,13 +40,8 @@
  *   accent itself (fills, marks, the focus ring) is the kit's, which passes 3:1.
  *   Re-run `pnpm vitest run src/styles` whenever a colour token changes.
  *
- * BREAKPOINTS (custom properties cannot be used inside @media / @container;
- * mirror these numbers in src/lib/layout.ts)
- *   Window  <  800px : search folds into an icon; the brand's note hides
+ * BREAKPOINTS (custom properties cannot be used inside @media / @container)
  *   Window  >= 1100px: the content inset grows from 12 to 16px
- *   Content >= 800px : Notes split view (list + editor) available
- *   Content >= 820px : task inspector docks (list narrows); below, it overlays
- *   Content <  560px : compact paddings; inspector and dialogs go full width
  *   Main window minimum size: 420 x 360 logical px.
  * ============================================================================= */
 
@@ -188,11 +183,11 @@
   --font-size-xs: 0.625rem; /* 10px  group labels, counts, kbd, status lines */
   --font-size-sm: 0.6875rem; /* 11px  secondary text, small controls, menus, fields */
   --font-size-md: 0.75rem; /* 12px  UI: rows, tabs, buttons */
-  --font-size-lg: 0.8125rem; /* 13px  editor body, Quick Capture input, dialog titles */
-  --font-size-heading: 0.875rem; /* 14px  inspector title, view title, editor H3 */
-  --font-size-xl: 0.9375rem; /* 15px  editor H2 */
-  --font-size-2xl: 1.0625rem; /* 17px  editor H1 */
-  --font-size-3xl: 1.375rem; /* 22px  document title */
+  --font-size-lg: 0.8125rem; /* 13px  editor body and H3, Quick Capture input, dialog titles */
+  --font-size-heading: 0.875rem; /* 14px  view title, editor H2 */
+  --font-size-xl: 0.9375rem; /* 15px */
+  --font-size-2xl: 1.0625rem; /* 17px  editor H1, note title */
+  --font-size-3xl: 1.375rem; /* 22px */
   --font-size-body: var(--font-size-md);
   --font-size-editor: var(--font-size-lg);
 

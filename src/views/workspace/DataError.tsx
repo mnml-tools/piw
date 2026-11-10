@@ -1,9 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
 import { EmptyState, iconProps } from '@/components/ui';
 import { common } from '@/strings/common';
-import styles from './WorkspaceApp.module.css';
+import styles from './DataError.module.css';
 
-/** Shown instead of the workspace when the database could not be opened. */
+/** Shown instead of the workspace when Piw's own database (settings, stickies) could not be opened. */
 export function DataError({ reason, path }: { reason: string; path: string | null }) {
   return (
     <main className={styles.dataError}>

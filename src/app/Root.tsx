@@ -3,7 +3,7 @@ import { AppProviders } from './providers';
 import type { WindowKind } from './window-kind';
 
 // Each window only loads the code it needs; the capture popup must open instantly.
-const WorkspaceApp = lazy(() => import('@/views/workspace/WorkspaceApp'));
+const MainWindow = lazy(() => import('@/views/MainWindow'));
 const CaptureWindow = lazy(() => import('@/views/capture/CaptureWindow'));
 const StickyWindow = lazy(() => import('@/views/sticky/StickyWindow'));
 // Dev-only component gallery: the import is dropped from production bundles.
@@ -20,7 +20,7 @@ export function Root({ kind }: { kind: WindowKind }) {
   return (
     <AppProviders>
       <Suspense fallback={null}>
-        {kind.kind === 'main' && <WorkspaceApp />}
+        {kind.kind === 'main' && <MainWindow />}
         {kind.kind === 'capture' && <CaptureWindow />}
         {kind.kind === 'sticky' && <StickyWindow target={kind.target} />}
       </Suspense>

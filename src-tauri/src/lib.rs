@@ -6,6 +6,7 @@ mod error;
 mod platform;
 mod services;
 mod storage;
+mod vault;
 
 use std::sync::Arc;
 
@@ -40,78 +41,38 @@ macro_rules! app_commands {
             $crate::commands::stickies::set_sticky_always_on_top,
             $crate::commands::stickies::set_sticky_color,
             $crate::commands::stickies::get_sticky,
-            $crate::commands::stickies::list_pinned,
             $crate::commands::stickies::reset_sticky_positions,
             $crate::commands::platform::quit_app,
             $crate::commands::workspace::app_status,
-            $crate::commands::workspace::list_spaces,
-            $crate::commands::workspace::create_space,
-            $crate::commands::workspace::rename_space,
-            $crate::commands::workspace::set_space_color,
-            $crate::commands::workspace::set_default_space,
-            $crate::commands::workspace::space_item_count,
-            $crate::commands::workspace::delete_space,
-            $crate::commands::workspace::list_inbox,
-            $crate::commands::workspace::inbox_count,
-            $crate::commands::workspace::mark_inbox_triaged,
-            $crate::commands::workspace::list_trash,
-            $crate::commands::workspace::empty_trash,
-            $crate::commands::workspace::list_tags,
-            $crate::commands::workspace::search,
             $crate::commands::workspace::get_settings,
             $crate::commands::workspace::update_settings,
-            $crate::commands::workspace::remember_capture_space,
             $crate::commands::workspace::get_capture_draft,
             $crate::commands::workspace::save_capture_draft,
             $crate::commands::workspace::clear_capture_draft,
-            $crate::commands::data::export_data,
-            $crate::commands::data::choose_export_folder,
-            $crate::commands::data::write_export,
-            $crate::commands::data::backup_database,
-            $crate::commands::notes::list_notes,
-            $crate::commands::notes::get_note,
-            $crate::commands::notes::create_note,
-            $crate::commands::notes::update_note_text,
-            $crate::commands::notes::discard_note_if_empty,
-            $crate::commands::notes::set_note_archived,
-            $crate::commands::notes::move_note,
-            $crate::commands::notes::trash_note,
-            $crate::commands::notes::restore_note,
-            $crate::commands::notes::purge_note,
-            $crate::commands::notes::set_note_triaged,
-            $crate::commands::notes::set_note_tags,
-            $crate::commands::notes::get_document,
-            $crate::commands::notes::get_tab,
-            $crate::commands::notes::create_document,
-            $crate::commands::notes::convert_note_to_document,
-            $crate::commands::notes::revert_document_conversion,
-            $crate::commands::notes::create_tab,
-            $crate::commands::notes::rename_tab,
-            $crate::commands::notes::reorder_tabs,
-            $crate::commands::notes::update_tab_content,
-            $crate::commands::notes::update_tab_settings,
-            $crate::commands::notes::duplicate_tab,
-            $crate::commands::notes::delete_tab,
-            $crate::commands::notes::restore_tab,
-            $crate::commands::notes::trash_document,
-            $crate::commands::notes::document_move_preview,
-            $crate::commands::notes::set_document_in_sidebar,
-            $crate::commands::tasks::list_tasks,
-            $crate::commands::tasks::list_document_tasks,
-            $crate::commands::tasks::count_completed_tasks,
-            $crate::commands::tasks::get_task,
-            $crate::commands::tasks::create_task,
-            $crate::commands::tasks::update_task_text,
-            $crate::commands::tasks::set_task_completed,
-            $crate::commands::tasks::set_task_due_date,
-            $crate::commands::tasks::move_task,
-            $crate::commands::tasks::set_task_document,
-            $crate::commands::tasks::reorder_tasks,
-            $crate::commands::tasks::trash_task,
-            $crate::commands::tasks::restore_task,
-            $crate::commands::tasks::purge_task,
-            $crate::commands::tasks::set_task_triaged,
-            $crate::commands::tasks::set_task_tags,
+            $crate::commands::vault::vault_status,
+            $crate::commands::vault::vault_tree,
+            $crate::commands::vault::vault_read_note,
+            $crate::commands::vault::vault_write_note,
+            $crate::commands::vault::vault_create_note,
+            $crate::commands::vault::vault_create_folder,
+            $crate::commands::vault::vault_rename,
+            $crate::commands::vault::vault_trash,
+            $crate::commands::vault::vault_list_trash,
+            $crate::commands::vault::vault_restore,
+            $crate::commands::vault::vault_purge,
+            $crate::commands::vault::vault_search,
+            $crate::commands::vault::vault_resolve_link,
+            $crate::commands::vault::vault_tasks,
+            $crate::commands::vault::vault_edit_task,
+            $crate::commands::vault::vault_pin_note,
+            $crate::commands::vault::vault_pin_tasks,
+            $crate::commands::vault::vault_sticky_view,
+            $crate::commands::vault::vault_pinned,
+            $crate::commands::vault::vault_capture,
+            $crate::commands::vault::vault_sticky_note,
+            $crate::commands::vault::vault_import_status,
+            $crate::commands::vault::vault_import,
+            $crate::commands::vault::choose_vault_folder,
             $($extra),*
         ]
     };
@@ -150,7 +111,6 @@ pub fn run() {
         .manage(ShortcutManager::default())
         .manage(StickyRegistry::default())
         .manage(UiScale::default())
-        .manage(commands::data::ExportTarget::default())
         .on_window_event(|window, event| {
             lifecycle::on_window_event(window, event);
             platform::stickies::on_window_event(window, event);
@@ -191,28 +151,59 @@ fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     window::ensure_capture(handle)?;
     commands::workspace::apply_settings(handle, &settings, &[]);
     commands::stickies::restore_on_launch(handle);
+    start_vault(handle);
     perform(handle, parse_args(std::env::args()));
     #[cfg(debug_assertions)]
     commands::spike::start_probe_if_requested(handle);
     Ok(())
 }
 
-/// Opens the database in the OS app-data directory (never next to the binary). Failures are
-/// kept and shown by the workspace instead of crashing; the data is never modified then.
-fn open_database(app: &AppHandle) -> Result<Arc<Database>, String> {
-    let path = match std::env::var_os("PIW_DATA_DIR") {
-        Some(dir) => std::path::PathBuf::from(dir).join(DATABASE_FILE),
+/// Piw's data directory: `PIW_DATA_DIR`, or the OS app-data directory (never next to the binary).
+fn data_dir(app: &AppHandle) -> Result<std::path::PathBuf, String> {
+    match std::env::var_os("PIW_DATA_DIR") {
+        Some(dir) => Ok(std::path::PathBuf::from(dir)),
         None => app
             .path()
             .app_data_dir()
-            .map_err(|e| format!("no app data directory: {e}"))?
-            .join(DATABASE_FILE),
-    };
+            .map_err(|e| format!("no app data directory: {e}")),
+    }
+}
+
+/// Opens the database in the data directory. Failures are kept and shown by the workspace
+/// instead of crashing; the data is never modified then.
+fn open_database(app: &AppHandle) -> Result<Arc<Database>, String> {
+    let path = data_dir(app)?.join(DATABASE_FILE);
     let db = Database::open(&path).map_err(|e| e.to_string())?;
-    db.write(services::spaces::ensure_seeded)
-        .map_err(|e| e.to_string())?;
     log::info!("database ready (schema v{})", storage::SCHEMA_VERSION);
     Ok(Arc::new(db))
+}
+
+/// The vault (docs/redesign.md): `PIW_VAULT`, else the folder chosen in Settings, else
+/// `~/Piw`. It opens, imports Piw 0.1's data on first use and starts watching in the background.
+fn start_vault(app: &AppHandle) {
+    use vault::{VaultPhase, VaultSlot};
+    let settings = commands::support::database(app)
+        .ok()
+        .and_then(|db| db.read(services::settings::get).ok())
+        .unwrap_or_default();
+    // With `PIW_DATA_DIR` (testing, the demo), the default vault lives in that directory too, so
+    // a test run never writes into the real `~/Piw`.
+    let root = std::env::var_os("PIW_VAULT")
+        .map(std::path::PathBuf::from)
+        .or_else(|| settings.vault_path.map(std::path::PathBuf::from))
+        .or_else(|| {
+            std::env::var_os("PIW_DATA_DIR").map(|dir| std::path::PathBuf::from(dir).join("vault"))
+        })
+        .or_else(|| app.path().home_dir().ok().map(|home| home.join("Piw")));
+    let Some(root) = root else {
+        app.manage(VaultSlot::new(VaultPhase::Failed {
+            root: std::path::PathBuf::new(),
+            reason: "no home folder to keep the vault in".into(),
+        }));
+        return;
+    };
+    app.manage(VaultSlot::new(VaultPhase::Starting { root: root.clone() }));
+    commands::vault::launch(app, root);
 }
 
 /// Executes a launch action from the command line or a second instance.

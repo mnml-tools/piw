@@ -10,52 +10,60 @@
 </p>
 
 <p align="center">
-  Minimal, local-first notes and tasks for the desktop.
+  Minimal, local-first notes and tasks for the desktop, in plain Markdown files.
 </p>
 
-Piw lets you capture a thought in seconds, keep the important ones on your desktop, and grow a
-note into a structured document whose tasks live in your task list. It's built with Tauri,
-React, TypeScript, and Rust, and keeps everything in one SQLite file on your computer.
+Piw keeps your notes as Markdown files in a folder of your choice, finds the tasks inside them,
+and puts the notes you need right now on your desktop as sticky notes. It's built with Tauri,
+React, TypeScript, and Rust; the files are yours, readable by any editor and by Obsidian.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/piw-screenshot-dark.png">
   <source media="(prefers-color-scheme: light)" srcset="docs/piw-screenshot-light.png">
-  <img src="docs/piw-screenshot-light.png" alt="A note open in Piw, with the Quick Capture popup adding a task and a sticky note on top">
+  <img src="docs/piw-screenshot-light.png" alt="Piw with several notes open in tabs, the folder tree, a note in live Markdown with its tasks beside it, and two sticky notes on top">
 </picture>
 
 View screenshots in [light mode](docs/piw-screenshot-light.png) or [dark mode](docs/piw-screenshot-dark.png).
+They are taken from the release build on the demo vault (see [Screenshots](#screenshots)).
 
 > [!NOTE]
-> Piw is pre-release (0.1). It runs daily on Linux with KDE Plasma. Windows and macOS build in CI
-> but have not been tested by hand yet. See [Platform support](#platform-support).
+> Piw is pre-release. It runs daily on Linux with KDE Plasma. Windows and macOS build in CI but
+> have not been tested by hand yet. See [Platform support](#platform-support).
 
 ## What you can do
 
+- **Write in plain Markdown.** Notes are `.md` files in your vault (`~/Piw` by default, or any
+  folder in Settings › Data). One live editor shows headings, emphasis, code and lists as you
+  type, with the markers only on the line you are editing. Link notes with `[[Note]]` (renaming
+  a note updates the links), tag them with `#tag`, and edit them in any other app: Piw follows.
+- **Organise with folders.** The sidebar shows the vault as a tree; the top-level folders are
+  spaces, and the space filter in the title bar narrows the tree, search and tasks to one of
+  them. Notes, task views, Trash and Settings open as tabs.
+- **Keep tasks where they belong.** A task is a `- [ ]` line in any note. Type `@tomorrow`,
+  `@friday` or a date (or press `Ctrl+D`) to give it a due date; Piw writes it as `📅 2026-11-12`,
+  the format of Obsidian's Tasks plugin. The panel beside a note lists its tasks and outline,
+  and Today, Upcoming and All collect the tasks of every note.
 - **Capture** from any app with `Ctrl+Shift+Space` (`⌘⇧Space` on macOS), type, then
-  `Ctrl+Enter`. The popup closes only after the note or task is saved, and a draft survives an
-  accidental close. The tray menu and `piw --quick-note` / `piw --quick-task` open it too.
-- **Write notes** in plain, Markdown-friendly text. Split the list and the editor side by side,
-  add tags, and archive the notes you are done with.
-- **Plan tasks** with subtasks, due dates and manual order in Today, Upcoming, All and Completed
-  views, with an Overdue section. A contextual inspector edits the selected task.
-- **Grow a note into a document** with tabs. Content tabs hold rich text, code blocks and
-  checklists; Tasks tabs are live views of real tasks. `Ctrl+T` turns a line into a task, and
-  completing it anywhere updates every view.
-- **Pin stickies** to your desktop for a note, a task or a document's task list. Keep them on
-  top or hide them without losing them; position and size are remembered.
-- **Search** everything with `Ctrl+K`: notes, documents and tasks across all spaces, with
-  highlighted matches.
-- **Sort by space.** Work and Personal come built in; add your own and use them as a global
-  filter. New items land in the Inbox until you triage them, and Trash keeps deletions with undo.
-- **Make it yours** with System, Light or Dark mode, three text sizes, a configurable global
-  shortcut with conflict detection, close to tray, and start at login (off by default).
-- **Keep it yours.** No account, no cloud, no telemetry, no network requests. Settings › Data
-  shows where the database lives, writes a consistent **backup**, and **exports** Markdown, JSON
-  and CSV.
+  `Ctrl+Enter`: the note or task lands in the chosen space's `Inbox.md`. The popup closes only
+  after it is saved, and a draft survives an accidental close. The tray menu and
+  `piw --quick-note` / `piw --quick-task` open it too.
+- **Pin stickies** to your desktop for a note or a task view, each in its own colour. Select text
+  in a note and choose **Create sticky from selection** to turn it into a new, linked note on
+  your desktop. Keep stickies on top or hide them without losing them; position and size are
+  remembered.
+- **Search** every note with `Ctrl+K`, with highlighted matches.
+- **Bring Piw 0.1 along.** Its notes, documents, sections and tasks are imported into the vault
+  the first time; the old database is left untouched.
+- **Make it yours** with System, Light or Dark mode, five accent colours, three text sizes, a
+  configurable global shortcut with conflict detection, close to tray, and start at login (off by
+  default).
+- **Keep it yours.** No account, no cloud, no telemetry, no network requests. Back up or sync the
+  vault like any folder.
 
 On macOS use `⌘` instead of `Ctrl`. Closing the window keeps Piw in the tray; **Quit Piw** in the
 tray menu exits. Every shortcut is listed in the
-[design system](docs/ui-design-system.md#14-keyboard).
+[design system](docs/ui-design-system.md#14-keyboard). The file format is specified in
+[docs/vault-format.md](docs/vault-format.md).
 
 ## Run locally
 
@@ -74,16 +82,24 @@ pnpm install
 pnpm tauri dev
 ```
 
-Set `PIW_DATA_DIR=/some/folder` to keep your real notes out of reach while you test.
+Set `PIW_DATA_DIR=/some/folder` to keep your real notes out of reach while you test: Piw then
+keeps its settings there and opens `/some/folder/vault` (or the folder in `PIW_VAULT`).
 
 Use `pnpm dev` to preview the interface in a browser at <http://localhost:1420>. Outside Tauri,
-an in-memory mock with demo data answers every command; it is dev-only and resets on reload. Its
+an in-memory mock with the same demo vault answers every command; it is dev-only and resets on reload. Its
 URL parameters are listed in the [architecture guide](docs/architecture.md#browser-preview).
 
-To see the real app full of data, build the release binary once (`pnpm tauri build --no-bundle`)
-and run `scripts/demo.sh`. It opens Piw on a separate, richly seeded database in
-`~/.local/share/piw-demo`. Quit Piw first; use `--reset` to start over and
-`PIW_DEMO_THEME=light|dark` to pick a theme.
+To see the app full of notes, run:
+
+```sh
+pnpm demo
+```
+
+It starts `tauri dev` on a demo vault (`fixtures/demo/`, with its dates moved to today) and two
+stickies on the desktop, in a separate data directory (`~/.local/share/piw-demo` on Linux), so
+your real notes and settings are never touched. Your edits there are kept; `pnpm demo --reset`
+starts over, and `pnpm demo --release` runs the release binary instead. Quit Piw first: a running
+Piw would take the launch.
 
 ## Build desktop packages
 
@@ -168,26 +184,40 @@ This is what CI runs: `pnpm typecheck`, `pnpm lint` (ESLint and Prettier), `pnpm
 Run `pnpm bindings` after changing a Rust DTO; CI fails if `src/lib/ipc/bindings` is stale.
 
 Native end-to-end scenarios run the release build in a private virtual KWin session (Linux with
-KWin, Xwayland and xdotool), so the production CSP and permissions are in force:
+KWin, Xwayland and xdotool), with its own data directory and vault, so the production CSP and
+permissions are in force:
 
 ```sh
 pnpm tauri build --no-bundle
 scripts/e2e/nested-session.sh scripts/e2e/<scenario>.sh
 ```
 
-Scenarios are `capture`, `document`, `sticky`, `workspace` and `perf`; results land in
-`target-e2e/<scenario>/`. For visual QA, `scripts/e2e/visual-qa.sh` screenshots every window
-(`THEME=light|dark`, `SIZE=WIDTHxHEIGHT`, `XFT_DPI=134` for a 140 % desktop) for review against
-the [design system checklist](docs/ui-design-system.md#18-for-view-authors-and-reviewers).
-`scripts/e2e/presentation.sh` produces the screenshots above. See the
-[architecture guide](docs/architecture.md#validation) for the test layers and measured numbers.
+Results land in `target-e2e/<scenario>/`. The other scenarios (`capture`, `sticky`,
+`workspace`, `perf`, `visual-qa`) were written for Piw 0.1 and still check its database; they
+are being ported to the vault. See the [architecture guide](docs/architecture.md#validation) for
+the test layers.
+
+### Screenshots
+
+The screenshots at the top come from the `presentation` scenario on the release build: the
+demo vault (`fixtures/demo/`) with five notes open in tabs, the note panel, two stickies beside
+the note and the blue accent, rendered at 2x and scaled down to 1440 × 900. To retake them:
+
+```sh
+pnpm tauri build --no-bundle
+for theme in light dark; do E2E_WIDTH=3200 E2E_HEIGHT=2000 THEME=$theme SHOT_VAULT=~/Piw-demo scripts/e2e/nested-session.sh scripts/e2e/presentation.sh target-e2e/presentation-$theme; rm -rf ~/Piw-demo; done
+cp target-e2e/presentation-*/piw-screenshot-*.png docs/
+```
+
+`SHOT_VAULT` only makes the status bar show a short path; it must be a folder that does not
+exist yet, and the loop deletes it after each run. Your own vault and settings are never used.
 
 ## Platform support
 
-- **Verified on Linux** with KDE Plasma 6.7 on Wayland: the workspace, Quick Capture, documents
-  and stickies, by hand and with the native E2E scenarios; the portal shortcut and the tray with
-  a scripted probe. Pressing the physical shortcut key and using the tray in the Plasma panel
-  still need a check by hand.
+- **Verified on Linux** with KDE Plasma 6.7 on Wayland, for Piw 0.1: the workspace, Quick
+  Capture and stickies, by hand and with the native E2E scenarios; the portal shortcut and the
+  tray with a scripted probe. The vault is tested in Rust and in the browser preview and still
+  needs a run in the packaged app.
 - **Windows and macOS** build and pass the Rust tests in CI, but have not been run by hand.
   GNOME and X11 sessions are untested too. Reports are very welcome.
 - **Wayland:** native Wayland does not let apps position windows or keep them on top, which
@@ -197,7 +227,7 @@ the [design system checklist](docs/ui-design-system.md#18-for-view-authors-and-r
 - **Global shortcut:** on KDE Plasma 6 and GNOME 48+ Piw asks the desktop's shortcuts portal;
   confirm the dialog the first time. X11, Windows and macOS use the native API. Elsewhere (e.g.
   Sway), bind `piw --quick-note` or `piw --quick-task` to a key; it opens the popup in the Piw that
-  is already running. The tray menu and **New** in the window always work.
+  is already running. The tray menu always works.
 
 ## License
 
