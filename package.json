@@ -28,7 +28,7 @@
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
     "rust:check": "pnpm rust:fmt && pnpm rust:lint && pnpm rust:test",
     "bindings": "cargo test --manifest-path src-tauri/Cargo.toml --locked export_bindings",
-    "verify": "pnpm check && pnpm rust:check && pnpm build"
+    "verify": "pnpm check && pnpm rust:check && pnpm build",
     "test:editor-perf": "EDITOR_PERF=1 vitest run src/lib/editor/__tests__/performance.test.ts --testTimeout=60000",
     "icons": "node scripts/build-icons.mjs",
     "icons:png": "tauri icon src/assets/AppIcon.png",
