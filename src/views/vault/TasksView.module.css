@@ -1,0 +1,144 @@
+/* Task views on the page grid (components/app/Page.module.css): group headings as the kit's
+   uppercase labels with their count (Overdue in the danger ink), rows of a 16px box, the text
+   with where it lives below in mono muted ink, and the due date at the right inset (a quiet
+   button that opens the date menu). A task ticked today stays, struck through. */
+.group {
+  margin-bottom: var(--space-4);
+}
+
+.groupTitle {
+  display: flex;
+  gap: var(--space-1-5);
+  margin: var(--space-3) 0 var(--space-1);
+  padding-inline: var(--text-start);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-meta);
+  font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+}
+
+.groupTitle[data-tone='overdue'] {
+  color: var(--color-danger);
+}
+
+.count {
+  color: var(--color-text-subtle);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-height: calc(var(--control-height-sm) + 2 * var(--space-1-5));
+  padding: var(--space-1) var(--content-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.row:hover {
+  background: var(--color-bg-hover);
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.text {
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.row[data-done] .text {
+  color: var(--color-text-subtle);
+  text-decoration: line-through;
+}
+
+.input {
+  padding: 0;
+  border: 0;
+  border-bottom: var(--border-width) solid var(--color-focus-ring);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+  outline: none;
+}
+
+.where {
+  overflow: hidden;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.due {
+  flex: none;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-1-5);
+  border: var(--border-width) solid transparent;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  cursor: pointer;
+}
+
+.due:hover,
+.due[aria-expanded='true'] {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.due[data-overdue] {
+  color: var(--color-danger);
+}
+
+/* "Add task": a row on the page grid, the plus in the glyph column, a borderless input. */
+.add {
+  display: flex;
+  align-items: center;
+  gap: var(--glyph-gap);
+  min-height: calc(var(--control-height-sm) + 2 * var(--space-1-5));
+  padding: var(--space-1) var(--content-inset);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.addIcon {
+  flex: none;
+  color: var(--color-text-subtle);
+}
+
+.addInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--font-size-ui);
+  outline: none;
+}
+
+.addInput::placeholder {
+  color: var(--color-placeholder);
+}

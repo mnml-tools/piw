@@ -6,76 +6,49 @@ import type { EntityKind } from '@/lib/ipc/bindings/EntityKind';
  * (and refetched only if some component is displaying it).
  */
 export const keys = {
-  spaces: ['spaces'] as const,
-  notes: (query: object = {}) => ['notes', query] as const,
-  note: (id: string) => ['note', id] as const,
-  document: (id: string) => ['document', id] as const,
-  tasks: (query: object = {}) => ['tasks', query] as const,
-  documentTasks: (documentId: string, show: string, sort: string) =>
-    ['documentTasks', documentId, show, sort] as const,
-  task: (id: string) => ['task', id] as const,
-  completedCount: (spaceId: string | null) => ['completedCount', spaceId] as const,
-  inbox: (spaceId: string | null) => ['inbox', spaceId] as const,
-  inboxCount: (spaceId: string | null) => ['inboxCount', spaceId] as const,
-  trash: ['trash'] as const,
-  tags: ['tags'] as const,
-  search: (query: string, spaceId: string | null) => ['search', query, spaceId] as const,
   settings: ['settings'] as const,
-  pinned: (spaceId: string | null) => ['pinned', spaceId] as const,
   sticky: (label: string) => ['sticky', label] as const,
+  vaultStatus: ['vaultStatus'] as const,
+  vaultTree: ['vaultTree'] as const,
+  vaultNote: (path: string) => ['vaultNote', path] as const,
+  vaultSearch: (query: string, space: string | null) => ['vaultSearch', query, space] as const,
+  vaultTrash: ['vaultTrash'] as const,
+  vaultTasks: (view: string, space: string | null, today: string) =>
+    ['vaultTasks', view, space, today] as const,
+  vaultPinned: ['vaultPinned'] as const,
+  vaultStickyView: (label: string) => ['vaultStickyView', label] as const,
+  vaultImport: ['vaultImport'] as const,
 };
 
 export type QueryRoot =
-  | 'spaces'
-  | 'notes'
-  | 'note'
-  | 'document'
-  | 'tasks'
-  | 'documentTasks'
-  | 'task'
-  | 'completedCount'
-  | 'inbox'
-  | 'inboxCount'
-  | 'trash'
-  | 'tags'
-  | 'search'
   | 'settings'
-  | 'pinned'
-  | 'sticky';
+  | 'sticky'
+  | 'vaultStatus'
+  | 'vaultTree'
+  | 'vaultNote'
+  | 'vaultSearch'
+  | 'vaultTrash'
+  | 'vaultTasks'
+  | 'vaultPinned'
+  | 'vaultStickyView'
+  | 'vaultImport';
 
 /** Which query roots must refresh when an entity kind changes. */
 const DEPENDENCIES: Record<EntityKind, readonly QueryRoot[]> = {
-  space: ['spaces', 'notes', 'tasks', 'inbox', 'inboxCount', 'search', 'pinned'],
-  note: [
-    'notes',
-    'note',
-    'document',
-    'tasks',
-    'documentTasks',
-    'task',
-    'inbox',
-    'inboxCount',
-    'trash',
-    'search',
-    'pinned',
+  settings: ['settings', 'vaultImport'],
+  sticky: ['sticky', 'vaultPinned', 'vaultStickyView'],
+  // Any vault path: the vault's queries are cheap, so they all refresh.
+  file: [
+    'vaultStatus',
+    'vaultTree',
+    'vaultNote',
+    'vaultSearch',
+    'vaultTrash',
+    'vaultTasks',
+    'vaultPinned',
+    'vaultStickyView',
+    'vaultImport',
   ],
-  tab: ['document', 'search', 'pinned'],
-  task: [
-    'tasks',
-    'documentTasks',
-    'task',
-    'completedCount',
-    'inbox',
-    'inboxCount',
-    'trash',
-    'search',
-    'notes',
-    'document',
-    'pinned',
-  ],
-  tag: ['tags', 'notes', 'note', 'tasks', 'task', 'documentTasks', 'inbox'],
-  settings: ['settings'],
-  sticky: ['pinned', 'sticky', 'notes', 'note', 'tasks', 'task', 'documentTasks'],
 };
 
 export function rootsFor(kinds: Iterable<EntityKind>): Set<QueryRoot> {

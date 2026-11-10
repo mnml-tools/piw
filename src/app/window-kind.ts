@@ -11,7 +11,7 @@ export type WindowKind =
   /** Dev-only component gallery (`?window=gallery` in a browser). */
   | { kind: 'gallery' };
 
-const STICKY_KINDS: readonly StickyKind[] = ['note', 'task', 'tasks_tab'];
+const STICKY_KINDS: readonly StickyKind[] = ['vault_note', 'vault_tasks'];
 const ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
 
 export function parseWindowLabel(label: string): WindowKind | null {

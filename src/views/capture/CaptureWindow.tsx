@@ -1,7 +1,7 @@
 import { listen } from '@tauri-apps/api/event';
 import { isTauri } from '@tauri-apps/api/core';
 import { AlertCircle, CalendarDays, Pin } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { SpaceMenu } from '@/components/app/SpaceMenu';
 import {
   Button,
@@ -15,7 +15,9 @@ import {
   TextInput,
 } from '@/components/ui';
 import { formatDueDate, todayString } from '@/lib/dates';
-import { useSettings, useSpaces } from '@/lib/hooks/data';
+import { useSettings } from '@/lib/hooks/data';
+import { useVaultStatus, useVaultTree } from '@/lib/hooks/vault';
+import { spacesOf } from '@/views/vault/tree';
 import { useHotkeys } from '@/lib/hooks/useHotkeys';
 import type { CaptureOpenPayload } from '@/lib/ipc/bindings/CaptureOpenPayload';
 import type { CaptureMode } from '@/lib/ipc/bindings/CaptureMode';
@@ -25,11 +27,16 @@ import styles from './CaptureWindow.module.css';
 
 const OPEN_EVENT = 'piw://capture/open';
 
-/** The Quick Capture popup (docs/ui-design-system.md §11). */
+/**
+ * The Quick Capture popup (docs/ui-design-system.md §11): appends to the chosen space's Inbox.md
+ * (docs/redesign.md, phase 4).
+ */
 export default function CaptureWindow() {
-  const spaces = useSpaces();
-  const settings = useSettings();
-  const capture = useCapture(spaces.data, settings.data);
+  const captureSetting = useSettings().data?.captureSpace ?? 'last_used';
+  const vaultReady = useVaultStatus().data?.phase === 'ready';
+  const tree = useVaultTree(vaultReady);
+  const spaceList = useMemo(() => spacesOf(tree.data ?? []), [tree.data]);
+  const capture = useCapture(vaultReady ? spaceList : undefined, captureSetting);
   const { form, state } = capture;
   const textRef = useRef<HTMLTextAreaElement & HTMLInputElement>(null);
   const retryRef = useRef<HTMLButtonElement>(null);
@@ -131,7 +138,7 @@ export default function CaptureWindow() {
         />
         <div className={styles.spacer} data-tauri-drag-region />
         <SpaceMenu
-          spaces={spaces.data ?? []}
+          spaces={spaceList}
           value={form.spaceId}
           onChange={(spaceId) => capture.update({ spaceId })}
           label={t.space}

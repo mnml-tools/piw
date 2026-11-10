@@ -1,0 +1,135 @@
+/* The note panel (docs/redesign.md, "Layout"), as a Zap side panel: 260px on --sidebar after a
+   hairline, quiet sentence-case labels with the progress at their end, a 2px progress bar in
+   the accent, rows of 24px at 11px (box, text, due date in mono), an overdue date in the
+   danger ink; then the outline as quiet rows indented by heading level. It hides when the
+   note column is narrower than 720px. */
+.panel {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 260px;
+  min-height: 0;
+  padding: var(--space-3) 0;
+  overflow-y: auto;
+  border-inline-start: var(--border-width) solid var(--color-border);
+  background: var(--color-bg-sidebar);
+  font-size: var(--font-size-secondary);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 var(--space-3) var(--space-1);
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+}
+
+.progress {
+  height: 2px;
+  margin: 0 var(--space-3) var(--space-1);
+  background: var(--color-border);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent-fill);
+}
+
+.hint {
+  margin: 0 var(--space-3);
+  color: var(--color-text-subtle);
+  line-height: var(--line-height-snug);
+}
+
+.group + .group {
+  margin-top: var(--space-2);
+}
+
+.groupTitle {
+  margin: 0 var(--space-3) var(--space-0-5);
+  overflow: hidden;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-height: 24px;
+  padding-inline-end: var(--space-3);
+}
+
+.text,
+.heading {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-0-5) 0;
+  overflow: hidden;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.text:hover,
+.heading:hover {
+  color: var(--color-text);
+}
+
+.task[data-done] .text {
+  color: var(--color-text-subtle);
+  text-decoration: line-through;
+}
+
+.heading {
+  display: block;
+  width: 100%;
+  padding-block: var(--space-1);
+  padding-inline-end: var(--space-3);
+}
+
+/* The section the caret is in: the kit's selected row, as the sidebar's active item. */
+.heading[aria-current] {
+  background: var(--color-bg-active);
+  color: var(--color-text);
+}
+
+.due {
+  flex: none;
+  color: var(--color-text-subtle);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+}
+
+.due[data-overdue] {
+  color: var(--color-danger);
+}
+
+@container (max-width: 719px) {
+  .panel {
+    display: none;
+  }
+}

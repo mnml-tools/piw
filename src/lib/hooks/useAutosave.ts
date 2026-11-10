@@ -7,14 +7,14 @@ import { Autosaver, type SaveStatus } from '@/lib/autosave';
  * flushed when the window loses focus or is hidden and when the component unmounts, so
  * switching notes or closing the window never drops text.
  */
-export function useAutosave<T>(
-  initial: { value: T; rev: number },
-  save: (value: T, rev: number) => Promise<number>,
+export function useAutosave<T, R = number>(
+  initial: { value: T; rev: R },
+  save: (value: T, rev: R) => Promise<R>,
   options: { delay?: number; equals?: (a: T, b: T) => boolean } = {},
 ) {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [saver] = useState(
-    () => new Autosaver<T>(initial, { save, onStatus: setStatus, ...options }),
+    () => new Autosaver<T, R>(initial, { save, onStatus: setStatus, ...options }),
   );
 
   useEffect(() => {

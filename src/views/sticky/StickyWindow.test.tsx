@@ -2,15 +2,23 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installDomPolyfills, setPlatform } from '@/components/ui/test-utils';
+import { todayString } from '@/lib/dates';
 import { api } from '@/lib/ipc/api';
 import type { StickyRecord } from '@/lib/ipc/bindings/StickyRecord';
-import { note, task } from '@/test/fixtures';
+import type { VaultNote } from '@/lib/ipc/bindings/VaultNote';
 import { renderWithProviders } from '@/test/render';
 import StickyWindow from './StickyWindow';
+
+const TARGET = { kind: 'vault_note', id: 'n1' } as const;
+const PATH = 'Work/Fornecedor.md';
 
 /** The editor's lines as shown (rendered Markdown, markers hidden while unfocused). */
 function lines(field: HTMLElement): string[] {
   return [...field.querySelectorAll('.cm-line')].map((line) => line.textContent ?? '');
+}
+
+function note(text: string): VaultNote {
+  return { path: PATH, title: 'Fornecedor', space: 'Work', text, hash: 'h1' };
 }
 
 function record(overrides: Partial<StickyRecord> = {}): StickyRecord {
@@ -29,8 +37,13 @@ beforeAll(() => {
 
 beforeEach(() => {
   vi.spyOn(api, 'getSticky').mockResolvedValue(record());
-  vi.spyOn(api, 'getNote').mockResolvedValue(
-    note({ body: 'Ligar ao fornecedor\nPedir orçamento revisto.' }),
+  vi.spyOn(api, 'vaultStickyView').mockResolvedValue({
+    kind: 'note',
+    path: PATH,
+    title: 'Fornecedor',
+  });
+  vi.spyOn(api, 'vaultReadNote').mockResolvedValue(
+    note('Ligar ao fornecedor\nPedir orçamento revisto.'),
   );
   vi.spyOn(api, 'setStickyColor').mockResolvedValue();
   vi.spyOn(api, 'setStickyAlwaysOnTop').mockResolvedValue();
@@ -40,7 +53,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('StickyWindow', () => {
   it('keeps the drag strip and every control reachable by name', async () => {
-    renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
+    renderWithProviders(<StickyWindow target={TARGET} />);
     const field = await screen.findByRole('textbox', { name: 'Note text' });
     expect(lines(field)).toEqual(['Ligar ao fornecedor', 'Pedir orçamento revisto.']);
 
@@ -49,24 +62,26 @@ describe('StickyWindow', () => {
     for (const name of ['Keep on top', 'Open in Piw', 'More actions', 'Hide from desktop']) {
       expect(within(strip).getByRole('button', { name })).toBeInTheDocument();
     }
-    // A quick note's title is its first line: the strip does not repeat it.
-    expect(within(strip).queryByText('Ligar ao fornecedor')).not.toBeInTheDocument();
+    expect(await within(strip).findByText('Fornecedor')).toBeInTheDocument();
 
     await userEvent.click(within(strip).getByRole('button', { name: 'Hide from desktop' }));
-    expect(api.closeSticky).toHaveBeenCalledWith({ kind: 'note', id: 'n1' });
+    expect(api.closeSticky).toHaveBeenCalledWith(TARGET);
   });
 
-  it('shows the note title in the strip only when it differs from the text', async () => {
-    vi.mocked(api.getNote).mockResolvedValue(
-      note({ title: 'Fornecedor', displayTitle: 'Fornecedor', body: 'Pedir orçamento.' }),
-    );
-    renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
-    expect(await within(screen.getByRole('banner')).findByText('Fornecedor')).toBeInTheDocument();
+  it('titles a task view with its view and space', async () => {
+    vi.mocked(api.vaultStickyView).mockResolvedValue({
+      kind: 'tasks',
+      view: 'today',
+      space: 'Work',
+    });
+    vi.spyOn(api, 'vaultTasks').mockResolvedValue([]);
+    renderWithProviders(<StickyWindow target={{ kind: 'vault_tasks', id: 'today' }} />);
+    expect(await within(screen.getByRole('banner')).findByText('Today · Work')).toBeInTheDocument();
   });
 
   it('applies the palette and lists the colours, with swatches, in More', async () => {
     vi.mocked(api.getSticky).mockResolvedValue(record({ color: 'peach' }));
-    const { container } = renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
+    const { container } = renderWithProviders(<StickyWindow target={TARGET} />);
     await waitFor(() =>
       expect(container.querySelector('[data-sticky-color]')).toHaveAttribute(
         'data-sticky-color',
@@ -87,30 +102,28 @@ describe('StickyWindow', () => {
     expect(within(menu).getByRole('menuitem', { name: 'Remove from desktop' })).toBeInTheDocument();
 
     await userEvent.click(within(menu).getByRole('menuitemradio', { name: 'Sage' }));
-    expect(api.setStickyColor).toHaveBeenCalledWith({ kind: 'note', id: 'n1' }, 'mint');
+    expect(api.setStickyColor).toHaveBeenCalledWith(TARGET, 'mint');
   });
 
   it('shows keep-on-top as a pressed toggle and turns it off', async () => {
     vi.mocked(api.getSticky).mockResolvedValue(
       record({ placement: { x: 0, y: 0, width: 300, height: 260, alwaysOnTop: true } }),
     );
-    renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
+    renderWithProviders(<StickyWindow target={TARGET} />);
     const toggle = await screen.findByRole('button', { name: 'Stop keeping on top' });
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(toggle);
-    expect(api.setStickyAlwaysOnTop).toHaveBeenCalledWith({ kind: 'note', id: 'n1' }, false);
+    expect(api.setStickyAlwaysOnTop).toHaveBeenCalledWith(TARGET, false);
   });
 
   it('renders the note as Markdown, counts its task items and ticks them', async () => {
-    vi.mocked(api.getNote).mockResolvedValue(
-      note({ body: '## Mykid\n\n- [x] Verify archive bug\n- [ ] Reply to **Rita**' }),
+    vi.mocked(api.vaultReadNote).mockResolvedValue(
+      note('## Mykid\n\n- [x] Verify archive bug\n- [ ] Reply to **Rita**'),
     );
-    const update = vi
-      .spyOn(api, 'updateNoteText')
-      .mockImplementation(async (_id, rev, patch) =>
-        note({ body: patch.body ?? '', rev: rev + 1 }),
-      );
-    renderWithProviders(<StickyWindow target={{ kind: 'note', id: 'n1' }} />);
+    const write = vi
+      .spyOn(api, 'vaultWriteNote')
+      .mockImplementation(async (_path, text) => ({ ...note(text), hash: 'h2' }));
+    renderWithProviders(<StickyWindow target={TARGET} />);
     const field = await screen.findByRole('textbox', { name: 'Note text' });
     expect(lines(field)).toEqual(['Mykid', '', 'Verify archive bug', 'Reply to Rita']);
 
@@ -122,23 +135,11 @@ describe('StickyWindow', () => {
     await userEvent.pointer({ keys: '[MouseLeft>]', target: reply });
     expect(within(strip).getByLabelText('2 of 2 done')).toBeInTheDocument();
     await waitFor(() =>
-      expect(update).toHaveBeenCalledWith('n1', expect.any(Number), {
-        body: '## Mykid\n\n- [x] Verify archive bug\n- [x] Reply to **Rita**',
-      }),
+      expect(write).toHaveBeenCalledWith(
+        PATH,
+        `## Mykid\n\n- [x] Verify archive bug\n- [x] Reply to **Rita** ✅ ${todayString()}`,
+        'h1',
+      ),
     );
-  });
-
-  it('renders a task with its checkbox, subtasks and the "Task" strip title', async () => {
-    vi.spyOn(api, 'getTask').mockResolvedValue({
-      task: task({ id: 't1', title: 'Comprar café', description: 'Grão, não moído' }),
-      subtasks: [task({ id: 's1', title: 'Ver preços', parentTaskId: 't1' })],
-      parentTitle: null,
-    });
-    renderWithProviders(<StickyWindow target={{ kind: 'task', id: 't1' }} />);
-    expect(await screen.findByRole('checkbox', { name: 'Comprar café' })).not.toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'Ver preços' })).toBeInTheDocument();
-    expect(screen.getByText('Grão, não moído')).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Add subtask' })).toBeInTheDocument();
-    expect(within(screen.getByRole('banner')).getByText('Task')).toBeInTheDocument();
   });
 });

@@ -14,8 +14,8 @@ and state: `pnpm dev`, then `/?window=gallery`.
 **In one sentence:** one soft title bar over a white canvas; square controls with hairline
 borders; warm neutral greys and one accent, used sparingly; the system font at 12px.
 
-**Conventions:** **Mod** = ⌘ on macOS, Ctrl on Windows and Linux. "Item" = note, document or
-task. Sizes are CSS px unless stated.
+**Conventions:** **Mod** = ⌘ on macOS, Ctrl on Windows and Linux. "Item" = a note or a task
+(a `- [ ]` line in a note). Sizes are CSS px unless stated.
 
 **Provenance:** the visual language is Zap's, shared through `@mnml-tools/ui` so that every
 mnml-tools app looks the same. Piw's own behaviour (capture first, autosave, keyboard-first, the
@@ -25,8 +25,8 @@ principles only were studied: no assets, code or values were taken from them.
 ## 1. Principles
 
 1. **Capture first.** Nothing may slow `shortcut → type → save → back to work`.
-2. **Quiet chrome.** Zap's shell: the title bar, the area tabs, the canvas, the status bar.
-   Hairlines separate them, panes from each other, and groups.
+2. **Quiet chrome.** Zap's shell: the title bar, the sidebar, the tab strip, the canvas, the
+   status bar. Hairlines separate them, panes from each other, and groups.
 3. **The kit's look, everywhere.** Use the kit's components or class names (`mnml-*`) before
    writing new CSS; when Piw needs a control the kit lacks, build it from the same parts (1px
    hairlines, square corners, the soft fill, 10–12px type).
@@ -133,10 +133,9 @@ sizes. There is no `zoom` or `scale` in CSS.
 | Editor body               | 13 / 400 / 1.6       | `--font-size-editor`, `--line-height-relaxed`   |
 | View title, inspector     | 14 / 600             | `--font-size-view-title`, `--font-size-heading` |
 | Editor H3 / H2 / H1       | 14, 15, 17 / 600     | `--font-size-heading`, `-xl`, `-2xl`            |
-| Document title            | 22 / 600             | `--font-size-3xl`, `--font-weight-bold`         |
+| Note title                | 17 / 600             | `--font-size-2xl`, `--font-weight-title`        |
 
-Weights: 400, 500, 600 (`font-synthesis: none`). No letter spacing, except −0.01em on the
-document title.
+Weights: 400, 500, 600 (`font-synthesis: none`). No letter spacing.
 
 ## 4. Grid
 
@@ -160,45 +159,61 @@ document title.
 
 ## 5. Shell
 
-### Title bar and area tabs (`src/views/workspace/TopBar.tsx`)
+The main window is the vault shell (`src/views/vault/VaultApp.tsx`): the title bar, then the
+sidebar beside the tab strip and its content, then the status bar.
 
-- The chrome is Zap's: the kit's `TitleBar`, then the kit's tab strip. The workspace window has
-  no system title bar: macOS keeps its native traffic lights overlaid on the bar (the kit's
-  `macInset`); Linux and Windows draw the kit's window controls at the right end
-  (`WindowChrome.tsx`, `.mnml-window-controls`: 29px borderless buttons the bar's full height,
-  close turns `--danger`), and Linux also draws resize edges.
+### Title bar
+
+- The chrome is Zap's: the kit's `TitleBar`. The window has no system title bar: macOS keeps
+  its native traffic lights overlaid on the bar (the kit's `macInset`); Linux and Windows draw
+  the kit's window controls at the right end (`WindowChrome.tsx`, `.mnml-window-controls`: 29px
+  borderless buttons the bar's full height, close turns `--danger`), and Linux also draws resize
+  edges.
 - **Title bar:** 36px on `--color-bg-soft` with one hairline under it. The bar is the Tauri drag
   region; the kit makes its children ignore the pointer and every control opts back in.
-  - **Left:** the kit's `Brand`: the 14px app mark in `--color-icon`, "piw" at 12/600, and the
-    note "notes & tasks" after a hairline (hidden below 800px by the kit).
-  - **Centre:** the space switcher (square dot or layers glyph, name at 12/600, chevron; open =
-    hover fill), centred on the window like the connection in Zap's bar.
-  - **Right:** as Zap's: the kit's palette toggle (`.mnml-theme-toggle`), which opens the
-    Appearance dialog (colour mode and accent, the kit's `AppearanceDialog` look); the kit's
-    status square with "Local workspace"; then the window controls.
-- **Area tabs:** `Inbox  Notes  Tasks  Pinned` as the kit's tab strip (`.mnml-tabs`, Zap's open
-  tabs): a 32px soft strip with a hairline at its foot, square tabs split by hairlines, a 13px
-  icon and an 11px muted label. The current area (`aria-current="page"`, `data-active`) sits on
-  the canvas in text ink with a 1px accent line on top. The Inbox count is a 10px mono number
-  (spoken as ", 3 unorganised"). The tabs never close and stay at every width.
-- **Strip actions:** at the strip's end, the 220px search field (the kit's sidebar search: a 1px
-  box on the canvas, 13px icon, "Search" in placeholder ink; `Mod+K` lives in its tooltip and
-  `aria-keyshortcuts`; it opens the palette; an icon button below 800px), then New, which opens
-  the Quick Capture popup (§11; as a task in the Tasks area, as a note elsewhere), then Trash
-  and Settings as kit icon buttons (they show `aria-pressed` while open), the last glyph on the
-  content inset. New documents keep `Mod+Shift+N` and a note's "Convert to document".
+  - **Left:** the kit's `Brand`: the 14px app mark in `--color-icon` and "piw" at 12/600.
+  - **Centre:** the space filter (`src/views/vault/SpaceMenu.tsx`: layers glyph, "All spaces" or
+    the folder's name at 12/600, chevron), centred on the window like the connection in Zap's
+    bar. It scopes the tree, search and task views; it also offers New space… (a top-level
+    folder).
+  - **Right:** the kit's palette toggle (`.mnml-theme-toggle`), which opens the Appearance
+    dialog (colour mode and accent), then Settings in the same style (`Mod+,`; pressed while its
+    tab is active), then the window controls.
 
-### Content region
+### Sidebar (`VaultSidebar.tsx`)
 
-`<main>` under the tabs, full width, a size container named `content`. Views show their counts
-in their own header.
+The kit's `ResizableSidebar` on `--color-bg-soft` (its width is remembered):
 
-### Status bar (`src/views/workspace/WorkspaceStatusBar.tsx`)
+- **Notes | Tasks** at the top: the kit's segmented control (`.mnml-segmented`), as Zap's
+  Tables | Queries: two joined buttons with a glyph and an 11px label, the current one on the
+  canvas in text ink; the choice is remembered.
+- The search field (the kit's sidebar search; `Mod+K` in its hint).
+- **Notes:** the label (the space's name, or Notes) with New note (`Mod+N`) and New folder at its
+  end, as 28px framed squares (the height of Notes | Tasks) like Zap's button beside Tables | Queries, then the vault
+  as a tree: each space's **Inbox** first, with its open tasks as a count, then folders, then
+  notes, by name; a pin marks a note on the desktop. Folders open and close (remembered); a note
+  opens in a tab. Every row has a context menu (New note, New folder, Rename, Move to Trash), and
+  notes and folders can be dragged onto a folder to move them.
+- **Tasks:** Today (with its open count), Upcoming and All tasks.
+- Trash in the kit's `SidebarFooter`.
+
+### Tabs and content (`VaultTabs.tsx`)
+
+The kit's tab strip (`.mnml-tabs`, Zap's open tabs): a 32px soft strip with a hairline at its
+foot, square tabs split by hairlines, a 13px icon and an 11px label, the active tab on the canvas
+in text ink with a 1px accent line on top, and a close button. A note, a task view, Trash and
+Settings each open in one tab; opening one already open activates it, a new tab opens after the
+active one, and closing one activates its neighbour, as in Zap. `+` after the last tab makes a
+new note (`Mod+N`). Tabs are remembered. With no tab
+open, the content region shows an empty state with New note.
+
+### Status bar
 
 The kit's `StatusBar`, as in Zap: 24px on `--color-bg-soft` with a hairline above it, 10px mono
-in secondary ink. Left: the app and the current space (`PIW / Work`, `PIW / All spaces`). Right:
-the Inbox count and where the data lives, split by the kit's `Separator` (`9 in inbox · Stored on
-this device`).
+in secondary ink. Left: the vault's folder and the current space (`~/Piw / Work`,
+`~/Piw / All spaces`). Right: the stickies on the desktop, then the open note's file state
+(Saved, Saving…, or Couldn't save / Changed on disk in the danger ink), split by the kit's
+`Separator`.
 
 ## 6. Page skeleton (`src/components/app/Page.tsx`)
 
@@ -279,9 +294,10 @@ Shared by every window. Nothing new outside this list without a design review.
 - **Badge.** The kit's `.mnml-badge`: 10px mono secondary ink in a 1px border, 3px 6px.
 - **SaveIndicator.** 11px tertiary text with no box ("Saving…", "✓ Saved"); errors in danger
   with a Retry text button.
-- **Drawer** (the task inspector, 360px). The canvas surface with one hairline on the left;
-  overlay mode adds `--shadow-drawer`; 20px padding; the header line aligns with the view
-  header beside it (13/600 secondary title, 28px icon buttons, the last glyph on the padding).
+- **Drawer** (360px). The canvas surface with one hairline on the left; overlay mode adds
+  `--shadow-drawer`; 20px padding; the header line aligns with the view header beside it
+  (13/600 secondary title, 28px icon buttons, the last glyph on the padding). No vault view uses
+  it yet.
 - **Spinner.** The kit's `Spinner`: a turning Loader2 in `currentColor`.
 - **AccentPicker.** The kit's appearance swatches (`.mnml-appearance-accents`): one toggle per
   accent, a 23px round swatch over its 10px name, the pressed one ringed in text ink.
@@ -314,105 +330,92 @@ Feedback states:
 - **Saving:** hidden at rest; "Saving…" only when a save is slow; "Saved" briefly after a
   visible save (Mod+S always shows it); "Couldn't save · Retry" stays until resolved while the
   save retries on its own (2s, 4s, 8s… up to 30s). Text is never discarded.
-- **Undo instead of confirmation** for anything restorable: Move to Trash, Mark organised (and
-  Mark all), Convert to document, Delete subtask, Delete an empty tab, Remove from desktop. The
-  toast offers Undo, and Mod+Z in the list also undoes.
-- **Confirmation only for irreversible or multi-item actions:** Delete forever, Empty trash,
-  Delete space, Delete a tab with content or a Tasks tab, a document with tasks → Trash, Move
-  a document to another space. The title is a question naming the object, the button an
-  explicit verb (danger for deletion), initial focus on Cancel, Esc cancels.
+- **Undo instead of confirmation** for anything restorable: Move to Trash (a note or a folder;
+  Trash restores it), Remove from desktop. The toast offers Undo.
+- **Confirmation only for irreversible or multi-item actions:** Delete forever, Import Piw 0.1
+  again. The title is a question naming the object, the button an explicit verb (danger for
+  deletion), initial focus on Cancel, Esc cancels.
 - **Platform limitation:** an inline notice in Settings and the related empty state, with the
   alternative. Never a modal, never a crash.
 
 ## 9. Layout and windows
 
-Breakpoints live in [`src/lib/layout.ts`](../src/lib/layout.ts) (CSS container queries mirror
-them, with a comment):
-
-| Width         | Behaviour                                                                 |
-| ------------- | ------------------------------------------------------------------------- |
-| Window < 800  | The top bar folds the areas into a menu and search into an icon           |
-| Window ≥ 1100 | The content inset grows from 16 to 20px                                   |
-| Content ≥ 800 | Notes split view (300px list + editor) is available; below, list ↔ editor |
-| Content ≥ 820 | The task inspector docks and the list narrows; below, it overlays         |
-| Content < 560 | Compact paddings; the inspector and dialogs go full width                 |
+| Width           | Behaviour                               |
+| --------------- | --------------------------------------- |
+| Window < 800    | The brand's note hides (the kit)        |
+| Window ≥ 1100   | The content inset grows from 12 to 16px |
+| Note view < 720 | The note panel hides; its toggle stays  |
 
 Windows (sizes in CSS px, from `src-tauri/src/platform/window.rs`):
 
 | Window                        | Size                                               | Chrome                                                                                  |
 | ----------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Workspace (`main`)            | 1120 × 740, minimum 420 × 360                      | No system title bar; the top bar is the title bar (§5)                                  |
+| Workspace (`main`)            | 1120 × 740, minimum 420 × 360                      | No system title bar; the kit's title bar (§5)                                           |
 | Quick Capture (`capture`)     | 520 × 200, fixed                                   | Undecorated, always on top, hidden from the taskbar, centred horizontally at 1/3 height |
 | Sticky (`sticky:<kind>:<id>`) | 300 × 260 by default, minimum 200 × 120, resizable | Undecorated with its own 24px drag strip, hidden from the taskbar; size is remembered   |
 
-Remembered layout: area, space filter, Notes split view and sort, Tasks view, last active tab
-per document. The task inspector's open state is never persisted.
+Remembered layout (`src/state/vault.ts`, per vault folder): open tabs and the active one, the
+space filter, open folders, the sidebar's width and whether the note panel is open.
 
 ## 10. Views
 
-- **Notes.** Each part of a row has one place: the kind in the glyph column (a document, a
-  quick note, or a quick note with a checklist); the title, with the row's state at its end
-  (checklist progress `1/5` or a document's tasks, then a pin when on the desktop; 10px mono,
-  before the reserved `⋯` slot, so it never moves); a one-line snippet; and the context on the
-  meta line (date · space dot · tags). A Favourites group sits at the top ("Add to favourites"
-  in a document's menu). Sort: Last edited (default), Created, Title. `⋯` › Show archived. Split
-  view: ↑/↓ load the editor while focus stays in the list; Enter or → moves focus to the
-  editor; Esc returns it.
+- **Note.** A breadcrumb line (`Work / Projects / Refactor 2FA`, 11px in tertiary ink) with Pin
+  to desktop and the note panel toggle, then the title, then the text. The save state is in the
+  status bar (§5). **The title is the file name** (docs/vault-format.md §2):
+  editing it renames the file on Enter or blur (links to it are rewritten), Esc restores it, and
+  Enter or ↓ moves on to the text. A new note opens with its title selected.
 - **Note editor.** The text as live Markdown (CodeMirror, `MarkdownEditor`), no toolbar: the
   text stays plain Markdown, **never rewritten**, but every line renders its formatting
-  (headings, bold, italic, strikethrough, inline code, links, quotes, rules). Only the lines
-  under the caret or selection show their markers, muted. Task list items (`- [ ]`, `- [x]`)
-  render as a square checkbox; a click ticks it in the text and a ticked item is struck in the
-  muted ink. The title is the first non-empty line without leading Markdown markers, cut to 80
-  characters; list excerpts leave the markers (and rules) out too: display only. Helpers (the only ones): Enter continues a list line and removes an empty marker;
-  Tab / Shift+Tab indent only on list lines (elsewhere Tab moves focus); Mod+B / Mod+I wrap the
-  selection in `**` / `_`; Mod+Enter ticks a task item or turns the line into one. Mod+N opens an unsaved draft;
-  the record is created on the first non-whitespace character and an empty draft is discarded
-  silently. Autosave runs 400ms after the last keystroke and on blur, navigation, hide and quit. **Convert to document** is
-  immediate: the full text moves unchanged into one Content tab named "Overview", with Undo.
-  If another window saved first, the editor shows "Changed in another window" with Reload and
-  Keep mine.
-- **Tasks.** Views Today · Upcoming · **All** (default) · Completed. Overdue is a small danger
-  section shown only when it has tasks (at most 5 rows, then "Show N more"). Rows: round
-  checkbox, title, then 11px tertiary metadata inline (document, subtasks, due date, space dot
-  under All); overdue dates are danger with an icon. **Completing a task never moves its row**
-  until you leave the view, and shows no toast. Add task is the first row and inherits the
-  visible context (space filter; Today → today; inside a document → linked to it). Manual order
-  (drag or Alt+↑/↓) only applies where there is no date and in document Tasks tabs. Dates are
-  all-day.
-- **Task inspector.** A non-modal region labelled "Task details", docked or overlaying (§9);
-  × or Esc closes it and focus returns to the row. Title (cannot be emptied), description,
-  subtasks (one level; Enter adds the next, Backspace on an empty one deletes it with Undo,
-  Alt+↑/↓ reorders), due date, space, document, tags. Completing all subtasks does not
-  complete the parent.
-- **Documents.** An explicit title, then document tabs (Content or Tasks). `+` adds a tab after
-  the active one in inline rename. The last tab cannot be deleted; an empty Content tab is
-  deleted with Undo, any other tab asks first (a Tasks tab's tasks stay in the document and in
-  Tasks). Content tabs use the rich editor ([architecture](architecture.md#documents-and-the-editor)): Markdown input
-  rules, code blocks, links (Ctrl/⌘+click opens them), no toolbar. `[ ]` creates an
-  **editorial checklist** item that never appears in Tasks; a **real task** is created only
-  explicitly (Mod+T, or Convert to task / Insert › Task in the menu) and renders the same
-  record as in Tasks. Switching tabs flushes the save first.
-- **Tasks tab.** A live view of the real tasks linked to the document, with per-tab Show and
-  Sort settings; it can be pinned to the desktop.
-- **Inbox.** Notes and tasks with no document that are not archived, completed or marked
-  organised, newest first. Documents never appear. O (or the row button) marks an item
-  organised; `⋯` › Mark all organised.
-- **Pinned.** Everything pinned to the desktop, visible or hidden; state is written as text.
-  Row actions: show / hide, keep on top, open, remove from desktop.
-- **Search (Mod+K or `/`).** A modal palette over all spaces (it ignores the space filter):
-  titles, content, tab names, descriptions and subtasks. Groups in a fixed order (Documents,
-  Notes, Tasks), up to 5 per group, matches highlighted with `<mark>` and bold. Trash is not
-  searched. ↑/↓ move, Enter opens (a task opens in Tasks with its inspector), Esc closes and
-  restores focus.
+  (headings, bold, italic, strikethrough, inline code, links, quotes, rules). Front matter folds
+  into one quiet line of its properties (tags as `#tag`) until the caret goes into it (a click
+  on the line, or ↑ from the first line), then shows as mono YAML. A fenced code block shows on
+  the soft fill with its language as a quiet label and its ``` fences hidden, until the caret
+  is in it. Empty lines outside code take half a line, as paragraph gaps, except the one being
+  edited. Only the lines under the caret or selection show their markers, muted. Task list items
+  (`- [ ]`, `- [x]`) render as a square checkbox; a click ticks it in the text, adding `✅ <today>` (hidden until the line is edited), and a
+  ticked item is struck in the muted ink. `[[links]]` open their note on
+  Ctrl/⌘+click (a link to nothing offers to create it); `#tags` are tinted. Helpers (the only
+  ones): Enter continues a list line and removes an empty marker; Tab / Shift+Tab indent only on
+  list lines (elsewhere Tab moves focus); Mod+B / Mod+I wrap the selection in `**` / `_`;
+  Mod+Enter ticks a task item or turns the line into one. Autosave runs 400ms after the last
+  keystroke and on blur, tab switch, hide and quit, guarded by the file's hash: if the file
+  changed on disk meanwhile, the editor shows "Changed in another window" with Reload and Keep
+  mine; with nothing unsaved it reloads quietly.
+- **Task dates.** A task's `📅` date renders as a chip after its text (overdue in danger ink,
+  `Today`, `Tomorrow`, a weekday within a week, else `12 Nov`); clicking it opens the date menu.
+  Typing `@` on a task line offers dates (`@today`, `@tomorrow`, weekdays, `@next week`,
+  `@nov 12`; Enter or Tab writes `📅 YYYY-MM-DD`); Mod+D opens the same menu for the task under
+  the caret, with "No date" when it has one. The menus are the kit's menu look on CodeMirror
+  tooltips.
+- **Selection menu.** Selecting text shows a small menu just below the selection, so it never
+  covers the line being read: **Create sticky from selection…** (also Mod+Shift+S: it asks for a
+  title, writes `<Space>/Stickies/<Title>.md` with the text and `From [[<note>]]`, and pins it),
+  then Bold and Link (`[text]()` with the caret ready for the address).
+- **Note panel** (`NotePanel.tsx`, 260px at the right, toggled from the breadcrumb): the note's
+  tasks under their heading's name, ticking and dates as in the editor, after "Tasks" with the
+  progress (`1 of 4`) and a 2px bar; then the outline (headings), with the section the caret is
+  in marked as the selected row. Labels are sentence case; Markdown markers are left out of the
+  text. Clicking an entry puts the caret on its line. It reads the text
+  being typed, not the saved file.
+- **Task views** (Today, Upcoming, All tasks): the tasks of every note in the space filter.
+  Today shows Overdue first, then today's tasks, and keeps what was ticked today until you leave
+  the view; Upcoming groups by day; All groups by note. Rows: square checkbox, the text, the
+  note (and heading) it lives in, the date chip. Ticking, dating and rewording edit the note's
+  line (refused, and refreshed, if that line changed meanwhile); clicking the note opens it at
+  the line. **Add task** is the first row: it appends to the space's `Inbox.md` (the last used
+  space under All spaces), with the view's date (Today → today). Pin to desktop puts the view on
+  the desktop.
+- **Search (Mod+K).** A modal palette over the notes in the space filter: titles and text,
+  matches highlighted with `<mark>`, `#tag` for tags. Trash is not searched. ↑/↓ move, Enter
+  opens the note at the match, Esc closes and restores focus.
+- **Trash.** What was deleted from the vault, newest first (`.piw/trash/`): Restore (under a
+  free name if the old one is taken) and Delete forever… (asks first). No automatic purge.
 - **Settings (Mod+,).** Tabs General · Shortcuts · Appearance · Data · Stickies; changes apply
-  immediately. Shortcuts shows the global shortcut's real registration state as icon + text,
-  a recorder that refuses reserved combinations (§14), and the `piw --quick-note` /
-  `--quick-task` fallback commands. Data shows the database path, Export… and Back up…
-  ([architecture](architecture.md#data-export-and-backup)).
-- **Trash and Archive.** Trash holds notes, documents and tasks: Restore (R), Delete forever…,
-  Empty trash…. No automatic purge. Archive applies to notes and documents only. Moving a
-  document with tasks to Trash asks whether to keep the tasks (unlinked) or trash them too.
+  immediately. Shortcuts shows the global shortcut's real registration state as icon + text, a
+  recorder that refuses reserved combinations (§14), and the `piw --quick-note` /
+  `--quick-task` fallback commands. Data shows the vault folder with Change folder…, the import
+  of Piw 0.1 (offered while there is something to import; Import again asks first), and where
+  the app keeps its own data ([architecture](architecture.md#data)).
 
 ## 11. Quick Capture
 
@@ -425,10 +428,11 @@ per document. The task inspector's open state is never persisted.
   caret. Focus goes to the text with the caret at the end, synchronously.
 - **Modes:** Note | Task (Mod+1 / Mod+2). Switching never loses text: Note → Task makes the
   first line the title and the rest the description, and back.
-- **Saving:** Mod+Enter in both modes, Enter in the task title, or Save. The popup hides **only
-  after the save is confirmed**; on error the text stays with Retry. Mod+Shift+P toggles "Pin
-  to desktop after saving". The space is the last used one or the default space (Settings ›
-  General).
+- **Saving:** Mod+Enter in both modes, Enter in the task title, or Save. The capture is
+  appended to the chosen space's `Inbox.md` (vault-format.md §5), and the popup hides **only
+  after the write is confirmed**; on error the text stays with Retry. Mod+Shift+P toggles "Pin
+  to desktop after saving", which pins that Inbox. The space is the last used one or the first
+  space (Settings › General).
 - **Closing:** Esc or blur hides it at once and keeps the text as a draft (written 300ms after
   each change, restored on reopen with "Draft restored · Discard"). Drafts are cleared only
   after a confirmed save or Discard.
@@ -441,25 +445,29 @@ per document. The task inspector's open state is never persisted.
   top, Open in Piw, Hide from desktop) appear on hover or keyboard focus. 13px body with round
   task checkboxes in the sticky's own ink. Linux draws a hairline with square corners (no shadow
   for undecorated windows); Windows and macOS use the native shadow.
-- **Bodies:** a note (editable, autosaved), a task (title, description, subtasks) or a
-  document's Tasks tab (its rows and Add task).
-- **A note sticky** uses the note editor (§10) at the sticky's size. The strip shows the count
-  of ticked task items after the title (`2/5`, 10px mono) when the note has any.
+- **Bodies:** a vault note (editable, autosaved like the note editor, §10) or a task view
+  (Today, Upcoming or All, in one space or all, with Add task).
+- **A note sticky** uses the note editor at the sticky's size, task dates included. The strip
+  shows the note's title and the count of ticked tasks after it (`2/5`, 10px mono) when the note
+  has any.
+- **A task view sticky** lists the view's tasks as rows (checkbox, text, date chip), titled with
+  the view and space (`Today · Work`).
 - **Four distinct actions:** _Pin to desktop_ creates the sticky; _Keep on top_ is optional;
-  _Hide from desktop_ closes the window but keeps it in Pinned; _Remove from desktop_ unpins
+  _Hide from desktop_ closes the window but keeps it pinned; _Remove from desktop_ unpins
   it. Closing through the window manager means Hide.
 - **One sticky per item or view;** pinning again shows and focuses it. Position, size and
   on-top are saved per sticky and re-applied after every show; a sticky that would be off-screen
   moves onto a connected monitor.
 - **Startup:** stickies come back only if "Reopen pinned stickies when Piw starts" is on (off by
   default, for privacy).
-- **An item moved to Trash** closes its sticky; Undo reopens it.
+- **A note moved to Trash** closes its sticky; a note renamed or moved in Piw keeps it (renamed
+  in another app, the sticky says the note is gone).
 - Each sticky is a separate webview: Piw warns above 8 open stickies.
 
 ## 13. Tray and lifecycle
 
 - Tray menu: Quick Note, Quick Task, Open Workspace, Show/Hide Sticky Notes, Settings…, Quit
-  Piw. On Linux the tray is menu-only.
+  Piw (Settings… opens the Settings tab). On Linux the tray is menu-only.
 - Closing the workspace hides it when "Keep running in the tray" is on (the default); capture,
   stickies and the shortcut keep working. The first time, a toast explains how to quit. Quit Piw
   (tray or Mod+Q) flushes pending saves, then exits.
@@ -472,19 +480,17 @@ per document. The task inspector's open state is never persisted.
 Single-key shortcuts (letters, `/`, Space, Delete) work only when focus is not in a text field.
 Every drag has a keyboard or menu alternative.
 
-| Where          | Keys                                                                                                                                                                                                                                           |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Global (OS)    | Quick capture: `Ctrl+Shift+Space` / `⌘⇧Space`, configurable in Settings › Shortcuts                                                                                                                                                            |
-| Workspace      | Mod+N new note · Mod+T new task · Mod+Shift+N new document · Mod+K or `/` search · Mod+1…4 Inbox, Notes, Tasks, Pinned · Mod+, Settings · Mod+[ or Alt+← back · Mod+Q quit                                                                     |
-| Notes          | Mod+Shift+\\ split view · Mod+S save now · Mod+Shift+P pin the open note                                                                                                                                                                       |
-| Lists          | ↑/↓ or j/k move · Home/End · Enter open · Space complete (tasks) · Delete (⌘⌫ on macOS) to Trash with Undo · Mod+Z undo · Alt+↑/↓ reorder (manual order, subtasks) · Shift+F10 or Menu key: row menu · O organised (Inbox) · R restore (Trash) |
-| Task inspector | Mod+Shift+P pin or hide the task · Esc close                                                                                                                                                                                                   |
-| Documents      | Ctrl+PgDn / Ctrl+PgUp next / previous tab · in the tab bar: ←/→ Home End, Alt+←/→ reorder, F2 or double-click rename · Mod+T turn the line into a task · Mod+B / Mod+I / Mod+E bold, italic, code · Mod+S save now                             |
-| Quick Capture  | Mod+1 / Mod+2 Note / Task · Mod+Enter save (Enter in the task title) · Tab / Shift+Tab fields · Mod+Shift+P pin after saving · Esc close, keeping the draft                                                                                    |
-| Sticky         | Mod+W hide · Mod+O open in Piw · Shift+F10 strip menu · Mod+Enter tick a note's task item                                                                                                                                                      |
+| Where         | Keys                                                                                                                                                                                           |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Global (OS)   | Quick capture: `Ctrl+Shift+Space` / `⌘⇧Space`, configurable in Settings › Shortcuts                                                                                                            |
+| Workspace     | Mod+N new note · Mod+K search · Mod+W close tab · Ctrl+Tab / Ctrl+Shift+Tab next / previous tab · Mod+, Settings · Mod+Q quit                                                                  |
+| Note          | Mod+Shift+P pin to desktop · Mod+Shift+S sticky from selection · Mod+D due date · `@` date suggestions · Mod+Enter tick or make a task · Mod+B / Mod+I bold, italic · Ctrl/⌘+click open a link |
+| Tree          | Shift+F10 or Menu key: row menu (New note, New folder, Rename, Move to Trash) · drag a row onto a folder to move it                                                                            |
+| Quick Capture | Mod+1 / Mod+2 Note / Task · Mod+Enter save (Enter in the task title) · Tab / Shift+Tab fields · Mod+Shift+P pin after saving · Esc close, keeping the draft                                    |
+| Sticky        | Mod+W hide · Mod+O open in Piw · Shift+F10 strip menu · Mod+Enter tick a note's task item                                                                                                      |
 
 **Esc order:** Esc closes the innermost layer first: menu or date picker → inline rename or
-shortcut recorder (cancel) → dialog or palette → inspector → editor (back to the list). **Esc
+shortcut recorder (cancel) → dialog or palette. **Esc
 never discards text and never hides a sticky.**
 
 **Global shortcut recorder** (`isReserved` in `src/lib/shortcuts/accelerator.ts`): it needs
@@ -508,11 +514,12 @@ App shortcuts never use Ctrl+Alt or Alt+letter either.
   least 24 × 24px.
 - Roving tabindex in lists, tab bars, segmented controls and radio groups (Tab leaves a list in
   one step). No keyboard traps.
-- Roles: areas use `aria-current="page"`; lists are `role="list"` with one primary focusable per
-  row (the open button for notes, the native checkbox for tasks; metadata via
-  `aria-describedby`); section headers are headings with their count in text; tabs are
-  `tablist` / `tab` / `tabpanel`; dialogs trap focus and return it (`alertdialog` for
-  confirmations); menus use menu roles with typeahead; the inspector is a labelled `region`;
+- Roles: the current sidebar entry uses `aria-current="page"`; the tree is a list of buttons
+  with `aria-expanded` on folders; lists are `role="list"` with one primary focusable per row
+  (the native checkbox for tasks; metadata via `aria-describedby`); group headers are headings
+  with their count in text; tabs are `tablist` / `tab` / `tabpanel`; dialogs trap focus and
+  return it (`alertdialog` for confirmations); menus use menu roles with typeahead; the note
+  panel is a labelled `complementary` region;
   Segmented is a `radiogroup`; search is a `combobox` + `listbox`; toasts are `status` (errors
   `alert`); "Saving… / Saved" are not announced, save errors are.
 - **Colour never carries meaning alone:** overdue = colour + icon + "Overdue" in the label;
@@ -525,7 +532,7 @@ App shortcuts never use Ctrl+Alt or Alt+letter either.
 ## 16. Microcopy
 
 - Strings live in `src/strings/`. English, sentence case everywhere; view names are proper
-  nouns (Inbox, Notes, Tasks, Pinned, Trash, Today, Upcoming, Completed).
+  nouns (Notes, Today, Upcoming, All tasks, Trash, Settings).
 - Buttons and menu items start with a verb and say exactly what happens ("Move to Trash",
   "Delete forever", "Retry"). Never "OK", "Yes" or "Submit".
 - Plain, calm and short: no blame, no exclamation marks, no error codes ("Couldn't save").
@@ -536,22 +543,22 @@ App shortcuts never use Ctrl+Alt or Alt+letter either.
 
 ## 17. Rules every change must respect
 
-1. **The top bar is the only shell.** No sidebar, status bar or second bar inside a view.
-2. **Spaces are a global filter** that persists across areas. _All_ is a filter, not a space.
-3. **The task inspector is non-modal and contextual.** It docks at content ≥ 820px and overlays
-   below; its open state is never persisted.
-4. **Note titles are display-only inferences.** Text is never rewritten. Documents have explicit
-   titles.
-5. **No empty records.** A note exists from its first non-whitespace character.
+1. **The shell is the title bar, the sidebar, the tab strip and the status bar.** No second
+   bar inside a view; a note's breadcrumb line is its header.
+2. **Spaces are a global filter** (the top-level folders) that persists across tabs. _All
+   spaces_ is a filter, not a space.
+3. **The file is the truth.** Piw never rewrites a note's text beyond the edit asked for (a
+   tick, a date, a rename's links), and every write is guarded by the file's hash.
+4. **A note's title is its file name**; editing the title renames the file.
+5. **A task is a line.** Views list lines of notes; there is no task record to diverge.
 6. **Completing a task never moves the row** until the user leaves the view. No toast for it.
 7. **Undo replaces confirmation** for anything restorable; confirmations are for irreversible or
    multi-item actions (§8).
-8. **Capture** closes only after persistence is confirmed. Esc and blur keep a draft. Switching
+8. **Capture** closes only after the write is confirmed. Esc and blur keep a draft. Switching
    modes is lossless. No animation.
 9. **Pin / Keep on top / Hide / Remove are four distinct actions.** Esc never hides a sticky.
    Stickies don't reopen at startup unless the user opted in.
-10. **Documents never appear in Inbox.** Archive applies to notes and documents only. Trash has
-    no automatic purge.
+10. **Trash has no automatic purge**, and Piw deletes nothing outside `.piw/trash/` on its own.
 11. **Single-key shortcuts** only outside text fields. No Ctrl+Alt or Alt+letter app shortcuts.
 12. **Colour never carries meaning alone.** Retest contrast whenever a token changes.
 
@@ -572,7 +579,7 @@ Checklist (verify in screenshots, e.g. from `scripts/e2e/visual-qa.sh`, see
 - [ ] Every interactive element has hover, active, focus-visible and disabled states.
 - [ ] Light and dark were each checked: contrast, fills and shadows.
 - [ ] 1100×750, 1440×900, 1920×1080 and 700×700: no clipping, no horizontal scroll, no orphan
-      voids; the top bar folds below 800px.
+      voids; the note panel hides below 720px of note.
 - [ ] Empty, loading, error and long-content cases.
 - [ ] No mono outside code, no uppercase labels, no dashed borders, no square task checkboxes.
 - [ ] Keyboard shortcuts, focus order and tests unchanged.

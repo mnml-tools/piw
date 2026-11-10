@@ -25,7 +25,7 @@ pub fn database<R: Runtime>(app: &AppHandle<R>) -> AppResult<Arc<Database>> {
     app.state::<DataState>().database()
 }
 
-async fn blocking<T: Send + 'static>(
+pub(crate) async fn blocking<T: Send + 'static>(
     job: impl FnOnce() -> AppResult<T> + Send + 'static,
 ) -> AppResult<T> {
     tauri::async_runtime::spawn_blocking(job)

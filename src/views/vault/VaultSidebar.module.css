@@ -1,0 +1,170 @@
+/* The vault sidebar (docs/ui-design-system.md §5): the kit's resizable sidebar on --sidebar;
+   Notes | Tasks as the kit's segmented control (Zap's Tables | Queries); the kit's search field as a button (the
+   palette is where you type); the kit's label with New note / New folder as framed squares at
+   its end; tree rows
+   are the kit's sidebar rows (27px, 11px, the active one with the selected fill and the accent
+   bar), indented 14px a level, a chevron for folders; Trash in the kit's footer. */
+.sidebar {
+  min-height: 0;
+  padding-top: var(--space-2-5);
+}
+
+.modes.modes {
+  box-sizing: border-box;
+  height: 28px;
+  margin: 0 9px var(--space-2-5);
+}
+
+/* New note and New folder at the label's end, as Zap's framed button: a 28px square (the height
+   of Notes | Tasks above) with the 1px edge. */
+.labelActions {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.framed.framed {
+  flex: none;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: 0;
+}
+
+.mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  cursor: pointer;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin: 0 9px var(--space-3);
+  padding: var(--space-1) var(--space-1-5);
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-subtle);
+  font: inherit;
+  font-size: var(--font-size-secondary);
+  text-align: start;
+  cursor: pointer;
+}
+
+.search:hover {
+  border-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.search span {
+  flex: 1 1 auto;
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  color: var(--color-text-subtle);
+}
+
+.label.label {
+  align-items: center;
+  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+}
+
+.tree {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tree[data-drop] {
+  background: var(--color-bg-hover);
+}
+
+.row {
+  gap: var(--space-1);
+}
+
+.row[data-drop] {
+  outline: var(--border-width) solid var(--color-accent-mark);
+  outline-offset: -1px;
+}
+
+.chevron {
+  flex: none;
+  color: var(--color-text-subtle);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.chevron[data-open] {
+  transform: rotate(90deg);
+}
+
+.chevron[data-hidden] {
+  visibility: hidden;
+}
+
+.icon {
+  flex: none;
+  color: var(--color-icon);
+}
+
+.empty {
+  padding: var(--space-4) var(--space-3);
+}
+
+.emptyAction {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.footerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footerButton:hover,
+.footerButton[aria-pressed='true'] {
+  color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+/* Today, Upcoming and All tasks: the same rows, above the tree, without growing. */
+.entries {
+  flex: none;
+  margin-bottom: var(--space-3);
+}
+
+.entries :global(.mnml-sidebar-nav) {
+  flex: none;
+  overflow: visible;
+}
+
+/* A note that is on the desktop: a small pin at the row's end, in muted ink. */
+.pin {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  color: var(--color-text-subtle);
+}

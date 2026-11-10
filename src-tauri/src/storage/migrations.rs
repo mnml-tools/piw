@@ -10,10 +10,20 @@ use rusqlite::{Connection, TransactionBehavior};
 
 use crate::error::{AppError, AppResult};
 
-const MIGRATIONS: &[(&str, &str)] = &[(
-    "0001_initial",
-    include_str!("../../migrations/0001_initial.sql"),
-)];
+const MIGRATIONS: &[(&str, &str)] = &[
+    (
+        "0001_initial",
+        include_str!("../../migrations/0001_initial.sql"),
+    ),
+    (
+        "0002_task_sections",
+        include_str!("../../migrations/0002_task_sections.sql"),
+    ),
+    (
+        "0003_vault_stickies",
+        include_str!("../../migrations/0003_vault_stickies.sql"),
+    ),
+];
 
 /// Schema version this build expects.
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
@@ -101,6 +111,97 @@ mod tests {
             )
             .unwrap();
         assert_eq!(fts, 1);
+    }
+
+    #[test]
+    fn upgrades_v1_data_to_task_sections_and_keeps_stickies() {
+        let mut conn = fresh();
+        migrate_with(&mut conn, None, &MIGRATIONS[..1]).unwrap();
+        conn.execute_batch(
+            "INSERT INTO spaces (id, name, sort_order, is_default, created_at, updated_at)
+                  VALUES ('s1', 'Work', 0, 1, 't', 't');
+             INSERT INTO tasks (id, space_id, title, sort_order, created_at, updated_at)
+                  VALUES ('t1', 's1', 'Keep me', 0, 't', 't');
+             INSERT INTO sticky_windows (target_kind, target_id, width, height, created_at, updated_at)
+                  VALUES ('task', 't1', 300, 260, 't', 't');",
+        )
+        .unwrap();
+        migrate(&mut conn, None).unwrap();
+        assert_eq!(current_version(&conn).unwrap(), SCHEMA_VERSION);
+        let section: Option<String> = conn
+            .query_row("SELECT section_id FROM tasks WHERE id = 't1'", [], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        assert_eq!(section, None);
+        conn.execute_batch(
+            "INSERT INTO sticky_windows (target_kind, target_id, width, height, created_at, updated_at)
+                  VALUES ('section', 'x', 300, 260, 't', 't');
+             DELETE FROM tasks WHERE id = 't1';",
+        )
+        .unwrap();
+        let kinds: Vec<String> = conn
+            .prepare("SELECT target_kind FROM sticky_windows ORDER BY target_kind")
+            .unwrap()
+            .query_map([], |r| r.get(0))
+            .unwrap()
+            .collect::<Result<_, _>>()
+            .unwrap();
+        assert_eq!(kinds, ["section"], "the task sticky went with its task");
+    }
+
+    #[test]
+    fn upgrades_v2_stickies_and_accepts_vault_stickies() {
+        let mut conn = fresh();
+        migrate_with(&mut conn, None, &MIGRATIONS[..2]).unwrap();
+        conn.execute_batch(
+            "INSERT INTO spaces (id, name, sort_order, is_default, created_at, updated_at)
+                  VALUES ('s1', 'Work', 0, 1, 't', 't');
+             INSERT INTO task_sections (id, space_id, title, sort_order, created_at, updated_at)
+                  VALUES ('x', 's1', 'Atlas', 0, 't', 't');
+             INSERT INTO sticky_windows (target_kind, target_id, width, height, color, created_at, updated_at)
+                  VALUES ('section', 'x', 300, 260, 'mint', 't', 't');",
+        )
+        .unwrap();
+        migrate(&mut conn, None).unwrap();
+        assert_eq!(current_version(&conn).unwrap(), SCHEMA_VERSION);
+        let color: String = conn
+            .query_row(
+                "SELECT color FROM sticky_windows WHERE target_id = 'x'",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(color, "mint", "existing stickies keep their state");
+        conn.execute_batch(
+            "INSERT INTO vault_stickies (target_kind, target_id, vault_root, path)
+                  VALUES ('vault_note', 'v1', '/vault', 'Work/Inbox.md');
+             INSERT INTO sticky_windows (target_kind, target_id, width, height, created_at, updated_at)
+                  VALUES ('vault_note', 'v1', 300, 260, 't', 't');",
+        )
+        .unwrap();
+        let duplicate = conn.execute(
+            "INSERT INTO vault_stickies (target_kind, target_id, vault_root, path)
+                  VALUES ('vault_note', 'v2', '/vault', 'Work/Inbox.md')",
+            [],
+        );
+        assert!(duplicate.is_err(), "one sticky per note");
+        conn.execute_batch(
+            "DELETE FROM sticky_windows WHERE target_id = 'v1';
+             DELETE FROM task_sections WHERE id = 'x';",
+        )
+        .unwrap();
+        let left: i64 = conn
+            .query_row(
+                "SELECT (SELECT count(*) FROM vault_stickies) + (SELECT count(*) FROM sticky_windows)",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(
+            left, 0,
+            "unpinning forgets the mapping; the section trigger still works"
+        );
     }
 
     #[test]

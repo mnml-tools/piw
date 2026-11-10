@@ -5,10 +5,10 @@ import { applyChangeSet } from './sync';
 
 function seeded(): QueryClient {
   const client = new QueryClient();
-  client.setQueryData(keys.tasks({ view: 'all' }), []);
-  client.setQueryData(keys.documentTasks('doc', 'open', 'manual'), []);
+  client.setQueryData(keys.vaultTasks('today', null, '2026-11-10'), []);
+  client.setQueryData(keys.vaultNote('Work/Plan.md'), {});
   client.setQueryData(keys.settings, {});
-  client.setQueryData(keys.spaces, []);
+  client.setQueryData(keys.sticky('sticky:vault_note:abc'), null);
   return client;
 }
 
@@ -21,10 +21,16 @@ const invalidated = (client: QueryClient) =>
     .sort();
 
 describe('applyChangeSet', () => {
-  it('a task change refreshes every task view, including document tabs', async () => {
+  it('a file change refreshes every vault view', async () => {
     const client = seeded();
-    await applyChangeSet(client, { changes: [{ kind: 'task', id: 't1' }] });
-    expect(invalidated(client)).toEqual(['documentTasks', 'tasks']);
+    await applyChangeSet(client, { changes: [{ kind: 'file', id: 'Work/Plan.md' }] });
+    expect(invalidated(client)).toEqual(['vaultNote', 'vaultTasks']);
+  });
+
+  it('a sticky change refreshes only stickies', async () => {
+    const client = seeded();
+    await applyChangeSet(client, { changes: [{ kind: 'sticky', id: 'sticky:vault_note:abc' }] });
+    expect(invalidated(client)).toEqual(['sticky']);
   });
 
   it('a settings change refreshes only settings', async () => {

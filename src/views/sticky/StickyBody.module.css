@@ -40,6 +40,46 @@
   padding-block: var(--space-0-5) var(--sticky-inset);
 }
 
+/* A section sticky's name: the paper's first line, set exactly as the note editor's H2 (a
+   note's `## Title`, the usual title of a checklist note: 15/600 at 1.3, 4px above and 2px
+   below, on the side inset), then one blank body line before the list, as a note leaves under
+   its title. A borderless field: the caret
+   is its focus indicator, as in the editor. */
+.sectionTitle {
+  flex: none;
+  width: 100%;
+  margin: 0 0 calc(var(--font-size-ui) * var(--line-height-normal));
+  padding: calc(var(--space-0-5) + var(--space-1)) var(--sticky-inset) var(--space-0-5);
+  border: 0;
+  background: transparent;
+  color: var(--sticky-text);
+  font: inherit;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-title);
+  line-height: var(--line-height-heading);
+  caret-color: var(--sticky-text);
+}
+
+.sectionTitle:focus-visible {
+  outline: none;
+}
+
+/* A section sticky's line metadata (section-sync.ts): the due date after the task's text, in
+   the 10px mono metadata face and the paper's muted ink; overdue adds the danger ink (the
+   date says it too). */
+.lineMeta {
+  margin-inline-start: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--sticky-text-muted);
+  white-space: nowrap;
+}
+
+.lineOverdue {
+  color: var(--color-danger);
+}
+
 /* Save error / conflict: a soft notice line under the text, which is kept. Wraps in narrow
    windows. */
 .errorBar {
@@ -206,6 +246,10 @@
 
 .rowMeta:empty {
   display: none;
+}
+
+.rowMeta.lineOverdue {
+  color: var(--color-danger);
 }
 
 /* "Add subtask" / "Add task": quiet, revealed with the window's controls. */

@@ -9,13 +9,11 @@ pub const EVENT_CHANGED: &str = "piw://changed";
 #[serde(rename_all = "snake_case")]
 #[ts(export, export_to = "bindings/")]
 pub enum EntityKind {
-    Space,
-    Note,
-    Tab,
-    Task,
-    Tag,
     Settings,
     Sticky,
+    /// A note or folder in the vault, by its vault path; `""` for the vault itself (its status,
+    /// the trash).
+    File,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, TS)]
@@ -66,10 +64,5 @@ impl ChangeSet {
 
     pub fn is_empty(&self) -> bool {
         self.changes.is_empty()
-    }
-
-    #[cfg(test)]
-    pub fn contains(&self, kind: EntityKind, id: &str) -> bool {
-        self.changes.iter().any(|c| c.kind == kind && c.id == id)
     }
 }

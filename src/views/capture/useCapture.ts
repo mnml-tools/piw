@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/lib/ipc/api';
 import type { CaptureDraft } from '@/lib/ipc/bindings/CaptureDraft';
 import type { CaptureMode } from '@/lib/ipc/bindings/CaptureMode';
-import type { Settings } from '@/lib/ipc/bindings/Settings';
-import type { Space } from '@/lib/ipc/bindings/Space';
+import type { CaptureSpace } from '@/lib/ipc/bindings/CaptureSpace';
 import { IpcError } from '@/lib/ipc/client';
-import { initialSpace } from '@/lib/spaces';
+import { initialSpace, rememberCaptureSpace } from '@/lib/vault/capture-space';
 
 export { initialSpace };
 
@@ -64,38 +63,34 @@ export function switchMode(form: CaptureForm, mode: CaptureMode): CaptureForm {
 }
 
 /**
- * Saves the capture as a note (text = body) or a task (text = title). Resolves only after the
- * database confirmed the write (docs/ui-design-system.md §11).
+ * Appends the capture to `<space>/Inbox.md` (a note's text, or a task line with its due date and
+ * description). Resolves only after the file was written (docs/ui-design-system.md §11); Pin puts
+ * that Inbox on the desktop.
  */
 async function persistCapture(form: CaptureForm): Promise<void> {
-  const spaceId = form.spaceId ?? undefined;
-  if (form.mode === 'note') {
-    const note = await api.createNote({ body: form.text, ...(spaceId ? { spaceId } : {}) });
-    if (form.pin) await api.openSticky({ kind: 'note', id: note.id }).catch(() => undefined);
-    return;
-  }
-  const task = await api.createTask({
-    title: form.text.trim(),
-    description: form.description.trim(),
-    ...(spaceId ? { spaceId } : {}),
-    ...(form.dueDate ? { dueDate: form.dueDate } : {}),
+  const path = await api.vaultCapture({
+    space: form.spaceId,
+    mode: form.mode,
+    text: form.mode === 'task' ? form.text.trim() : form.text,
+    description: form.description,
+    due: form.mode === 'task' ? form.dueDate : null,
   });
-  if (form.pin) await api.openSticky({ kind: 'task', id: task.id }).catch(() => undefined);
+  if (form.pin) await api.vaultPinNote(path).catch(() => undefined);
 }
 
 /**
  * State and behaviour of the Quick Capture window: draft recovery, lossless mode switching,
  * save-then-close, and errors that keep the text.
  */
-export function useCapture(spaces: Space[] | undefined, settings: Settings | undefined) {
+export function useCapture(spaces: readonly string[] | undefined, setting: CaptureSpace) {
   const [rawForm, setForm] = useState<CaptureForm>(EMPTY_FORM);
   // Until the user picks one, the space follows settings (and arrives once spaces load).
   const form = useMemo(
     () =>
       rawForm.spaceId === null
-        ? { ...rawForm, spaceId: initialSpace(spaces ?? [], settings) }
+        ? { ...rawForm, spaceId: initialSpace(spaces ?? [], setting) }
         : rawForm,
-    [rawForm, spaces, settings],
+    [rawForm, spaces, setting],
   );
   const [state, setState] = useState<CaptureState>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -144,7 +139,7 @@ export function useCapture(spaces: Space[] | undefined, settings: Settings | und
           mode: draft.mode,
           text: draft.text,
           description: draft.description,
-          spaceId: draft.spaceId ?? initialSpace(spaces ?? [], settings),
+          spaceId: draft.spaceId ?? initialSpace(spaces ?? [], setting),
           dueDate: draft.dueDate,
           pin: draft.pin,
         });
@@ -158,11 +153,11 @@ export function useCapture(spaces: Space[] | undefined, settings: Settings | und
           : {
               ...EMPTY_FORM,
               mode: mode ?? current.mode,
-              spaceId: initialSpace(spaces ?? [], settings),
+              spaceId: initialSpace(spaces ?? [], setting),
             },
       );
     },
-    [spaces, settings],
+    [spaces, setting],
   );
 
   const submit = useCallback(async (): Promise<boolean> => {
@@ -187,15 +182,13 @@ export function useCapture(spaces: Space[] | undefined, settings: Settings | und
     if (draftTimer.current) clearTimeout(draftTimer.current);
     draftTimer.current = null;
     await api.clearCaptureDraft().catch(() => undefined);
-    if (current.spaceId && current.spaceId !== settings?.lastCaptureSpaceId) {
-      void api.rememberCaptureSpace(current.spaceId).catch(() => undefined);
-    }
+    if (current.spaceId) rememberCaptureSpace(current.spaceId);
     setForm({ ...EMPTY_FORM, mode: current.mode, spaceId: current.spaceId });
     setRestored(false);
     setState('idle');
     await api.hideCapture().catch(() => undefined);
     return true;
-  }, [flushDraft, settings?.lastCaptureSpaceId, state]);
+  }, [flushDraft, state]);
 
   const setMode = useCallback(
     (mode: CaptureMode) => {

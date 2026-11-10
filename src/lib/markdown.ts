@@ -153,23 +153,10 @@ export function indentList(
 const TASK_LINE = /^(\s*(?:[-*+]|\d+[.)])\s+)\[([ xX])\](?=\s|$)/;
 const LIST_PREFIX = /^(\s*(?:[-*+]|\d+[.)])\s+)/;
 
-/** Progress of a note's checklist items (the sticky strip; `checklistDone/Count` in lists). */
+/** Progress of a note's tasks (the sticky strip), counted by `src/lib/vault/tasks.ts`. */
 export interface TaskProgress {
   done: number;
   total: number;
-}
-
-/** The same rule as the database's `checklist_progress` (`domain/text.rs`). */
-export function taskProgress(text: string): TaskProgress {
-  let done = 0;
-  let total = 0;
-  for (const line of text.split('\n')) {
-    const match = TASK_LINE.exec(line);
-    if (!match) continue;
-    total += 1;
-    if (match[2] !== ' ') done += 1;
-  }
-  return { done, total };
 }
 
 /**
@@ -187,4 +174,23 @@ export function toggleTaskLine(line: string): string | null {
   if (list) return `${list[0]}[ ] ${line.slice(list[0].length)}`;
   const indent = /^\s*/.exec(line)?.[0] ?? '';
   return `${indent}- [ ] ${line.slice(indent.length)}`;
+}
+
+/**
+ * A line's inline Markdown as plain text, for lists that show a task or a heading outside the
+ * editor: links keep their text, `[[Note|alias]]` its alias (else the note), and emphasis, code
+ * and strike markers go. Display only; the file keeps its Markdown.
+ */
+export function inlineText(text: string): string {
+  return (
+    text
+      .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2')
+      .replace(/\[\[([^\]]+)\]\]/g, '$1')
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/(\*\*|__|~~)(?=\S)(.+?)(?<=\S)\1/g, '$2')
+      .replace(/\*(?=\S)(.+?)(?<=\S)\*/g, '$1')
+      // `_` marks emphasis only at word edges (CommonMark): snake_case stays.
+      .replace(/(?<!\w)_(?=\S)(.+?)(?<=\S)_(?!\w)/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+  );
 }

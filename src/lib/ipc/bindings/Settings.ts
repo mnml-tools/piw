@@ -20,4 +20,12 @@ captureShortcut: string | null, captureSpace: CaptureSpace, lastCaptureSpaceId: 
 /**
  * Reopen pinned stickies when Piw starts (off by default for privacy).
  */
-restoreStickiesOnLaunch: boolean, trayNoticeShown: boolean, };
+restoreStickiesOnLaunch: boolean, trayNoticeShown: boolean, 
+/**
+ * The vault folder (docs/redesign.md); `null` means `~/Piw`. `PIW_VAULT` overrides it.
+ */
+vaultPath: string | null, 
+/**
+ * When the notes and tasks of Piw 0.1 were imported into the vault (`vault/import`).
+ */
+vaultImportedAt: string | null, };

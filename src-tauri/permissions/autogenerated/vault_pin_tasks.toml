@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-vault-pin-tasks"
+description = "Enables the vault_pin_tasks command without any pre-configured scope."
+commands.allow = ["vault_pin_tasks"]
+
+[[permission]]
+identifier = "deny-vault-pin-tasks"
+description = "Denies the vault_pin_tasks command without any pre-configured scope."
+commands.deny = ["vault_pin_tasks"]

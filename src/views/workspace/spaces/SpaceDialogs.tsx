@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button, ConfirmDialog, Dialog, TextInput } from '@/components/ui';
-import { api } from '@/lib/ipc/api';
-import type { Space } from '@/lib/ipc/bindings/Space';
+import { useRef, useState } from 'react';
+import { Button, Dialog, TextInput } from '@/components/ui';
 import { IpcError } from '@/lib/ipc/client';
 import { common } from '@/strings/common';
 import { workspaceStrings as t } from '@/strings/workspace';
-import styles from './SpaceDialogs.module.css';
 
 interface SpaceNameDialogProps {
   title: string;
@@ -14,7 +11,8 @@ interface SpaceNameDialogProps {
   onSubmit: (name: string) => Promise<void>;
 }
 
-/** Create or rename a space. Validation errors from Rust (duplicates…) show inline. */
+/** Asks for a name (a new space or folder, a rename, a sticky's title). Validation errors from
+ * Rust (taken names…) show inline. */
 export function SpaceNameDialog({
   title,
   initialName = '',
@@ -77,55 +75,5 @@ export function SpaceNameDialog({
         />
       </form>
     </Dialog>
-  );
-}
-
-interface DeleteSpaceDialogProps {
-  space: Space;
-  spaces: readonly Space[];
-  onClose: () => void;
-  onDeleted: (moveTo: string) => void;
-}
-
-/** Deleting a space always asks where its items go; nothing is deleted. */
-export function DeleteSpaceDialog({ space, spaces, onClose, onDeleted }: DeleteSpaceDialogProps) {
-  const others = spaces.filter((s) => s.id !== space.id);
-  const [moveTo, setMoveTo] = useState(others.find((s) => s.isDefault)?.id ?? others[0]?.id ?? '');
-  const [count, setCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    void api.spaceItemCount(space.id).then(setCount, () => setCount(null));
-  }, [space.id]);
-
-  return (
-    <ConfirmDialog
-      open
-      onOpenChange={(open) => !open && onClose()}
-      title={t.spaces.deleteTitle(space.name)}
-      description={count === null ? undefined : t.spaces.deleteBody(count)}
-      confirmLabel={t.spaces.delete}
-      cancelLabel={common.actions.cancel}
-      destructive
-      onConfirm={async () => {
-        await api.deleteSpace(space.id, moveTo);
-        onDeleted(moveTo);
-        onClose();
-      }}
-    >
-      {others.length === 0 ? (
-        <p>{t.spaces.lastSpace}</p>
-      ) : (
-        <label className={styles.field}>
-          <span>{t.spaces.moveTo}</span>
-          <select value={moveTo} onChange={(event) => setMoveTo(event.target.value)}>
-            {others.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-    </ConfirmDialog>
   );
 }

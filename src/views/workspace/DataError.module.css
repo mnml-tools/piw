@@ -1,0 +1,18 @@
+/* Piw's own database could not be opened: a centred notice on the canvas, with the reason and
+   the path in mono so they can be copied. */
+.dataError {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.detail {
+  display: block;
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-meta);
+  overflow-wrap: anywhere;
+  user-select: text;
+}
