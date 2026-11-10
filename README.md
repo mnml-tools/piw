@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/AppIcon.png?v=1" width="112" height="112" alt="Piw app icon">
+  <img src="src/assets/AppIcon.png?v=2" width="112" height="112" alt="Piw app icon">
 </p>
 
 <h1 align="center">Piw</h1>
@@ -119,7 +119,7 @@ bind `piw --quick-note` to a key there. Packages are not signed; publish checksu
 
 ### macOS
 
-On a Mac with the Xcode command line tools installed, run:
+On a Mac with Xcode 26 or newer selected with `xcode-select`, run:
 
 ```sh
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
@@ -143,6 +143,19 @@ The NSIS installer and the MSI land in `bundle/nsis/` and `bundle/msi/`. They ar
 SmartScreen warns on first run (More info › Run anyway). If the WebView2 runtime is missing, the
 installer downloads it from Microsoft; Piw itself makes no network requests. See
 [Tauri's Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
+
+## App icons
+
+Edit `src-tauri/icons/AppIcon.icon` in Icon Composer, then run `pnpm icons` on macOS with
+Xcode 26 or newer selected. This exports a temporary PNG, regenerates desktop and mobile icon
+assets, and compiles the native macOS icon catalog. The temporary PNG is removed afterward;
+`src/assets/AppIcon.png` is left unchanged. Other platforms use a flattened version of the
+default macOS appearance.
+
+Run `pnpm icons:mac` to compile only the native macOS icon catalog, or `pnpm icons:png` to
+regenerate standard assets from the checked-in PNG on any platform. macOS builds automatically
+compile and bundle the native catalog while retaining the ICNS fallback for older macOS versions.
+Desktop CI runs `pnpm icons` on macOS and `pnpm icons:png` on Linux and Windows.
 
 ## Automated desktop builds
 

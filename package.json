@@ -16,7 +16,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "demo": "node scripts/demo.mjs",
     "tauri": "tauri",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint . && prettier --check .",
@@ -30,6 +29,10 @@
     "rust:check": "pnpm rust:fmt && pnpm rust:lint && pnpm rust:test",
     "bindings": "cargo test --manifest-path src-tauri/Cargo.toml --locked export_bindings",
     "verify": "pnpm check && pnpm rust:check && pnpm build"
+    "test:editor-perf": "EDITOR_PERF=1 vitest run src/lib/editor/__tests__/performance.test.ts --testTimeout=60000",
+    "icons": "node scripts/build-icons.mjs",
+    "icons:png": "tauri icon src/assets/AppIcon.png",
+    "icons:mac": "node scripts/build-macos-icon.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",
