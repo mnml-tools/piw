@@ -473,43 +473,53 @@ export function stickyFor(
   return sticky;
 }
 
-/** The demo notes (`fixtures/demo/`, also `PIW_DEMO=1` in the app), by vault path. */
-const DEMO_FILES = Object.fromEntries(
-  Object.entries(
-    import.meta.glob<string>('../../fixtures/demo/**/*.md', {
-      query: '?raw',
-      import: 'default',
-      eager: true,
-    }),
-  ).map(([file, text]) => [file.replace(/^.*\/fixtures\/demo\//, ''), text]),
-);
-
-/** `{{today}}`, `{{today+3}}`, `{{today-2}}` as dates around `today` (as `vault/demo.rs`). */
-export function expandDates(text: string, today: string): string {
-  return text.replace(/\{\{today(?:([+-])(\d+))?\}\}/g, (_, sign?: string, n?: string) =>
-    addDays(today, sign ? (sign === '-' ? -1 : 1) * Number(n) : 0),
-  );
-}
-
-/** A vault holding `files` (path → text, dates expanded) and every folder above them. */
-export function vaultFrom(files: Record<string, string>, today: string = todayString()): MockVault {
+/** A vault holding `files` (path → text) and every folder above them. */
+export function vaultFrom(files: Record<string, string>): MockVault {
   const folders = new Set<string>();
   for (const path of Object.keys(files)) {
     const parts = path.split('/');
     for (let i = 1; i < parts.length; i += 1) folders.add(parts.slice(0, i).join('/'));
   }
-  return {
-    root: '/home/you/Piw',
-    stickies: [],
-    folders: [...folders].sort(),
-    trash: [],
-    files: Object.fromEntries(
-      Object.entries(files).map(([path, text]) => [path, expandDates(text, today)]),
-    ),
-  };
+  return { root: '/home/you/Piw', stickies: [], folders: [...folders].sort(), trash: [], files };
 }
 
-/** The demo vault: the same notes as `pnpm demo` in the app. */
+/** The browser preview's vault, with its dates around `today` so Today and Upcoming have tasks. */
 export function seedVault(today: string = todayString()): MockVault {
-  return vaultFrom(DEMO_FILES, today);
+  const day = (offset: number) => addDays(today, offset);
+  return vaultFrom({
+    'Work/Inbox.md': `- [ ] Call the accountant 📅 ${day(0)}\n- [ ] Order a new keyboard\n`,
+    'Work/Projects/Refactor 2FA.md': [
+      '---',
+      'tags: [auth, security]',
+      '---',
+      '',
+      '## Problem',
+      '',
+      'SMS codes are being phased out. Move **TOTP** into the auth service. #backend',
+      '',
+      '## Plan',
+      '',
+      `- [x] Read RFC 6238 ✅ ${day(-2)}`,
+      `- [ ] Agree on the tolerance window 📅 ${day(1)}`,
+      '- [ ] Add unit tests',
+      '  - [ ] Clock drift of one step',
+      `- [ ] Review with the team 📅 ${day(-1)}`,
+      '',
+      '## Verification',
+      '',
+      '```ts',
+      'export function verify(code: string) {}',
+      '```',
+      '',
+      'See [[Reuniões]] and [[Onboarding#Week 1|the onboarding plan]].',
+      '',
+    ].join('\n'),
+    'Work/Projects/Onboarding.md': `## Week 1\n\n1. [ ] Set up the laptop\n2. [ ] Meet the team 📅 ${day(6)}\n\n## Week 2\n\n- [ ] Ship a first small change\n`,
+    'Work/Reuniões.md':
+      'Weekly sync notes. #meetings\n\n## 2026-11-03\n\n- Decided to drop SMS codes, see [[Refactor 2FA]].\n- [ ] Send the summary to finance\n',
+    'Personal/Ideias de prendas.md':
+      'Books, a good coffee grinder, concert tickets, a plant for the office.\n',
+    'Personal/Stickies/Recovery codes.md':
+      'Recovery codes are shown once. Make that obvious before the user leaves the page.\n\nFrom [[Refactor 2FA]]\n',
+  });
 }

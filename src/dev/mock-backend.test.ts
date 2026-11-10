@@ -41,12 +41,12 @@ describe('mock backend', () => {
   });
 
   it('guards note writes with the hash and rolls back failed writes', async () => {
-    const note = await api.vaultReadNote('Work/Weekly sync.md');
+    const note = await api.vaultReadNote('Work/Reuniões.md');
     const saved = await api.vaultWriteNote(note.path, 'New text\n', note.hash);
     expect(saved.hash).not.toBe(note.hash);
     expect(commits.at(-1)).toEqual({
       origin: 'main',
-      changes: [{ kind: 'file', id: 'Work/Weekly sync.md' }],
+      changes: [{ kind: 'file', id: 'Work/Reuniões.md' }],
     });
     const error = await api.vaultWriteNote(note.path, 'stale', note.hash).catch((e) => e);
     expect(error).toBeInstanceOf(IpcError);
@@ -61,12 +61,12 @@ describe('mock backend', () => {
   });
 
   it('pins a note to the desktop and colours its sticky', async () => {
-    expect(await api.vaultPinNote('Work/Weekly sync.md')).toBe(1);
+    expect(await api.vaultPinNote('Work/Reuniões.md')).toBe(1);
     const [pinned] = await api.vaultPinned();
     expect(pinned?.shows).toEqual({
       kind: 'note',
-      path: 'Work/Weekly sync.md',
-      title: 'Weekly sync',
+      path: 'Work/Reuniões.md',
+      title: 'Reuniões',
     });
     expect(opened).toHaveLength(1);
     const target = pinned!.target;

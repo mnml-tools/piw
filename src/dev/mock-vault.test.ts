@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { addDays } from '@/lib/dates';
 import {
   captureToInbox,
   createNote,
@@ -13,56 +12,11 @@ import {
   resolveLink,
   restoreEntry,
   searchVault,
-  vaultFrom,
+  seedVault,
   trashEntry,
   vaultTree,
   writeNote,
 } from './mock-vault';
-
-/** The small vault these tests were written against (the demo, `seedVault`, is larger). */
-function seedVault(today = '2026-11-10'): ReturnType<typeof vaultFrom> {
-  const day = (offset: number) => addDays(today, offset);
-  const vault = vaultFrom(
-    {
-      'Work/Inbox.md': `- [ ] Call the accountant 📅 ${day(0)}\n- [ ] Order a new keyboard\n`,
-      'Work/Projects/Refactor 2FA.md': [
-        '---',
-        'tags: [auth, security]',
-        '---',
-        '',
-        '## Problem',
-        '',
-        'SMS codes are being phased out. Move **TOTP** into the auth service. #backend',
-        '',
-        '## Plan',
-        '',
-        `- [x] Read RFC 6238 ✅ ${day(-2)}`,
-        `- [ ] Agree on the tolerance window 📅 ${day(1)}`,
-        '- [ ] Add unit tests',
-        '  - [ ] Clock drift of one step',
-        `- [ ] Review with the team 📅 ${day(-1)}`,
-        '',
-        '## Verification',
-        '',
-        '```ts',
-        'export function verify(code: string) {}',
-        '```',
-        '',
-        'See [[Reuniões]] and [[Onboarding#Week 1|the onboarding plan]].',
-        '',
-      ].join('\n'),
-      'Work/Projects/Onboarding.md': `## Week 1\n\n1. [ ] Set up the laptop\n2. [ ] Meet the team 📅 ${day(6)}\n\n## Week 2\n\n- [ ] Ship a first small change\n`,
-      'Work/Reuniões.md':
-        'Weekly sync notes. #meetings\n\n## 2026-11-03\n\n- Decided to drop SMS codes, see [[Refactor 2FA]].\n- [ ] Send the summary to finance\n',
-      'Personal/Ideias de prendas.md':
-        'Books, a good coffee grinder, concert tickets, a plant for the office.\n',
-      'Personal/Stickies/Recovery codes.md':
-        'Recovery codes are shown once. Make that obvious before the user leaves the page.\n\nFrom [[Refactor 2FA]]\n',
-    },
-    today,
-  );
-  return vault;
-}
 
 describe('mock vault', () => {
   it('lists folders before notes and guards writes with the hash', () => {

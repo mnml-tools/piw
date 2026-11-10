@@ -1,5 +1,5 @@
 /**
- * Dev-only starting data for the browser mock: the demo vault (`?mock=empty` for an empty one).
+ * Dev-only starting data for the browser mock: a small sample vault (`?mock=empty` for an empty one).
  */
 import { todayString } from '@/lib/dates';
 import { DEFAULT_SETTINGS, type Store } from './mock-store';

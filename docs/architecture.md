@@ -307,11 +307,11 @@ and reopen it, restart; use the tray; uninstall (the vault and the data director
 ### Browser preview
 
 `pnpm dev` serves the UI at <http://localhost:1420>. Outside Tauri, `src/dev/` mocks every
-command in `src/lib/ipc/api.ts` in memory, with the demo vault (`fixtures/demo/`, read by
+command in `src/lib/ipc/api.ts` in memory, with a small sample vault (`seedVault` in
 `mock-vault.ts`) and change events.
 It is dev-only (behind `import.meta.env.DEV`), never part of `pnpm build`, and resets on reload.
 
-- **Windows:** `/` (the vault shell), `?window=capture` (captures into the demo vault's Inbox
+- **Windows:** `/` (the vault shell), `?window=capture` (captures into the sample vault's Inbox
   notes), `?window=sticky:vault_note:<title>`, `?window=sticky:vault_tasks:today|upcoming|all`,
   `?window=gallery`.
 - **Data and theme:** `mock=empty` (an empty vault), `import=1` (Piw 0.1 data waiting to be
@@ -326,16 +326,15 @@ Example: <http://localhost:1420/?note=refactor&theme=dark>.
 
 ### Development switches
 
-| Variable                      | Effect                                                                                                                                                 |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PIW_DATA_DIR`                | Use another data directory (and, unless `PIW_VAULT` says otherwise, a vault inside it)                                                                 |
-| `PIW_VAULT=/some/folder`      | Open this vault instead of the one in Settings › Data (or `~/Piw`)                                                                                     |
-| `PIW_DEMO=1`                  | Fill a vault that has no notes with the demo (`fixtures/demo/`, `vault/demo.rs`) and pin its stickies; `pnpm demo` sets it with its own data directory |
-| `PIW_WAYLAND_NATIVE=1`        | Run GTK on native Wayland instead of XWayland                                                                                                          |
-| `PIW_UI_SCALE=1.25`           | Override the window size factor (XWayland: detected from `Xft.dpi`)                                                                                    |
-| `PIW_WEBVIEW_ZOOM=1.25`       | Zoom the webviews by hand, only for a webview that does not apply the OS scale itself                                                                  |
-| `PIW_DISABLE_PORTAL=1`        | Linux Wayland: skip the shortcuts portal and use the Tauri plugin                                                                                      |
-| `PIW_SPIKE_PROBE=report.json` | Debug builds only: run the platform probe (`PIW_SPIKE_PROBE_EXIT=1` quits afterwards)                                                                  |
+| Variable                      | Effect                                                                                 |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| `PIW_DATA_DIR`                | Use another data directory (and, unless `PIW_VAULT` says otherwise, a vault inside it) |
+| `PIW_VAULT=/some/folder`      | Open this vault instead of the one in Settings › Data (or `~/Piw`)                     |
+| `PIW_WAYLAND_NATIVE=1`        | Run GTK on native Wayland instead of XWayland                                          |
+| `PIW_UI_SCALE=1.25`           | Override the window size factor (XWayland: detected from `Xft.dpi`)                    |
+| `PIW_WEBVIEW_ZOOM=1.25`       | Zoom the webviews by hand, only for a webview that does not apply the OS scale itself  |
+| `PIW_DISABLE_PORTAL=1`        | Linux Wayland: skip the shortcuts portal and use the Tauri plugin                      |
+| `PIW_SPIKE_PROBE=report.json` | Debug builds only: run the platform probe (`PIW_SPIKE_PROBE_EXIT=1` quits afterwards)  |
 
 Keep pull requests small, describe how you tested them and on which OS and desktop, and add a
 line under **Unreleased** in [CHANGELOG.md](../CHANGELOG.md) for user-visible changes. Product

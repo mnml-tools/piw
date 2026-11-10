@@ -24,7 +24,6 @@ React, TypeScript, and Rust; the files are yours, readable by any editor and by 
 </picture>
 
 View screenshots in [light mode](docs/piw-screenshot-light.png) or [dark mode](docs/piw-screenshot-dark.png).
-They are taken from the release build on the demo vault (see [Screenshots](#screenshots)).
 
 > [!NOTE]
 > Piw is pre-release. It runs daily on Linux with KDE Plasma. Windows and macOS build in CI but
@@ -86,20 +85,8 @@ Set `PIW_DATA_DIR=/some/folder` to keep your real notes out of reach while you t
 keeps its settings there and opens `/some/folder/vault` (or the folder in `PIW_VAULT`).
 
 Use `pnpm dev` to preview the interface in a browser at <http://localhost:1420>. Outside Tauri,
-an in-memory mock with the same demo vault answers every command; it is dev-only and resets on reload. Its
+an in-memory mock with a small sample vault answers every command; it is dev-only and resets on reload. Its
 URL parameters are listed in the [architecture guide](docs/architecture.md#browser-preview).
-
-To see the app full of notes, run:
-
-```sh
-pnpm demo
-```
-
-It starts `tauri dev` on a demo vault (`fixtures/demo/`, with its dates moved to today) and two
-stickies on the desktop, in a separate data directory (`~/.local/share/piw-demo` on Linux), so
-your real notes and settings are never touched. Your edits there are kept; `pnpm demo --reset`
-starts over, and `pnpm demo --release` runs the release binary instead. Quit Piw first: a running
-Piw would take the launch.
 
 ## Build desktop packages
 
@@ -209,21 +196,6 @@ Results land in `target-e2e/<scenario>/`. The other scenarios (`capture`, `stick
 `workspace`, `perf`, `visual-qa`) were written for Piw 0.1 and still check its database; they
 are being ported to the vault. See the [architecture guide](docs/architecture.md#validation) for
 the test layers.
-
-### Screenshots
-
-The screenshots at the top come from the `presentation` scenario on the release build: the
-demo vault (`fixtures/demo/`) with five notes open in tabs, the note panel, two stickies beside
-the note and the blue accent, rendered at 2x and scaled down to 1440 × 900. To retake them:
-
-```sh
-pnpm tauri build --no-bundle
-for theme in light dark; do E2E_WIDTH=3200 E2E_HEIGHT=2000 THEME=$theme SHOT_VAULT=~/Piw-demo scripts/e2e/nested-session.sh scripts/e2e/presentation.sh target-e2e/presentation-$theme; rm -rf ~/Piw-demo; done
-cp target-e2e/presentation-*/piw-screenshot-*.png docs/
-```
-
-`SHOT_VAULT` only makes the status bar show a short path; it must be a folder that does not
-exist yet, and the loop deletes it after each run. Your own vault and settings are never used.
 
 ## Platform support
 

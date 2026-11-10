@@ -40,7 +40,6 @@ All notable changes are documented here. The format follows
   become notes and task lines, on the first start with an empty vault or from Settings › Data;
   stickies follow their notes and the old database stays untouched.
 - **Settings › Data** shows the vault folder and lets you open another one.
-- **`pnpm demo`** opens Piw on a demo vault with stickies, in its own data directory.
 - **App icon** (a pen nib) for the packages, the window and the tray; the title bar shows it as
   a one-colour glyph.
 - Tray menu, single instance, close to tray, start at login (off by default).

@@ -487,11 +487,9 @@ pub fn launch<R: Runtime>(app: &AppHandle<R>, root: std::path::PathBuf) {
             };
             let started =
                 data_dir(&app).and_then(|data| crate::vault::start(&root, &data, on_change));
-            let mut demo = false;
             let phase = match started {
                 Ok(state) => {
                     import_on_first_use(&app, &state.vault);
-                    demo = seed_demo(&state.vault);
                     VaultPhase::Ready(state)
                 }
                 Err(error) => {
@@ -502,19 +500,10 @@ pub fn launch<R: Runtime>(app: &AppHandle<R>, root: std::path::PathBuf) {
                     }
                 }
             };
-            let root = match &phase {
-                VaultPhase::Ready(state) => Some(root_of(&state.vault)),
-                _ => None,
-            };
             if let Some(slot) = app.try_state::<VaultSlot>()
                 && slot.set(phase).is_ok()
             {
                 broadcast(&app, vault_changed(), None);
-            }
-            if let (true, Some(root)) = (demo, root)
-                && let Err(error) = pin_demo_stickies(&app, &root)
-            {
-                log::error!("demo stickies not pinned ({:?})", error.code());
             }
         });
     if let Err(error) = started {
@@ -530,75 +519,6 @@ fn data_dir<R: Runtime>(app: &AppHandle<R>) -> AppResult<std::path::PathBuf> {
             .app_data_dir()
             .map_err(|e| AppError::Storage(format!("no app data directory: {e}"))),
     }
-}
-
-/// `PIW_DEMO=1` (`pnpm demo`): fills a vault that has no notes yet with the demo notes
-/// (`vault/demo.rs`). Returns whether it did, so the demo stickies follow.
-fn seed_demo(vault: &Vault) -> bool {
-    if std::env::var_os("PIW_DEMO").is_none_or(|v| v.is_empty() || v == "0") {
-        return false;
-    }
-    let empty = vault.index().notes().map(|n| n.is_empty()).unwrap_or(false);
-    if !empty {
-        return false;
-    }
-    let today = chrono::Local::now().date_naive();
-    match crate::vault::demo::write(vault.root(), today).and_then(|()| vault.sync()) {
-        Ok(_) => {
-            log::info!("demo vault written");
-            true
-        }
-        Err(error) => {
-            log::error!("demo vault not written ({:?})", error.code());
-            false
-        }
-    }
-}
-
-/// Pins and shows the demo's stickies, with their colours, and has them reopen at launch.
-fn pin_demo_stickies<R: Runtime>(app: &AppHandle<R>, root: &str) -> AppResult<()> {
-    use crate::services::{settings, stickies};
-    use crate::vault::demo::{DemoSticky, STICKIES};
-    let db = super::support::database(app)?;
-    let pinned = db.write(|tx| {
-        let mut pinned = Vec::new();
-        for sticky in STICKIES {
-            let (item, color) = match sticky {
-                DemoSticky::Note { path, color } => (
-                    VaultStickyItem::Note {
-                        path: (*path).to_owned(),
-                    },
-                    *color,
-                ),
-                DemoSticky::Tasks { view, color } => (
-                    VaultStickyItem::Tasks {
-                        view: (*view).to_owned(),
-                        space: None,
-                    },
-                    *color,
-                ),
-            };
-            let target = vault_stickies::target_for(tx, root, &item)?;
-            let (record, _) = stickies::pin(tx, &target)?;
-            stickies::set_color(tx, &target, Some(color))?;
-            pinned.push((target, record));
-        }
-        let mut patch = serde_json::Map::new();
-        patch.insert(
-            "restoreStickiesOnLaunch".into(),
-            serde_json::Value::Bool(true),
-        );
-        settings::update(tx, patch)?;
-        Ok(pinned)
-    })?;
-    for (target, record) in pinned {
-        crate::platform::window::open_sticky(app, &target, record.placement)?;
-    }
-    let mut changes = ChangeSet::new();
-    changes.add(EntityKind::Sticky, "*");
-    changes.add(EntityKind::Settings, "restoreStickiesOnLaunch");
-    broadcast(app, changes, None);
-    Ok(())
 }
 
 fn import_on_first_use<R: Runtime>(app: &AppHandle<R>, vault: &Vault) {

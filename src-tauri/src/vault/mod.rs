@@ -4,7 +4,6 @@
 //! It runs only when `PIW_VAULT` points at a folder; the workspace then shows the new shell
 //! (`commands/vault.rs`).
 
-pub mod demo;
 pub mod dto;
 pub mod files;
 pub mod import;

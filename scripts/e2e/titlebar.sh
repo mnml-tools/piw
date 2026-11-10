@@ -3,10 +3,6 @@
 # not follow xdotool's synthetic pointer in the nested session — the same holds for the sticky
 # drag strip — so those three are reported as UNVERIFIED and must be checked by hand.
 . "$ROOT/scripts/e2e/lib.sh"
-start_piw --hidden
-stop_piw
-sleep 2
-python3 "$ROOT/scripts/seed-rich.py" "$PIW_DATA_DIR/piw.sqlite3" "${THEME:-light}" >/dev/null
 start_piw
 wait_for_window "^Piw$" 20
 id="$(xdo search --onlyvisible --name "^Piw$" | head -1)"

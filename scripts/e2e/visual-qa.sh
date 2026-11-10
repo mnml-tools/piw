@@ -1,5 +1,5 @@
 # Visual QA screenshots of every window on the real build (light or dark, one window size).
-# SEED=demo|rich (scripts/seed-rich.py fills every view)  THEME=light|dark  SIZE=WIDTHxHEIGHT of the main window in X11 pixels (default 1280x800).
+# THEME=light|dark  SIZE=WIDTHxHEIGHT of the main window in X11 pixels (default 1280x800).
 # XFT_DPI=134 reproduces a 140 % KDE desktop (WebKitGTK scales CSS px by dpi/96; then use
 # SIZE=1792x1120 for a 1280x800 CSS-px window and a larger E2E_WIDTH/E2E_HEIGHT).
 # Run: E2E_WIDTH=2000 E2E_HEIGHT=1200 THEME=dark scripts/e2e/nested-session.sh scripts/e2e/visual-qa.sh
@@ -71,11 +71,7 @@ set_dpi
 start_piw --hidden
 stop_piw
 sleep 2
-if [ "${SEED:-demo}" = rich ]; then
-  python3 "$ROOT/scripts/seed-rich.py" "$PIW_DATA_DIR/piw.sqlite3" "$THEME" >/dev/null
-else
-  python3 "$ROOT/scripts/e2e/seed-demo.py" "$PIW_DATA_DIR/piw.sqlite3" "$THEME" >/dev/null
-fi
+python3 "$ROOT/scripts/e2e/seed-demo.py" "$PIW_DATA_DIR/piw.sqlite3" "$THEME" >/dev/null
 python3 - "$PIW_DATA_DIR/piw.sqlite3" <<'PY'
 import sqlite3, sys
 db = sqlite3.connect(sys.argv[1])

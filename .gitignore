@@ -23,7 +23,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
-fixtures
 
 # Spikes keep their own lockfiles out of the repo
 spikes/**/node_modules/
@@ -31,4 +30,3 @@ spikes/**/dist/
 
 # Native end-to-end output
 target-e2e/
-scripts

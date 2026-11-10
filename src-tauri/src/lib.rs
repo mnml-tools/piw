@@ -186,7 +186,7 @@ fn start_vault(app: &AppHandle) {
         .ok()
         .and_then(|db| db.read(services::settings::get).ok())
         .unwrap_or_default();
-    // With `PIW_DATA_DIR` (testing, the demo), the default vault lives in that directory too, so
+    // With `PIW_DATA_DIR` (testing), the default vault lives in that directory too, so
     // a test run never writes into the real `~/Piw`.
     let root = std::env::var_os("PIW_VAULT")
         .map(std::path::PathBuf::from)
