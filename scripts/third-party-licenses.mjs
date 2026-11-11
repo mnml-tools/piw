@@ -12,8 +12,9 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'src-tauri', 'resources', 'THIRD_PARTY_LICENSES.md');
 const LICENSE_FILE = /^(licen[cs]e|copying|notice)([.-].*)?$/i;
 
-function run(cmd, args, cwd = root) {
-  return execFileSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+// `shell`: on Windows pnpm is `pnpm.cmd`, which Node only starts through a shell.
+function run(cmd, args, cwd = root, shell = false) {
+  return execFileSync(cmd, args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, shell });
 }
 
 function licenseTexts(dir) {
@@ -26,7 +27,9 @@ function licenseTexts(dir) {
 
 // npm: production dependencies only (what ends up in the bundled UI).
 const npm = [];
-const byLicense = JSON.parse(run('pnpm', ['licenses', 'list', '--prod', '--json']));
+const byLicense = JSON.parse(
+  run('pnpm', ['licenses', 'list', '--prod', '--json'], root, process.platform === 'win32'),
+);
 for (const [license, packages] of Object.entries(byLicense)) {
   for (const pkg of packages) {
     pkg.versions.forEach((version, i) =>
