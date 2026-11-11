@@ -31,7 +31,7 @@
     "verify": "pnpm check && pnpm rust:check && pnpm build",
     "test:editor-perf": "EDITOR_PERF=1 vitest run src/lib/editor/__tests__/performance.test.ts --testTimeout=60000",
     "icons": "node scripts/build-icons.mjs",
-    "icons:png": "tauri icon src/assets/AppIcon.png",
+    "icons:png": "node scripts/build-flat-icons.mjs",
     "icons:mac": "node scripts/build-macos-icon.mjs"
   },
   "dependencies": {
