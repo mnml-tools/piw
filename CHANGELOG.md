@@ -9,10 +9,10 @@ All notable changes are documented here. The format follows
 ### Added
 
 - **A vault of Markdown notes.** Notes are `.md` files in a folder you pick (default `~/Piw`),
-  readable and editable by any app, Obsidian included; Piw follows external edits. The
+  readable and editable by any app; Piw follows external edits. The
   top-level folders are spaces, and the title bar's space filter scopes the tree, search and
   tasks. The format is specified in [docs/vault-format.md](docs/vault-format.md).
-- **An Obsidian-like workspace:** a sidebar with the folder tree (new note or folder, rename,
+- **A new workspace:** a sidebar with the folder tree (new note or folder, rename,
   drag to move, Trash), Zap-style tabs for notes, task views, Trash and Settings that are
   remembered, search over every note, and a status bar.
 - **One live Markdown editor** everywhere (CodeMirror): headings, emphasis, code, quotes, lists
@@ -22,7 +22,7 @@ All notable changes are documented here. The format follows
   a line while you are not editing them. Selecting text offers Create sticky from selection, Bold
   and Link.
 - **Tasks are lines in notes** (`- [ ]`), with due dates as `📅 YYYY-MM-DD` and `✅` on
-  completion, as Obsidian Tasks writes them. Type `@today`, `@tomorrow`, `@friday` or a date, or
+  completion. Type `@today`, `@tomorrow`, `@friday` or a date, or
   press Mod+D, to pick a date; dates show as chips.
   - A panel beside each note lists its tasks by heading, with progress and dates, and the
     note's outline.

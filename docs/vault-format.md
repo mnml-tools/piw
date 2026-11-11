@@ -5,8 +5,8 @@ reads from a folder of Markdown files, and exactly what it writes back. The Rust
 TypeScript editor both follow it, and both are tested against the same fixtures
 ([`fixtures/`](../fixtures/README.md)).
 
-The format stays compatible with Obsidian and its Tasks plugin, so the same folder can be opened
-in either app.
+The format is plain Markdown with a few common conventions, so the same folder can be opened
+and edited in other Markdown apps.
 
 ## 1. The vault
 
@@ -28,7 +28,7 @@ truth; everything Piw keeps elsewhere can be rebuilt from them or is state of th
 - **Notes** are the files ending in `.md` (case-insensitive). Every other file is ignored for
   now.
 - **Hidden entries** are ignored, with everything under them: any file or folder whose name
-  starts with `.` (`.piw`, `.obsidian`, `.git`, `.trash`). Symbolic links are not followed.
+  starts with `.` (`.piw`, `.git`, `.trash`). Symbolic links are not followed.
 - **Spaces** are the folders at the vault root. A note belongs to the space of its first path
   segment; a note at the root belongs to none. Creating a space creates a folder, and moving a
   note between spaces moves the file. Piw creates `Work/` and `Personal/` in a new, empty vault.
@@ -65,10 +65,10 @@ A task is a GFM task list item that has text after the box:
 - **Marker**: a `-`, `*`, `+` or `1.` / `1)` list item whose content starts with `[ ]` (open) or
   `[x]` / `[X]` (done), followed by a space or a tab and at least one character that is not
   whitespace. `- [ ]` alone, `-[ ] …` and `- [ ]text` are not tasks.
-- **Other boxes** (`[-]`, `[/]`, `[>]`… used by some Obsidian themes) are not tasks in format 1.
+- **Other boxes** (`[-]`, `[/]`, `[>]`… used by some Markdown apps) are not tasks in format 1.
   Piw leaves them as they are.
 - **Not tasks**: items inside fenced or indented code, HTML blocks or comments, front matter or a
-  block quote (Obsidian callouts included).
+  block quote (callouts included).
 - **Subtasks** follow CommonMark list nesting: a task's parent is the list item that directly
   encloses it, when that item is a task. Under a plain bullet, the task has no parent.
 - **Section**: the text of the closest heading above the task, of any level (`Plan`), or none.
@@ -164,6 +164,6 @@ database or moves windows on another computer:
 - **Task commands** carry `{ path, line, lineText, fileHash }`. If the hash matches, the line is
   changed. If it does not but exactly one line still has `lineText`, that line is changed.
   Otherwise the command is refused and the views refetch.
-- **External changes** (Obsidian, an editor, Syncthing) arrive through the file watcher. Piw
+- **External changes** (another editor, Syncthing) arrive through the file watcher. Piw
   also compares sizes and modification times on start and when the window gains focus, in case
   the watcher missed an event.

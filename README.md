@@ -15,7 +15,7 @@
 
 Piw keeps your notes as Markdown files in a folder of your choice, finds the tasks inside them,
 and puts the notes you need right now on your desktop as sticky notes. It's built with Tauri,
-React, TypeScript, and Rust; the files are yours, readable by any editor and by Obsidian.
+React, TypeScript, and Rust; the files are yours, readable by any editor.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/piw-screenshot-dark.png">
@@ -39,9 +39,9 @@ View screenshots in [light mode](docs/piw-screenshot-light.png) or [dark mode](d
   spaces, and the space filter in the title bar narrows the tree, search and tasks to one of
   them. Notes, task views, Trash and Settings open as tabs.
 - **Keep tasks where they belong.** A task is a `- [ ]` line in any note. Type `@tomorrow`,
-  `@friday` or a date (or press `Ctrl+D`) to give it a due date; Piw writes it as `📅 2026-11-12`,
-  the format of Obsidian's Tasks plugin. The panel beside a note lists its tasks and outline,
-  and Today, Upcoming and All collect the tasks of every note.
+  `@friday` or a date (or press `Ctrl+D`) to give it a due date, shown as a chip and kept as
+  plain text in the note. The panel beside a note lists its tasks and outline, and Today,
+  Upcoming and All collect the tasks of every note.
 - **Capture** from any app with `Ctrl+Shift+Space` (`⌘⇧Space` on macOS), type, then
   `Ctrl+Enter`: the note or task lands in the chosen space's `Inbox.md`. The popup closes only
   after it is saved, and a draft survives an accidental close. The tray menu and

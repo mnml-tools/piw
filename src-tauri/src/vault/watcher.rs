@@ -1,4 +1,4 @@
-//! Keeps the index in step with changes made outside Piw (Obsidian, an editor, Syncthing).
+//! Keeps the index in step with changes made outside Piw (another editor, Syncthing).
 //!
 //! Events are collected until the folder has been quiet for a moment, then the touched notes are
 //! re-read. Piw's own writes come through here too and change nothing, because the index already
