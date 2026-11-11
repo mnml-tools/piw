@@ -83,7 +83,10 @@
   min-height: 0;
 }
 
-.tree[data-drop] {
+/* While dragging: the folder a drop lands in is lit as a whole, its row and the rows inside it
+   (the tree itself for the root), its row also outlined in the accent; the dragged row fades. */
+.tree[data-drop],
+.row[data-drop] {
   background: var(--color-bg-hover);
 }
 
@@ -91,9 +94,13 @@
   gap: var(--space-1);
 }
 
-.row[data-drop] {
+.row[data-drop='folder'] {
   outline: var(--border-width) solid var(--color-accent-mark);
   outline-offset: -1px;
+}
+
+.row[data-dragging] {
+  opacity: 0.5;
 }
 
 .chevron {

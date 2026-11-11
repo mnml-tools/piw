@@ -91,3 +91,14 @@ export function newNoteFolder(activeNote: string | null, space: string | null): 
   }
   return space;
 }
+
+/** Where a row takes a drop: a folder takes it inside, a note into the folder it is in. */
+export function dropFolderFor(entry: VaultEntry): string | null {
+  return entry.kind === 'folder' ? entry.path : parentOf(entry.path);
+}
+
+/** Whether moving `path` into `folder` (`null`: the vault root) changes anything and is allowed. */
+export function canMoveInto(path: string, folder: string | null): boolean {
+  if (parentOf(path) === folder) return false;
+  return folder === null || (folder !== path && !folder.startsWith(`${path}/`));
+}

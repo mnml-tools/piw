@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { VaultEntry } from '@/lib/ipc/bindings/VaultEntry';
-import { buildTree, newNoteFolder, spacesOf, visibleRows } from './tree';
+import {
+  buildTree,
+  canMoveInto,
+  dropFolderFor,
+  newNoteFolder,
+  spacesOf,
+  visibleRows,
+} from './tree';
 
 const folder = (path: string): VaultEntry => ({
   path,
@@ -58,5 +65,18 @@ describe('vault tree', () => {
     expect(newNoteFolder('Loose.md', null)).toBeNull();
     expect(newNoteFolder('Personal/Gifts.md', 'Work')).toBe('Work');
     expect(newNoteFolder(null, 'Work')).toBe('Work');
+  });
+
+  it('drops into a folder, or beside a note, never into itself', () => {
+    expect(dropFolderFor(folder('Work/Projects'))).toBe('Work/Projects');
+    expect(dropFolderFor(note('Work/Projects/Refactor.md'))).toBe('Work/Projects');
+    expect(dropFolderFor(note('Loose.md'))).toBeNull();
+    expect(canMoveInto('Work/Agenda.md', 'Work/Projects')).toBe(true);
+    expect(canMoveInto('Work/Agenda.md', null)).toBe(true);
+    expect(canMoveInto('Work/Agenda.md', 'Work')).toBe(false);
+    expect(canMoveInto('Loose.md', null)).toBe(false);
+    expect(canMoveInto('Work', 'Work')).toBe(false);
+    expect(canMoveInto('Work', 'Work/Projects')).toBe(false);
+    expect(canMoveInto('Work', 'Workshop')).toBe(true);
   });
 });
