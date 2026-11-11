@@ -51,10 +51,10 @@ describe('Toast', () => {
   it('runs the action and closes the toast', () => {
     const onAction = vi.fn();
     renderProvider();
-    show({ message: '“Comprar café” moved to Trash', action: { label: 'Undo', onAction } });
+    show({ message: '“Buy coffee” moved to Trash', action: { label: 'Undo', onAction } });
     fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
     expect(onAction).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('“Comprar café” moved to Trash')).not.toBeInTheDocument();
+    expect(screen.queryByText('“Buy coffee” moved to Trash')).not.toBeInTheDocument();
   });
 
   it('auto-dismisses after its duration (default 8 s)', () => {

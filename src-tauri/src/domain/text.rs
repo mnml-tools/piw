@@ -92,8 +92,8 @@ mod tests {
     #[test]
     fn infers_the_title_from_the_first_line() {
         assert_eq!(
-            display_title("", Some("\n  # Ligar ao fornecedor\nmais")),
-            "Ligar ao fornecedor"
+            display_title("", Some("\n  # Call the supplier\nmore")),
+            "Call the supplier"
         );
         assert_eq!(display_title("  Explicit ", Some("Body")), "Explicit");
         assert_eq!(display_title("", Some("   \n\n")), "");
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn truncates_long_titles_on_char_boundaries() {
-        let long = "ação ☕ ".repeat(40);
+        let long = "café ☕ ".repeat(40);
         let title = display_title("", Some(&long));
         assert!(title.chars().count() <= 120);
         assert!(title.ends_with('…'));
@@ -112,7 +112,7 @@ mod tests {
     fn titles_leave_out_markdown_markers() {
         let body = "## Mykid\n\n- [ ] Verify bug;";
         assert_eq!(display_title("", Some(body)), "Mykid");
-        assert_eq!(display_title("", Some("___\n- [ ] Ligar")), "Ligar");
+        assert_eq!(display_title("", Some("___\n- [ ] Call")), "Call");
         // Not markers: no space after them.
         assert_eq!(
             display_title("", Some("#tag -1 2.5 [x]y")),

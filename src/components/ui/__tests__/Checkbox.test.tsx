@@ -8,7 +8,7 @@ function Controlled({ onChange }: { onChange?: (checked: boolean) => void }) {
   const [checked, setChecked] = useState(false);
   return (
     <Checkbox
-      aria-label="Comprar café"
+      aria-label="Buy coffee"
       checked={checked}
       onChange={(event) => {
         setChecked(event.target.checked);
@@ -21,7 +21,7 @@ function Controlled({ onChange }: { onChange?: (checked: boolean) => void }) {
 describe('Checkbox', () => {
   it('is a native checkbox named by aria-label', () => {
     render(<Controlled />);
-    const box = screen.getByRole('checkbox', { name: 'Comprar café' });
+    const box = screen.getByRole('checkbox', { name: 'Buy coffee' });
     expect(box.tagName).toBe('INPUT');
     expect(box).not.toBeChecked();
   });

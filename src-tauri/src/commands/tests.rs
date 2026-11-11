@@ -407,7 +407,7 @@ fn vault_stickies_capture_and_reach_only_their_own_note() {
         json!({ "kind": "note", "path": "Work/Inbox.md", "title": "Inbox" })
     );
     assert!(call("vault_read_note", json!({ "path": "Work/Inbox.md" })).is_ok());
-    let denied = call("vault_read_note", json!({ "path": "Work/Reuniões.md" })).unwrap_err();
+    let denied = call("vault_read_note", json!({ "path": "Work/Meetings.md" })).unwrap_err();
     assert_eq!(denied["code"], "validation");
     let denied = call(
         "vault_tasks",
@@ -442,7 +442,7 @@ fn vault_stickies_capture_and_reach_only_their_own_note() {
 
     let made = h.ok(
         "vault_sticky_note",
-        json!({ "path": "Work/Reuniões.md", "title": "Finance", "text": "Send the summary" }),
+        json!({ "path": "Work/Meetings.md", "title": "Finance", "text": "Send the summary" }),
     );
     assert_eq!(made, "Work/Stickies/Finance.md");
 }

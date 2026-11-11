@@ -67,8 +67,8 @@ describe('indentList', () => {
 
 describe('inferTitle', () => {
   it('uses the first non-empty line without Markdown markers', () => {
-    expect(inferTitle('\n  # Ligar ao fornecedor\nmais')).toBe('Ligar ao fornecedor');
-    expect(inferTitle('- [ ] comprar café')).toBe('comprar café');
+    expect(inferTitle('\n  # Call the supplier\nmore')).toBe('Call the supplier');
+    expect(inferTitle('- [ ] buy coffee')).toBe('buy coffee');
     expect(inferTitle('   \n ')).toBe('');
     expect(inferTitle('x'.repeat(100))).toHaveLength(80);
   });

@@ -183,13 +183,13 @@ fn the_tree_lists_folders_before_notes() {
             ("Personal/Stickies", Folder),
             ("Personal/Stickies/Recovery codes.md", Note),
             ("Personal/Edge cases.md", Note),
-            ("Personal/Ideias de prendas.md", Note),
+            ("Personal/Gift ideas.md", Note),
             ("Work", Folder),
             ("Work/Projects", Folder),
             ("Work/Projects/Onboarding.md", Note),
             ("Work/Projects/Refactor 2FA.md", Note),
             ("Work/Inbox.md", Note),
-            ("Work/Reuniões.md", Note),
+            ("Work/Meetings.md", Note),
             ("Loose note.md", Note),
         ]
     );
@@ -336,14 +336,14 @@ fn rename_and_move_keep_the_index_in_step() {
 
     // Links resolve against the notes as they are now.
     f.vault
-        .rename(&p("Work/Reuniões.md"), &p("Personal/Reuniões.md"))
+        .rename(&p("Work/Meetings.md"), &p("Personal/Meetings.md"))
         .unwrap();
-    let moved = index.note(&p("Personal/Reuniões.md")).unwrap().unwrap();
+    let moved = index.note(&p("Personal/Meetings.md")).unwrap().unwrap();
     assert_eq!(moved.space.as_deref(), Some("Personal"));
     let links = index.links_of(&p("Work/Projects/Refactor 2FA.md")).unwrap();
     assert_eq!(
         links[0].path.as_ref().map(RelPath::as_str),
-        Some("Personal/Reuniões.md")
+        Some("Personal/Meetings.md")
     );
 
     let report = f
@@ -363,7 +363,7 @@ fn rename_and_move_keep_the_index_in_step() {
     assert!(index.note(&p("Personal/Edge Cases.md")).unwrap().is_some());
 
     for (from, to) in [
-        ("Work/Today.md", "Personal/ideias de PRENDAS.md"),
+        ("Work/Today.md", "Personal/gift IDEAS.md"),
         ("Work", "Work/Clients/Work"),
         ("Work/Today.md", "Work/Today.txt"),
         ("Work/Today.md", "Work/bad:name.md"),
@@ -555,11 +555,19 @@ fn search_finds_titles_and_text_without_diacritics() {
     // The title outranks the link to it from Refactor 2FA.
     assert_eq!(
         index
-            .search("reunioes")
+            .search("meetings")
             .unwrap()
             .first()
             .map(|hit| hit.path.as_str()),
-        Some("Work/Reuniões.md")
+        Some("Work/Meetings.md")
+    );
+    assert_eq!(
+        index
+            .search("creme brulee")
+            .unwrap()
+            .first()
+            .map(|hit| hit.path.as_str()),
+        Some("Personal/Gift ideas.md")
     );
     index.search("NOT OR \"*").unwrap();
     assert!(index.search("   ").unwrap().is_empty());
@@ -581,7 +589,7 @@ fn renaming_a_note_rewrites_the_links_to_it() {
     fs::write(
         f.root.join("Personal/Links.md"),
         "[[refactor 2fa]] [[Refactor 2FA#Plan|plan]] [[Work/Projects/Refactor 2FA]]\n\
-         [[Refactor 2FAX]] [[Reuniões]]\n",
+         [[Refactor 2FAX]] [[Meetings]]\n",
     )
     .unwrap();
     f.vault.sync().unwrap();
@@ -607,16 +615,16 @@ fn renaming_a_note_rewrites_the_links_to_it() {
         vec![
             "Personal/Links.md",
             "Personal/Stickies/Recovery codes.md",
-            "Work/Reuniões.md"
+            "Work/Meetings.md"
         ]
     );
     assert_eq!(
         fs::read_to_string(f.root.join("Personal/Links.md")).unwrap(),
         "[[TOTP rollout]] [[TOTP rollout#Plan|plan]] [[Work/Auth/TOTP rollout]]\n\
-         [[Refactor 2FAX]] [[Reuniões]]\n"
+         [[Refactor 2FAX]] [[Meetings]]\n"
     );
     assert!(
-        fs::read_to_string(f.root.join("Work/Reuniões.md"))
+        fs::read_to_string(f.root.join("Work/Meetings.md"))
             .unwrap()
             .contains("see [[TOTP rollout]].")
     );
@@ -637,7 +645,7 @@ fn renaming_a_note_rewrites_the_links_to_it() {
     // A move that keeps the title leaves links by title alone.
     let moved = f
         .vault
-        .rename(&p("Work/Reuniões.md"), &p("Personal/Reuniões.md"))
+        .rename(&p("Work/Meetings.md"), &p("Personal/Meetings.md"))
         .unwrap();
     assert!(moved.linked.is_empty());
 }
@@ -672,7 +680,7 @@ fn task_views_list_by_date_and_keep_what_was_ticked_today() {
         vec![
             "Work/Projects/Refactor 2FA.md:14 Agree on the tolerance window",
             "Work/Projects/Onboarding.md:6 Meet the team",
-            "Work/Reuniões.md:11 Book the room for next week",
+            "Work/Meetings.md:11 Book the room for next week",
         ]
     );
     assert!(view_lines(&f.vault, Upcoming, Some("Personal"))[0].starts_with("Personal/Edge"));

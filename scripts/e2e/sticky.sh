@@ -12,8 +12,8 @@ db = sqlite3.connect(sys.argv[1])
 space = db.execute("SELECT id FROM spaces WHERE is_default = 1").fetchone()[0]
 task = str(uuid.uuid4())
 ts = "2026-11-06T12:00:00.000Z"
-db.execute("INSERT INTO tasks (id, space_id, title, description, sort_order, created_at, updated_at) VALUES (?, ?, 'Comprar cafe', 'Grao, nao moido', 0, ?, ?)", (task, space, ts, ts))
-db.execute("INSERT INTO tasks (id, space_id, parent_task_id, title, sort_order, created_at, updated_at) VALUES (?, ?, ?, 'Ver precos', 0, ?, ?)", (str(uuid.uuid4()), space, task, ts, ts))
+db.execute("INSERT INTO tasks (id, space_id, title, description, sort_order, created_at, updated_at) VALUES (?, ?, 'Buy coffee', 'Whole beans, not ground', 0, ?, ?)", (task, space, ts, ts))
+db.execute("INSERT INTO tasks (id, space_id, parent_task_id, title, sort_order, created_at, updated_at) VALUES (?, ?, ?, 'Compare prices', 0, ?, ?)", (str(uuid.uuid4()), space, task, ts, ts))
 db.execute("INSERT INTO sticky_windows (target_kind, target_id, x, y, width, height, always_on_top, color, is_open, created_at, updated_at) VALUES ('task', ?, 900, 200, 300, 260, 1, 'yellow', 1, ?, ?)", (task, ts, ts))
 db.execute("INSERT INTO settings (key, value, updated_at) VALUES ('restoreStickiesOnLaunch', 'true', ?)", (ts,))
 db.commit()

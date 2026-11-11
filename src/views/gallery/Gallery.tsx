@@ -486,7 +486,7 @@ function FieldsSection() {
           aria-label="Editor"
           variant="editor"
           autoGrow
-          defaultValue={'Ligar ao fornecedor\nPedir orçamento revisto até sexta.'}
+          defaultValue={'Call the supplier\nAsk for the revised quote before Friday.'}
         />
       </div>
     </Section>
@@ -503,8 +503,8 @@ function CheckboxSection() {
         <Checkbox aria-label="Disabled checked task" disabled defaultChecked />
       </Row>
       <Row label="task sm">
-        <Checkbox size="sm" label="Testar serviço TOTP" defaultChecked />
-        <Checkbox size="sm" label="Testar recuperação" />
+        <Checkbox size="sm" label="Test the TOTP service" defaultChecked />
+        <Checkbox size="sm" label="Test recovery" />
       </Row>
     </Section>
   );
@@ -796,7 +796,7 @@ function MenuSection() {
       icon: <Trash {...iconProps} />,
       shortcut: 'Delete',
       danger: true,
-      onSelect: () => toast({ message: '“Ligar ao fornecedor” moved to Trash' }),
+      onSelect: () => toast({ message: '“Call the supplier” moved to Trash' }),
     },
   ];
   return (
@@ -1013,7 +1013,7 @@ function ToastSection() {
         <Button
           onClick={() =>
             toast({
-              message: '“Comprar café” moved to Trash',
+              message: '“Buy coffee” moved to Trash',
               action: { label: 'Undo', onAction: () => toast({ message: 'Restored' }) },
             })
           }
@@ -1034,7 +1034,7 @@ function ToastSection() {
       </Row>
       <div className={styles.toastStack} inert>
         <div className={toastStyles.toast}>
-          <p className={toastStyles.message}>“Comprar café” moved to Trash</p>
+          <p className={toastStyles.message}>“Buy coffee” moved to Trash</p>
           <Button variant="ghost" size="sm" className={toastStyles.action}>
             Undo
           </Button>
@@ -1169,7 +1169,7 @@ function TaskRow({
 const DEMO_TASKS: DemoTask[] = [
   {
     id: 't1',
-    title: 'Enviar fatura ao cliente',
+    title: 'Send the invoice to the client',
     due: '3 Nov',
     overdue: true,
     color: 'mint',
@@ -1178,7 +1178,7 @@ const DEMO_TASKS: DemoTask[] = [
   },
   {
     id: 't2',
-    title: 'Adicionar testes',
+    title: 'Add tests',
     due: 'Today',
     doc: 'Refactor 2FA',
     subtasks: '1/3',
@@ -1186,10 +1186,10 @@ const DEMO_TASKS: DemoTask[] = [
     space: 'Work',
     done: false,
   },
-  { id: 't3', title: 'Comprar café', due: 'Fri', color: 'sky', space: 'Personal', done: false },
+  { id: 't3', title: 'Buy coffee', due: 'Fri', color: 'sky', space: 'Personal', done: false },
   {
     id: 't4',
-    title: 'Ler artigo sobre WAL',
+    title: 'Read the article on WAL',
     due: 'Mon',
     color: 'sky',
     space: 'Personal',
@@ -1209,9 +1209,9 @@ function ListSection() {
       <ul role="list" aria-label="Notes" className={styles.list}>
         <li>
           <ListRow
-            title="Ligar ao fornecedor"
+            title="Call the supplier"
 
-            snippet="Pedir orçamento revisto até sexta. Confirmar prazos de entrega e pedir contacto alternativo."
+            snippet="Ask for the revised quote before Friday. Confirm delivery dates and ask for a backup contact."
             meta={<SpaceDot color="mint" label="Work" />}
             actions={
               <IconButton
@@ -1413,13 +1413,13 @@ function StickySample({ color }: { color: StickyColor }) {
         <IconButton size="sm" aria-label="Hide from desktop" icon={<X {...iconProps} />} />
       </div>
       <div className={styles.stickyBody}>
-        <Checkbox size="sm" label="Comprar café" defaultChecked={color === 'mint'} />
-        <Checkbox size="sm" label="Ver preços" />
+        <Checkbox size="sm" label="Buy coffee" defaultChecked={color === 'mint'} />
+        <Checkbox size="sm" label="Compare prices" />
         <TextArea
           aria-label={`${COLOR_NAMES[color]} sticky note`}
           variant="ghost"
           autoGrow
-          defaultValue="Grão, não moído"
+          defaultValue="Whole beans, not ground"
         />
       </div>
     </div>

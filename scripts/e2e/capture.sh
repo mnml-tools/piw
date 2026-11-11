@@ -8,34 +8,34 @@ start_piw --hidden
 piw_cli --quick-note
 wait_for_window "Quick Capture" 10
 focus_window "Quick Capture"
-type_text "Ligar ao fornecedor"
+type_text "Call the supplier"
 shot 01-capture-note
 key ctrl+Return
 sleep 1.5
 assert_hidden "Quick Capture" "capture closes after saving a note"
-assert_sql "note persisted" "SELECT body FROM notes" "Ligar ao fornecedor"
+assert_sql "note persisted" "SELECT body FROM notes" "Call the supplier"
 
 piw_cli --quick-task
 wait_for_window "Quick Capture" 10
 focus_window "Quick Capture"
-type_text "Comprar cafe"
+type_text "Buy coffee"
 key Tab
-type_text "No supermercado"
+type_text "At the supermarket"
 shot 02-capture-task
 key ctrl+Return
 sleep 1.5
-assert_sql "task persisted with description" "SELECT title || ' / ' || description FROM tasks" "Comprar cafe / No supermercado"
+assert_sql "task persisted with description" "SELECT title || ' / ' || description FROM tasks" "Buy coffee / At the supermarket"
 
 # Escape keeps a draft; reopening restores it.
 piw_cli --quick-note
 wait_for_window "Quick Capture" 10
 focus_window "Quick Capture"
-type_text "rascunho por acabar"
+type_text "unfinished draft"
 sleep 0.8
 key Escape
 sleep 1
 assert_hidden "Quick Capture" "Escape closes the capture"
-assert_sql "draft kept after Escape" "SELECT json_extract(content, '$.text') FROM capture_drafts" "rascunho por acabar"
+assert_sql "draft kept after Escape" "SELECT json_extract(content, '$.text') FROM capture_drafts" "unfinished draft"
 piw_cli --quick-note
 wait_for_window "Quick Capture" 10
 sleep 1

@@ -210,9 +210,9 @@ mod tests {
 
     #[test]
     fn parse_normalises_to_nfc() {
-        let decomposed = RelPath::parse("Work/Reunio\u{0303}es.md").unwrap();
-        assert_eq!(decomposed.as_str(), "Work/Reuniões.md");
-        assert_eq!(name_key("REUNIO\u{0303}ES.md"), "reuniões.md");
+        let decomposed = RelPath::parse("Work/Re\u{0301}sume\u{0301}.md").unwrap();
+        assert_eq!(decomposed.as_str(), "Work/Résumé.md");
+        assert_eq!(name_key("RE\u{0301}SUME\u{0301}.md"), "résumé.md");
     }
 
     #[test]
@@ -248,7 +248,7 @@ mod tests {
     #[test]
     fn validate_name_follows_the_format() {
         assert!(validate_name("Refactor 2FA").is_ok());
-        assert!(validate_name("Reuniões").is_ok());
+        assert!(validate_name("Résumé").is_ok());
         for bad in [
             "",
             "a/b",

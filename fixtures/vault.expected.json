@@ -1,0 +1,290 @@
+{
+  "formatVersion": 1,
+  "notes": {
+    "Loose note.md": {
+      "space": null,
+      "title": "Loose note",
+      "tags": [],
+      "links": [],
+      "tasks": [
+        {
+          "line": 3,
+          "checked": false,
+          "text": "Root tasks only show under All spaces",
+          "due": null,
+          "done": null,
+          "heading": null,
+          "parentLine": null
+        }
+      ]
+    },
+    "Personal/Edge cases.md": {
+      "space": "Personal",
+      "title": "Edge cases",
+      "tags": [],
+      "links": [],
+      "tasks": [
+        {
+          "line": 5,
+          "checked": false,
+          "text": "Plain open task",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 6,
+          "checked": true,
+          "text": "Capital X counts as done",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 11,
+          "checked": false,
+          "text": "Plus bullet",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 12,
+          "checked": false,
+          "text": "Tab-indented child of the plus bullet",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": 11
+        },
+        {
+          "line": 13,
+          "checked": false,
+          "text": "Due with a variation selector",
+          "due": "2026-11-12",
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 14,
+          "checked": false,
+          "text": "Impossible date stays text 📅 2026-02-30",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 15,
+          "checked": false,
+          "text": "Two due dates, the last one counts 📅 2026-11-01",
+          "due": "2026-11-20",
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 16,
+          "checked": false,
+          "text": "Other Tasks emoji stay in the text ⏫ 🔁 every week",
+          "due": "2026-11-13",
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 17,
+          "checked": true,
+          "text": "Done without a completion date",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        },
+        {
+          "line": 18,
+          "checked": false,
+          "text": "Continuation lines",
+          "due": null,
+          "done": null,
+          "heading": "Edge cases",
+          "parentLine": null
+        }
+      ]
+    },
+    "Personal/Gift ideas.md": {
+      "space": "Personal",
+      "title": "Gift ideas",
+      "tags": [],
+      "links": [],
+      "tasks": []
+    },
+    "Personal/Stickies/Recovery codes.md": {
+      "space": "Personal",
+      "title": "Recovery codes",
+      "tags": [],
+      "links": [{ "target": "Refactor 2FA", "heading": null, "path": "Work/Projects/Refactor 2FA.md" }],
+      "tasks": []
+    },
+    "Work/Inbox.md": {
+      "space": "Work",
+      "title": "Inbox",
+      "tags": [],
+      "links": [],
+      "tasks": [
+        {
+          "line": 1,
+          "checked": false,
+          "text": "Call the accountant",
+          "due": "2026-11-10",
+          "done": null,
+          "heading": null,
+          "parentLine": null
+        },
+        {
+          "line": 2,
+          "checked": false,
+          "text": "Order a new keyboard",
+          "due": null,
+          "done": null,
+          "heading": null,
+          "parentLine": null
+        }
+      ]
+    },
+    "Work/Projects/Onboarding.md": {
+      "space": "Work",
+      "title": "Onboarding",
+      "tags": [],
+      "links": [],
+      "tasks": [
+        {
+          "line": 5,
+          "checked": false,
+          "text": "Set up the laptop",
+          "due": null,
+          "done": null,
+          "heading": "Week 1",
+          "parentLine": null
+        },
+        {
+          "line": 6,
+          "checked": false,
+          "text": "Meet the team",
+          "due": "2026-11-16",
+          "done": null,
+          "heading": "Week 1",
+          "parentLine": null
+        },
+        {
+          "line": 11,
+          "checked": false,
+          "text": "Ship a first small change",
+          "due": null,
+          "done": null,
+          "heading": "Week 2",
+          "parentLine": null
+        }
+      ]
+    },
+    "Work/Projects/Refactor 2FA.md": {
+      "space": "Work",
+      "title": "Refactor 2FA",
+      "tags": ["auth", "backend", "security"],
+      "links": [
+        { "target": "Meetings", "heading": null, "path": "Work/Meetings.md" },
+        { "target": "Onboarding", "heading": "Week 1", "path": "Work/Projects/Onboarding.md" }
+      ],
+      "tasks": [
+        {
+          "line": 13,
+          "checked": true,
+          "text": "Read RFC 6238",
+          "due": null,
+          "done": "2026-11-08",
+          "heading": "Plan",
+          "parentLine": null
+        },
+        {
+          "line": 14,
+          "checked": false,
+          "text": "Agree on the tolerance window",
+          "due": "2026-11-11",
+          "done": null,
+          "heading": "Plan",
+          "parentLine": null
+        },
+        {
+          "line": 15,
+          "checked": false,
+          "text": "Add unit tests",
+          "due": null,
+          "done": null,
+          "heading": "Plan",
+          "parentLine": null
+        },
+        {
+          "line": 16,
+          "checked": false,
+          "text": "Clock drift of one step",
+          "due": null,
+          "done": null,
+          "heading": "Plan",
+          "parentLine": 15
+        },
+        {
+          "line": 17,
+          "checked": true,
+          "text": "Wrong secret",
+          "due": null,
+          "done": "2026-11-09",
+          "heading": "Plan",
+          "parentLine": 15
+        },
+        {
+          "line": 18,
+          "checked": false,
+          "text": "Review with the team",
+          "due": "2026-11-09",
+          "done": null,
+          "heading": "Plan",
+          "parentLine": null
+        }
+      ]
+    },
+    "Work/Meetings.md": {
+      "space": "Work",
+      "title": "Meetings",
+      "tags": ["meetings"],
+      "links": [
+        { "target": "Refactor 2FA", "heading": null, "path": "Work/Projects/Refactor 2FA.md" },
+        { "target": "Nowhere", "heading": null, "path": null }
+      ],
+      "tasks": [
+        {
+          "line": 6,
+          "checked": false,
+          "text": "Send the summary to finance",
+          "due": null,
+          "done": null,
+          "heading": "2026-11-03",
+          "parentLine": null
+        },
+        {
+          "line": 11,
+          "checked": false,
+          "text": "Book the room for next week",
+          "due": "2026-11-17",
+          "done": null,
+          "heading": "2026-11-10",
+          "parentLine": null
+        }
+      ]
+    }
+  },
+  "ignored": [".config/app.json", "Personal/todo.txt"]
+}

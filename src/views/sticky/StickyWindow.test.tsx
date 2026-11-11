@@ -43,7 +43,7 @@ beforeEach(() => {
     title: 'Fornecedor',
   });
   vi.spyOn(api, 'vaultReadNote').mockResolvedValue(
-    note('Ligar ao fornecedor\nPedir orçamento revisto.'),
+    note('Call the supplier\nAsk for the revised quote.'),
   );
   vi.spyOn(api, 'setStickyColor').mockResolvedValue();
   vi.spyOn(api, 'setStickyAlwaysOnTop').mockResolvedValue();
@@ -55,7 +55,7 @@ describe('StickyWindow', () => {
   it('keeps the drag strip and every control reachable by name', async () => {
     renderWithProviders(<StickyWindow target={TARGET} />);
     const field = await screen.findByRole('textbox', { name: 'Note text' });
-    expect(lines(field)).toEqual(['Ligar ao fornecedor', 'Pedir orçamento revisto.']);
+    expect(lines(field)).toEqual(['Call the supplier', 'Ask for the revised quote.']);
 
     const strip = screen.getByRole('banner');
     expect(strip).toHaveAttribute('data-tauri-drag-region');

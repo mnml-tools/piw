@@ -51,14 +51,14 @@ describe('useCapture', () => {
     });
     const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('note'));
-    act(() => result.current.update({ text: 'Ligar ao fornecedor' }));
+    act(() => result.current.update({ text: 'Call the supplier' }));
     await act(async () => {
       expect(await result.current.submit()).toBe(true);
     });
     expect(api.vaultCapture).toHaveBeenCalledWith({
       space: 'Personal',
       mode: 'note',
-      text: 'Ligar ao fornecedor',
+      text: 'Call the supplier',
       description: '',
       due: null,
     });
@@ -72,14 +72,14 @@ describe('useCapture', () => {
     const { result } = renderHook(() => useCapture(spaces, 'last_used'));
     await act(() => result.current.open('task'));
     act(() =>
-      result.current.update({ text: 'Comprar café', description: 'No supermercado', pin: true }),
+      result.current.update({ text: 'Buy coffee', description: 'At the supermarket', pin: true }),
     );
     await act(() => result.current.submit());
     expect(api.vaultCapture).toHaveBeenCalledWith({
       space: 'Personal',
       mode: 'task',
-      text: 'Comprar café',
-      description: 'No supermercado',
+      text: 'Buy coffee',
+      description: 'At the supermarket',
       due: null,
     });
     expect(sticky).toHaveBeenCalledWith('Personal/Inbox.md');

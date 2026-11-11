@@ -24,7 +24,7 @@ describe('Drawer', () => {
     return (
       <div>
         <button type="button" onClick={() => setOpen(true)}>
-          Adicionar testes
+          Add tests
         </button>
         <Drawer open={open} onClose={() => setOpen(false)} title="Task" regionLabel="Task details">
           <input aria-label="Title" />
@@ -36,7 +36,7 @@ describe('Drawer', () => {
   it('is a labelled non-modal region; Esc closes it and focus returns to the row', async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    const row = screen.getByRole('button', { name: 'Adicionar testes' });
+    const row = screen.getByRole('button', { name: 'Add tests' });
     await user.click(row);
     const region = screen.getByRole('region', { name: 'Task details' });
     expect(screen.getByRole('heading', { name: 'Task' })).toHaveFocus();
@@ -51,7 +51,7 @@ describe('Drawer', () => {
   it('closes with ×', async () => {
     const user = userEvent.setup();
     render(<Harness />);
-    await user.click(screen.getByRole('button', { name: 'Adicionar testes' }));
+    await user.click(screen.getByRole('button', { name: 'Add tests' }));
     await user.click(screen.getByRole('button', { name: 'Close' }));
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });

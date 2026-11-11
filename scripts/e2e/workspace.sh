@@ -10,11 +10,11 @@ shot 01-inbox-empty
 # CA-02: a quick task with no metadata, from the keyboard (Mod+T focuses "Add task").
 key ctrl+t
 sleep 0.8
-type_text "Comprar cafe"
+type_text "Buy coffee"
 key Return
 sleep 1
 shot 02-tasks-added
-assert_sql "CA-02 task created" "SELECT title FROM tasks" "Comprar cafe"
+assert_sql "CA-02 task created" "SELECT title FROM tasks" "Buy coffee"
 
 # Notes: a new note from Mod+N; the record appears on the first character.
 key ctrl+n

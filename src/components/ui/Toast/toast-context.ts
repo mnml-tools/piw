@@ -8,7 +8,7 @@ export interface ToastAction {
 }
 
 export interface ToastOptions {
-  /** Plain text, e.g. "“Comprar café” moved to Trash". */
+  /** Plain text, e.g. "“Buy coffee” moved to Trash". */
   message: string;
   /**
    * Optional action (undo). Only one toast with an action is shown at a time: a new one replaces

@@ -29,7 +29,7 @@ describe('mock vault', () => {
       'Personal',
       'Personal/Stickies',
       'Personal/Stickies/Recovery codes.md',
-      'Personal/Ideias de prendas.md',
+      'Personal/Gift ideas.md',
     ]);
     const note = readNote(vault, 'Work/Inbox.md');
     const saved = writeNote(vault, note.path, 'new\n', note.hash);
@@ -43,10 +43,11 @@ describe('mock vault', () => {
     const vault = seedVault();
     expect(createNote(vault, 'Work', 'Inbox', '').path).toBe('Work/Inbox 2.md');
     const renamed = renameEntry(vault, 'Work/Projects/Refactor 2FA.md', 'Work/Projects/TOTP.md');
-    expect(renamed.linked).toEqual(['Personal/Stickies/Recovery codes.md', 'Work/Reuniões.md']);
-    expect(readNote(vault, 'Work/Reuniões.md').text).toContain('[[TOTP]]');
+    expect(renamed.linked).toEqual(['Personal/Stickies/Recovery codes.md', 'Work/Meetings.md']);
+    expect(readNote(vault, 'Work/Meetings.md').text).toContain('[[TOTP]]');
     expect(resolveLink(vault, 'totp')).toBe('Work/Projects/TOTP.md');
-    expect(searchVault(vault, 'reunioes', null)[0]?.path).toBe('Work/Reuniões.md');
+    expect(searchVault(vault, 'meetings', null)[0]?.path).toBe('Work/Meetings.md');
+    expect(searchVault(vault, 'creme brulee', null)[0]?.path).toBe('Personal/Gift ideas.md');
   });
 
   it('trashes and restores a folder whole', () => {
@@ -99,9 +100,9 @@ describe('mock vault capture and stickies', () => {
 
   it('makes a sticky note from a selection and keeps one sticky per note', () => {
     const vault = seedVault('2026-11-10');
-    const path = createStickyNote(vault, 'Work/Reuniões.md', 'Finance', ' Send it ');
+    const path = createStickyNote(vault, 'Work/Meetings.md', 'Finance', ' Send it ');
     expect(path).toBe('Work/Stickies/Finance.md');
-    expect(readNote(vault, path).text).toBe('Send it\n\nFrom [[Reuniões]]\n');
+    expect(readNote(vault, path).text).toBe('Send it\n\nFrom [[Meetings]]\n');
     const sticky = stickyFor(vault, { path });
     expect(stickyFor(vault, { path })).toBe(sticky);
     renameEntry(vault, path, 'Work/Stickies/Money.md');

@@ -511,14 +511,14 @@ export function seedVault(today: string = todayString()): MockVault {
       'export function verify(code: string) {}',
       '```',
       '',
-      'See [[Reuniões]] and [[Onboarding#Week 1|the onboarding plan]].',
+      'See [[Meetings]] and [[Onboarding#Week 1|the onboarding plan]].',
       '',
     ].join('\n'),
     'Work/Projects/Onboarding.md': `## Week 1\n\n1. [ ] Set up the laptop\n2. [ ] Meet the team 📅 ${day(6)}\n\n## Week 2\n\n- [ ] Ship a first small change\n`,
-    'Work/Reuniões.md':
+    'Work/Meetings.md':
       'Weekly sync notes. #meetings\n\n## 2026-11-03\n\n- Decided to drop SMS codes, see [[Refactor 2FA]].\n- [ ] Send the summary to finance\n',
-    'Personal/Ideias de prendas.md':
-      'Books, a good coffee grinder, concert tickets, a plant for the office.\n',
+    'Personal/Gift ideas.md':
+      'Books, a good coffee grinder, concert tickets, a crème brûlée torch, a plant for the office.\n',
     'Personal/Stickies/Recovery codes.md':
       'Recovery codes are shown once. Make that obvious before the user leaves the page.\n\nFrom [[Refactor 2FA]]\n',
   });

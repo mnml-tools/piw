@@ -1,0 +1,83 @@
+{
+  "formatVersion": 1,
+  "about": "How a task line changes (docs/vault-format.md §3, What Piw writes). boxAt is where the [ ] starts. Both parsers' line edits are tested against these cases.",
+  "cases": [
+    {
+      "name": "ticking adds the completion date",
+      "line": "- [ ] Call the accountant 📅 2026-11-12",
+      "boxAt": 2,
+      "change": { "kind": "check", "checked": true, "today": "2026-11-10" },
+      "expected": "- [x] Call the accountant 📅 2026-11-12 ✅ 2026-11-10"
+    },
+    {
+      "name": "ticking replaces an old completion date",
+      "line": "- [ ] Water the plants ✅ 2026-01-01",
+      "boxAt": 2,
+      "change": { "kind": "check", "checked": true, "today": "2026-11-10" },
+      "expected": "- [x] Water the plants ✅ 2026-11-10"
+    },
+    {
+      "name": "unticking removes the completion date",
+      "line": "  - [X] Wrong secret ✅ 2026-11-09",
+      "boxAt": 4,
+      "change": { "kind": "check", "checked": false, "today": "2026-11-10" },
+      "expected": "  - [ ] Wrong secret"
+    },
+    {
+      "name": "unticking without a completion date",
+      "line": "* [x] Done without a date",
+      "boxAt": 2,
+      "change": { "kind": "check", "checked": false, "today": "2026-11-10" },
+      "expected": "* [ ] Done without a date"
+    },
+    {
+      "name": "a due date goes at the end",
+      "line": "- [ ] Order a new keyboard",
+      "boxAt": 2,
+      "change": { "kind": "due", "due": "2026-11-12" },
+      "expected": "- [ ] Order a new keyboard 📅 2026-11-12"
+    },
+    {
+      "name": "a due date goes before the completion date",
+      "line": "- [x] Read RFC 6238 ✅ 2026-11-08",
+      "boxAt": 2,
+      "change": { "kind": "due", "due": "2026-11-12" },
+      "expected": "- [x] Read RFC 6238 📅 2026-11-12 ✅ 2026-11-08"
+    },
+    {
+      "name": "a due date replaces the recognised one and keeps other signs",
+      "line": "- [ ] Review with the team 📅️ 2026-11-01 ⏫",
+      "boxAt": 2,
+      "change": { "kind": "due", "due": "2026-11-12" },
+      "expected": "- [ ] Review with the team 📅 2026-11-12 ⏫"
+    },
+    {
+      "name": "clearing the due date removes it and the space before it",
+      "line": "1. [ ] Meet the team 📅 2026-11-16 ⏫",
+      "boxAt": 3,
+      "change": { "kind": "due", "due": null },
+      "expected": "1. [ ] Meet the team ⏫"
+    },
+    {
+      "name": "an impossible date is not the due date",
+      "line": "- [ ] Bad 📅 2026-02-30",
+      "boxAt": 2,
+      "change": { "kind": "due", "due": "2026-03-02" },
+      "expected": "- [ ] Bad 📅 2026-02-30 📅 2026-03-02"
+    },
+    {
+      "name": "new text replaces what the views show, up to the first date",
+      "line": "\t- [ ] Old text 🔁 weekly 📅 2026-11-12 ✅ 2026-11-10",
+      "boxAt": 3,
+      "change": { "kind": "text", "text": "  New text " },
+      "expected": "\t- [ ] New text 📅 2026-11-12 ✅ 2026-11-10"
+    },
+    {
+      "name": "new text on a line without dates",
+      "line": "+ [ ] Plus bullet   ",
+      "boxAt": 2,
+      "change": { "kind": "text", "text": "Renamed" },
+      "expected": "+ [ ] Renamed"
+    }
+  ]
+}
