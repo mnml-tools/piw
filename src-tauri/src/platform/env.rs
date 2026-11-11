@@ -31,11 +31,13 @@ pub struct EnvironmentInfo {
     pub desktop: Option<String>,
 }
 
+#[cfg(any(target_os = "linux", test))]
 pub const ENV_WAYLAND_NATIVE: &str = "PIW_WAYLAND_NATIVE";
 
 /// Decides whether GTK should be forced onto the X11 backend.
 ///
 /// Pure so that the policy can be unit tested; `lookup` reads an environment variable.
+#[cfg(any(target_os = "linux", test))]
 pub fn should_force_x11(lookup: impl Fn(&str) -> Option<String>) -> bool {
     let wayland_session = lookup("XDG_SESSION_TYPE").is_some_and(|v| v == "wayland")
         || lookup("WAYLAND_DISPLAY").is_some_and(|v| !v.is_empty());

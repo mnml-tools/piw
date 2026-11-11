@@ -42,6 +42,7 @@ impl UiScale {
 }
 
 /// Converts GTK's `gtk-xft-dpi` (DPI × 1024, or -1 when unset) to a zoom factor.
+#[cfg(any(target_os = "linux", test))]
 pub fn factor_from_xft_dpi(xft_dpi: i32) -> f64 {
     if xft_dpi <= 0 {
         return 1.0;

@@ -29,6 +29,8 @@ pub const EVENT_SHORTCUT_STATUS: &str = "piw://shortcut/status";
 #[ts(export, export_to = "bindings/")]
 pub enum ShortcutBackend {
     Native,
+    // Only Linux binds through the portal; the variant stays so the TypeScript type is the same.
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     Portal,
 }
 

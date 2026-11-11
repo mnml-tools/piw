@@ -7,6 +7,7 @@ pub const DEFAULT_ACCELERATOR: &str = "CommandOrControl+Shift+Space";
 ///
 /// Returns `None` when a token cannot be represented, in which case the portal is asked to
 /// bind the shortcut without a preferred trigger and the user picks one.
+#[cfg(any(target_os = "linux", test))]
 pub fn to_portal_trigger(accelerator: &str) -> Option<String> {
     let mut parts = Vec::new();
     let tokens: Vec<&str> = accelerator.split('+').map(str::trim).collect();
@@ -32,6 +33,7 @@ pub fn to_portal_trigger(accelerator: &str) -> Option<String> {
     Some(trigger)
 }
 
+#[cfg(any(target_os = "linux", test))]
 fn portal_key(key: &str) -> Option<String> {
     let lower = key.to_ascii_lowercase();
     let named = match lower.as_str() {
