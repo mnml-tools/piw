@@ -68,9 +68,27 @@ fn check_main_capability() {
     );
 }
 
+/// The Windows application manifest (Common Controls v6, which the dialog plugin needs). Tauri
+/// would put it in a resource that only the app binary links; embedding it with the linker gives
+/// it to the test binaries too, which otherwise exit with `STATUS_ENTRYPOINT_NOT_FOUND`.
+fn embed_windows_manifest() {
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    let target_env = std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_default();
+    if target_os != "windows" || target_env != "msvc" {
+        return;
+    }
+    let manifest =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("windows-app-manifest.xml");
+    println!("cargo:rerun-if-changed={}", manifest.display());
+    println!("cargo:rustc-link-arg=/MANIFEST:EMBED");
+    println!("cargo:rustc-link-arg=/MANIFESTINPUT:{}", manifest.display());
+}
+
 fn main() {
     check_main_capability();
+    embed_windows_manifest();
     let attributes = tauri_build::Attributes::new()
+        .windows_attributes(tauri_build::WindowsAttributes::new_without_app_manifest())
         .app_manifest(tauri_build::AppManifest::new().commands(COMMANDS));
     if let Err(error) = tauri_build::try_build(attributes) {
         panic!("tauri-build failed: {error:#}");
